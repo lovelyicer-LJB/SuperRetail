@@ -1,11 +1,596 @@
 {
-  "title": "我的画板",
+  "title": "Plan",
   "viewport": {
-    "x": 32.9515548511165,
-    "y": -520.7330688476565,
+    "x": -123.93328857421876,
+    "y": 160.60000000000002,
     "zoom": 1.1
   },
-  "cards": [],
+  "cards": [
+    {
+      "id": "c_nrmk08u0mu1yyvlw",
+      "type": "todo",
+      "x": 1181.2595893012153,
+      "y": -82.96289401584204,
+      "w": 240,
+      "h": 817,
+      "text": "",
+      "meta": {
+        "title": "每日执行底层框架",
+        "items": [
+          {
+            "text": "理性，创生与湮灭规则，创造与牺牲",
+            "done": false,
+            "mission": false
+          },
+          {
+            "text": "想象世界和真实世界要相互反馈",
+            "done": false,
+            "mission": false
+          },
+          {
+            "text": "从结果倒推",
+            "done": false,
+            "mission": false
+          },
+          {
+            "text": "建立快速实现目标，解决现有问题，一切尽在掌控的信心",
+            "done": false
+          },
+          {
+            "text": "批量流水线解决问题",
+            "done": false
+          },
+          {
+            "text": "专注，做纯粹、减法的乐趣",
+            "done": false
+          },
+          {
+            "text": "对每个决策进行收益分析",
+            "done": false
+          },
+          {
+            "text": "行动,效率，先完成再优化",
+            "done": false
+          },
+          {
+            "text": "掌控自己，世界大局视角，不要被硬控，一切都是小事，把自己这个游戏玩出乐趣和成就感，掌握行动规则，玩弄规则，破坏规则，建立规则",
+            "done": false
+          },
+          {
+            "text": "趣味，欲望、人性，我现在需要的什么，需要的是点满科技树，科技是第一生产力，有科技就有钱",
+            "done": false
+          },
+          {
+            "text": "借鉴模版，AI解决",
+            "done": false
+          },
+          {
+            "text": "分解任务,细分到不超过5个独立任务，流水线迭代",
+            "done": false
+          }
+        ],
+        "locked": true
+      }
+    },
+    {
+      "id": "c_jq3indhwmu3e6kx8",
+      "type": "todo",
+      "x": 673.7278053977273,
+      "y": -83.5152587890625,
+      "w": 240,
+      "h": 402,
+      "text": "",
+      "meta": {
+        "title": "部门工作线程",
+        "items": [
+          {
+            "text": "打包盒异形贴",
+            "done": false
+          },
+          {
+            "text": "姚开花店铺装修",
+            "done": false
+          },
+          {
+            "text": "LOGO-Workflow",
+            "done": false
+          },
+          {
+            "text": "整理平台所需的品牌系统，及系统子项目",
+            "done": false
+          },
+          {
+            "text": "品牌系统各子项工作流",
+            "done": false
+          },
+          {
+            "text": "Poster Workflow",
+            "done": false,
+            "depth": 0
+          },
+          {
+            "text": "Looking for inspiration & Idea",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "Optimize Prompt",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "Text to Image",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "Agent Fix Detail",
+            "done": false,
+            "depth": 1
+          }
+        ],
+        "locked": true
+      }
+    },
+    {
+      "id": "c_4ylahka8mu3e9sfe",
+      "type": "todo",
+      "x": 172.6666259765625,
+      "y": -86,
+      "w": 240,
+      "h": 99,
+      "text": "",
+      "meta": {
+        "title": "Evoloop 线程",
+        "items": [
+          {
+            "text": "n8n",
+            "done": false
+          }
+        ],
+        "locked": true
+      }
+    },
+    {
+      "id": "c_zd9suz4rmu3ebqzx",
+      "type": "todo",
+      "x": 929.4444851345486,
+      "y": -83.1481492784288,
+      "w": 240,
+      "h": 549,
+      "text": "",
+      "meta": {
+        "title": "长远计划",
+        "items": [
+          {
+            "text": "learn Tactical Combat Tutorial",
+            "done": false
+          },
+          {
+            "text": "Transform to C++",
+            "done": false
+          },
+          {
+            "text": "study Open design",
+            "done": false
+          },
+          {
+            "text": "Using DOTS construct PCG",
+            "done": false
+          },
+          {
+            "text": "Using Agent constryct PCG",
+            "done": false
+          },
+          {
+            "text": "Using Comfiui product charactor & cloth",
+            "done": false
+          },
+          {
+            "text": "看Create Endless Platform-Unreal Engine 5 Endless Runner Seeries",
+            "done": false
+          },
+          {
+            "text": "Ace Studio Make Music",
+            "done": false,
+            "mission": false
+          },
+          {
+            "text": "在UE5中制作卡片",
+            "done": false
+          },
+          {
+            "text": "基础工作流-Agent skill",
+            "done": false
+          }
+        ],
+        "locked": true
+      }
+    },
+    {
+      "id": "c_rcplfvy6mu3gpa3c",
+      "type": "todo",
+      "x": 424.3331298828125,
+      "y": -81.66668701171875,
+      "w": 240,
+      "h": 273,
+      "text": "",
+      "meta": {
+        "title": "超零售线程",
+        "items": [
+          {
+            "text": "Overall Frame",
+            "done": true,
+            "mission": false
+          },
+          {
+            "text": "版图",
+            "done": true,
+            "depth": 1,
+            "mission": false
+          },
+          {
+            "text": "官方排行榜",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "仪表图",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "商城",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "互动",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "工坊",
+            "done": false,
+            "depth": 1
+          }
+        ],
+        "locked": true
+      }
+    },
+    {
+      "id": "c_w0qfpl9bmu57klva",
+      "type": "todo",
+      "x": 1429.3338623046873,
+      "y": -81.99998982747397,
+      "w": 240,
+      "h": 1302,
+      "text": "",
+      "meta": {
+        "title": "海报解决方案参考",
+        "items": [
+          {
+            "text": "https://www.bilibili.com/video/BV1dRKZ6GEWD/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
+            "done": false,
+            "mission": false
+          },
+          {
+            "text": "https://www.bilibili.com/video/BV1xfuV6kEvf/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
+            "done": false,
+            "mission": false
+          },
+          {
+            "text": "https://www.bilibili.com/video/BV1LetB6rEUC/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
+            "done": false,
+            "mission": false
+          },
+          {
+            "text": "https://www.bilibili.com/video/BV1unY36NEAU/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
+            "done": false,
+            "mission": false
+          },
+          {
+            "text": "https://www.bilibili.com/video/BV1F53b62Eov/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
+            "done": false,
+            "mission": false
+          },
+          {
+            "text": "https://www.bilibili.com/video/BV1uSTg6NEB6/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
+            "done": false,
+            "mission": false
+          },
+          {
+            "text": "https://www.bilibili.com/video/BV1De2uYeEtK/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
+            "done": false,
+            "mission": false
+          }
+        ],
+        "locked": true
+      }
+    },
+    {
+      "id": "c_itln9autmubywlhi",
+      "type": "todo",
+      "x": 172.666748046875,
+      "y": 20.33331298828125,
+      "w": 240,
+      "h": 99,
+      "text": "",
+      "meta": {
+        "title": "Evoloop即时线程",
+        "items": [
+          {
+            "text": "按住alt复制卡片",
+            "done": false
+          }
+        ],
+        "locked": true
+      }
+    },
+    {
+      "id": "c_tbo9kokcmufq1giw",
+      "type": "board",
+      "x": 1255.7878085049713,
+      "y": 794.4546508789061,
+      "w": 140,
+      "h": 116,
+      "text": "",
+      "meta": {
+        "title": "Sub-board",
+        "sub": {
+          "title": "Sub-board",
+          "viewport": {
+            "x": 0,
+            "y": 0,
+            "zoom": 1
+          },
+          "cards": [],
+          "lines": [],
+          "completedMissions": 0
+        }
+      }
+    },
+    {
+      "id": "c_syf7symemuggih2x",
+      "type": "todo",
+      "x": 335.54586514559645,
+      "y": 206.242304021662,
+      "w": 278.96977095170456,
+      "h": 966,
+      "text": "",
+      "meta": {
+        "title": "SuperRetail Process",
+        "items": [
+          {
+            "text": "数字资产规则",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "原材料",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "地理标识",
+            "done": false,
+            "depth": 3
+          },
+          {
+            "text": "",
+            "done": false,
+            "depth": 3
+          },
+          {
+            "text": "配方",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "餐厅",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "食物原材料虚拟卡",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "小朋友虚拟数字人形象+机器人蒙皮Live",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "活动：博湖钓鱼佬，梨城好朋友：跑火车；天山飞鸡",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "文明保护银行",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "Energy to Food ",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "Super Market",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "Community",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "Platform",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "Classes",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "玩家",
+            "done": false,
+            "depth": 3
+          },
+          {
+            "text": "普通玩家",
+            "done": false,
+            "depth": 4
+          },
+          {
+            "text": "核心（氪金）玩家",
+            "done": false,
+            "depth": 4
+          },
+          {
+            "text": "土豪玩家",
+            "done": false,
+            "depth": 4
+          },
+          {
+            "text": "职业玩家",
+            "done": false,
+            "depth": 4
+          },
+          {
+            "text": "明星玩家",
+            "done": false,
+            "depth": 4
+          },
+          {
+            "text": "职业经理人",
+            "done": false,
+            "depth": 3
+          },
+          {
+            "text": "平台端 | Sys",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "企业端 | Bis",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "消费端 | Cus",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "制造端 | Fac",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "场景端 | Sce",
+            "done": false,
+            "depth": 2
+          },
+          {
+            "text": "政府端 | Gov",
+            "done": false,
+            "depth": 2
+          }
+        ],
+        "manualW": true
+      }
+    },
+    {
+      "id": "c_ddjy67hzmuhr5sgj",
+      "type": "todo",
+      "x": 653.6061345880682,
+      "y": 327.72705078125,
+      "w": 264.42431640625,
+      "h": 665,
+      "text": "",
+      "meta": {
+        "title": "Department Process",
+        "items": [
+          {
+            "text": "figma",
+            "done": false
+          },
+          {
+            "text": "分析大香梨5图需求",
+            "done": false,
+            "depth": 0
+          },
+          {
+            "text": "4，家宴",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "2，参考烤鸭",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "辣子鸡两面墙",
+            "done": false,
+            "depth": 0
+          },
+          {
+            "text": "下层，鸡舍+公仔",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "中层，一个下蛋模拟器+导轨",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "上层",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "香梨节五连图：",
+            "done": false,
+            "depth": 0
+          },
+          {
+            "text": "场景1：一个男人从树上把香梨摘下来，递给地上的一个男孩",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "场景2，三两妇女在地上愉快的挑选香梨",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "场景3，远景香梨园的美丽景象",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "场景4，老人赶着成队的骡车（带头的是马车）在路边走",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "场景5，在新疆美丽的少数名族院子里，大家分食大盘子里的香梨",
+            "done": false,
+            "depth": 1
+          }
+        ],
+        "locked": false,
+        "manualW": true
+      }
+    }
+  ],
   "lines": [],
   "completedMissions": 0,
   "workflowTemplate": null
