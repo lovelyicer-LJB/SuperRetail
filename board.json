@@ -529,6 +529,16 @@
         "locked": false,
         "manualW": true
       }
+    },
+    {
+      "id": "c_6kfszfgzmv3me4wz",
+      "type": "note",
+      "x": 699,
+      "y": 669,
+      "w": 180,
+      "h": 60,
+      "text": "",
+      "meta": {}
     }
   ],
   "lines": [],
