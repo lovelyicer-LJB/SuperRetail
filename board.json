@@ -398,9 +398,9 @@
           },
           {
             "text": "食物原材料虚拟卡",
-            "done": true,
+            "done": false,
             "depth": 1,
-            "mission": true
+            "mission": false
           },
           {
             "text": "小朋友虚拟数字人形象+机器人蒙皮Live",
