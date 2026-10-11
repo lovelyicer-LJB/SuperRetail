@@ -516,7 +516,7 @@
       "x": 653.6061345880682,
       "y": 327.72705078125,
       "w": 264.42431640625,
-      "h": 294,
+      "h": 207,
       "text": "",
       "meta": {
         "title": "Department Process",
@@ -524,21 +524,6 @@
           {
             "text": "figma",
             "done": false
-          },
-          {
-            "text": "分析大香梨5图需求",
-            "done": false,
-            "depth": 0
-          },
-          {
-            "text": "4，家宴",
-            "done": false,
-            "depth": 1
-          },
-          {
-            "text": "2，参考烤鸭",
-            "done": false,
-            "depth": 1
           },
           {
             "text": "辣子鸡两面墙",
