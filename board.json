@@ -353,14 +353,19 @@
     {
       "id": "c_syf7symemuggih2x",
       "type": "todo",
-      "x": 335.54586514559645,
-      "y": 206.242304021662,
+      "x": 376.21249112215895,
+      "y": 222.242304021662,
       "w": 278.96977095170456,
-      "h": 1016,
+      "h": 1045,
       "text": "",
       "meta": {
         "title": "SuperRetail Process",
         "items": [
+          {
+            "text": "",
+            "done": false,
+            "depth": 0
+          },
           {
             "text": "众生线程，众人一同生成，生成",
             "done": false,
