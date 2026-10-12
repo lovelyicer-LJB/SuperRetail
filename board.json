@@ -309,25 +309,6 @@
       }
     },
     {
-      "id": "c_itln9autmubywlhi",
-      "type": "todo",
-      "x": 165.3333740234375,
-      "y": 37,
-      "w": 240,
-      "h": 99,
-      "text": "",
-      "meta": {
-        "title": "Evoloop即时线程",
-        "items": [
-          {
-            "text": "按住alt复制卡片",
-            "done": false
-          }
-        ],
-        "locked": false
-      }
-    },
-    {
       "id": "c_tbo9kokcmufq1giw",
       "type": "board",
       "x": 1255.7878085049713,
