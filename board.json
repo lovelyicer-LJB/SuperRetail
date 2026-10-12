@@ -530,6 +530,16 @@
         "locked": false,
         "manualW": true
       }
+    },
+    {
+      "id": "c_qv6x50hymv4z1z70",
+      "type": "note",
+      "x": 727,
+      "y": 616,
+      "w": 180,
+      "h": 60,
+      "text": "",
+      "meta": {}
     }
   ],
   "lines": [],
