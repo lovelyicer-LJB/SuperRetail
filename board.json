@@ -356,13 +356,18 @@
       "x": 376.21249112215895,
       "y": 222.242304021662,
       "w": 278.96977095170456,
-      "h": 1045,
+      "h": 1074,
       "text": "",
       "meta": {
         "title": "SuperRetail Process",
         "items": [
           {
             "text": "激活流动状态",
+            "done": false,
+            "depth": 0
+          },
+          {
+            "text": "收纳整理节点",
             "done": false,
             "depth": 0
           },
