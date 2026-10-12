@@ -148,7 +148,7 @@
             "done": false
           }
         ],
-        "locked": true
+        "locked": false
       }
     },
     {
@@ -311,8 +311,8 @@
     {
       "id": "c_itln9autmubywlhi",
       "type": "todo",
-      "x": 172.666748046875,
-      "y": 20.33331298828125,
+      "x": 165.3333740234375,
+      "y": 37,
       "w": 240,
       "h": 99,
       "text": "",
@@ -324,7 +324,7 @@
             "done": false
           }
         ],
-        "locked": true
+        "locked": false
       }
     },
     {
