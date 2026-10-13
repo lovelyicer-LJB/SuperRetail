@@ -508,7 +508,7 @@
       "x": 653.6061345880682,
       "y": 327.72705078125,
       "w": 264.42431640625,
-      "h": 99,
+      "h": 128,
       "text": "",
       "meta": {
         "title": "Department Process",
@@ -516,6 +516,11 @@
           {
             "text": "PS Picture to figma",
             "done": false
+          },
+          {
+            "text": "",
+            "done": false,
+            "depth": 0
           }
         ],
         "locked": false,
