@@ -116,6 +116,8 @@ export function sanitizeDoc(raw: unknown, depth: number): BoardDoc {
   if (typeof raw.detachId === 'string' && raw.detachId) doc.detachId = raw.detachId
   // 🔴 改动 2026-10-15 · Tab 稳定身份白名单放行（坞内拖动换位的 React key）
   if (typeof raw.tid === 'string' && raw.tid) doc.tid = raw.tid
+  // 🔴 改动 2026-10-15 · 子画板标记白名单放行（属于其它画板的子画板不在 Tab 坞显示标签）
+  if (raw.isSubBoard === true) doc.isSubBoard = true
   return doc
 }
 

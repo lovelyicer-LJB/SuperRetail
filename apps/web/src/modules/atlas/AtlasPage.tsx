@@ -746,6 +746,9 @@ function PinnedBoardWindow({
   onMove,
   onPersist,
   onCollapse,
+  closeLabel,
+  onDragMove,
+  onDragEnd,
 }: {
   dark: boolean
   title: string
@@ -757,8 +760,16 @@ function PinnedBoardWindow({
   onMove: (dx: number, dy: number) => void
   onPersist: (doc: BoardDoc) => void
   onCollapse: () => void
+  /** 🔴 改动 2026-10-15 · 关闭按钮的无障碍标签（子画板 X = 删除，默认「收起」） */
+  closeLabel?: string
+  /** 🔴 改动 2026-10-15 · 拖动过程上报指针位置（页面层判定是否悬停在 Tab 坞上，做落点高亮） */
+  onDragMove?: (clientX: number, clientY: number) => void
+  /** 🔴 改动 2026-10-15 · 拖动结束上报落点（页面层判定：落到 Tab 坞 = 取消屏幕钉并全屏显示） */
+  onDragEnd?: (clientX: number, clientY: number) => void
 }) {
   const dragRef = useRef<{ x: number; y: number; moved: boolean; btn: number } | null>(null)
+  /** 🔴 改动 2026-10-15 · 最近一次指针位置（endDrag 时 dragRef 已置空，需经此把落点带给 onDragEnd） */
+  const lastPosRef = useRef({ x: 0, y: 0 })
   /** 🔴 改动 2026-10-13 · 右键拖动过 = 本次 contextmenu 吞掉（拖动语义）；原地右键 = 放行给子画板右键菜单 */
   const rightDragMoved = useRef(false)
 
@@ -794,9 +805,13 @@ function PinnedBoardWindow({
     if (!dragRef.current.moved && Math.hypot(dx, dy) < 3) return
     if (dragRef.current.btn === 2) rightDragMoved.current = true
     dragRef.current = { ...dragRef.current, x: e.clientX, y: e.clientY, moved: true }
+    lastPosRef.current = { x: e.clientX, y: e.clientY }
     onMove(dx, dy)
+    onDragMove?.(e.clientX, e.clientY)
   }
   const endDrag = () => {
+    const wasMoved = !!dragRef.current?.moved
+    const at = lastPosRef.current
     // 🔴 改动 2026-10-13 · 右键拖动后在窗口外松手：contextmenu 目标在窗外，捕获拦截不到，
     // 注册一次性 document 捕获拦截兜底（窗内松手由 onContextMenuCapture 处理）
     if (dragRef.current?.btn === 2 && dragRef.current.moved) {
@@ -809,6 +824,7 @@ function PinnedBoardWindow({
       window.setTimeout(() => document.removeEventListener('contextmenu', suppress, { capture: true }), 800)
     }
     dragRef.current = null
+    if (wasMoved) onDragEnd?.(at.x, at.y)
   }
 
   return (
@@ -862,7 +878,7 @@ function PinnedBoardWindow({
         </span>
         <button
           type="button"
-          aria-label={`收起 ${title}`}
+          aria-label={closeLabel ?? `收起 ${title}`}
           onClick={onCollapse}
           className={cn(
             'flex size-6 shrink-0 items-center justify-center rounded-full transition-colors',
@@ -1317,20 +1333,21 @@ export function AtlasPage() {
    *  叶子以收起态入树（pinned 叶子不在窗格渲染，兄弟画板自动填充） */
   const handleChainActivated = (sub: { doc: BoardDoc; title: string; kind: 'thread' | 'loop' }) => {
     const prev = atlasSplitRef.current ?? emptySplitState()
-    // 🔴 改动 2026-10-15 · 补发 Tab 稳定身份 tid（引擎抽取的子画板文档没有该字段）
-    const subDoc = sub.doc.tid ? sub.doc : { ...sub.doc, tid: uid() }
+    // 🔴 改动 2026-10-15 · 补发 Tab 稳定身份 tid（引擎抽取的子画板文档没有该字段）；
+    // 标记 isSubBoard：属于其它画板的子画板不在 Tab 坞显示标签（只以屏幕钉浮动窗口存在）
+    const subDoc: BoardDoc = { ...sub.doc, isSubBoard: true, tid: sub.doc.tid ?? uid() }
     const boards = [...prev.boards, subDoc]
     const index = boards.length - 1
     const root = groupNode('vertical', 0.5, prev.root, boardNode(index, true))
     commitSplit({ activeSplit: index, boards, root, pinned: [...prev.pinned, true] })
-    setSoloTab(null)
-    setSplitOpen(true)
+    // 🔴 改动 2026-10-15 · 不再强制打开拆分视图：当前全屏/独占视图原样保留，浮动窗口直接浮在上方
   }
 
   /** Tab 坞点击：切换次窗格显示的拆分画板并打开拆分视图。
       🔴 改动 2026-10-13 · 同时取消钉、恢复收起（被覆盖）并复位祖先分组比例到 50/50；
-      已拆出的 Tab（detachId）点击 = 挂回主窗口（清除拆出标记，独立窗口侧经 storage 事件感知） */
-  const handleSelectTab = (index: number) => {
+      已拆出的 Tab（detachId）点击 = 挂回主窗口（清除拆出标记，独立窗口侧经 storage 事件感知）
+      🔴 改动 2026-10-15 · forceSolo = 画中画拖回坞等场景：无论当前是否拆分视图都独占全屏显示 */
+  const handleSelectTab = (index: number, forceSolo = false) => {
     const prev = atlasSplitRef.current
     if (!prev || !prev.boards[index]) return
     // 🔴 改动 2026-10-14 · 点任一拆分 Tab 即回画板（退出地图视图，拆分状态原样恢复）
@@ -1347,12 +1364,6 @@ export function AtlasPage() {
       : prev.boards
     // 🔴 改动 2026-10-15 · 单画板全屏视图下点 Tab = 该画板独占全屏（solo），不自动进入同屏拆分；
     // 已在拆分视图里点 Tab 维持原行为（切换次窗格并展开）
-    if (!splitOpen) {
-      // 独占全屏同时取消屏幕钉（钉是拆分视图里的浮动窗口语义）
-      commitSplit({ ...prev, activeSplit: index, boards, pinned: prev.pinned.map((p, i) => (i === index ? false : p)) })
-      setSoloTab(index)
-      return
-    }
     const restore = (node: SplitNode): SplitNode => {
       if (node.kind === 'board') return node.tab === index ? { ...node, collapsed: false } : node
       const first = restore(node.first)
@@ -1360,9 +1371,25 @@ export function AtlasPage() {
       const contains = containsTab(node.first, index) || containsTab(node.second, index)
       return { ...node, ratio: contains ? 0.5 : node.ratio, first, second }
     }
-    commitSplit({ ...prev, activeSplit: index, boards, root: restore(prev.root), pinned: prev.pinned.map((p, i) => (i === index ? false : p)) })
+    const commit = { ...prev, activeSplit: index, boards, root: restore(prev.root), pinned: prev.pinned.map((p, i) => (i === index ? false : p)) }
+    if (!splitOpen || forceSolo) {
+      // 独占全屏同时取消屏幕钉（钉是拆分视图里的浮动窗口语义），叶子复位（下次进拆分视图直接可见）
+      commitSplit(commit)
+      setSplitOpen(false)
+      setSoloTab(index)
+      return
+    }
+    commitSplit(commit)
     setSoloTab(null)
     setSplitOpen(true)
+  }
+
+  /** 🔴 改动 2026-10-15 · Tab 坞栏引用 + 画中画拖回坞的悬停高亮态（指针悬在坞上时整栏亮边提示落点） */
+  const dockBarRef = useRef<HTMLDivElement>(null)
+  const [pinDragOverDock, setPinDragOverDock] = useState(false)
+  const pointerOverDock = (clientX: number, clientY: number) => {
+    const r = dockBarRef.current?.getBoundingClientRect()
+    return !!r && clientX >= r.left && clientX <= r.right && clientY >= r.top - 6 && clientY <= r.bottom + 6
   }
 
   /** 🔴 改动 2026-10-13 · 拖动悬浮子画板：屏幕像素增量，钳制在画板区范围内（每 Tab 独立位置） */
@@ -1408,7 +1435,8 @@ export function AtlasPage() {
       pinned: prev.pinned.map((p, i) => (i === index ? true : p)),
     })
     setPinnedSelected(index)
-    setSplitOpen(true)
+    // 🔴 改动 2026-10-15 · 不再强制打开拆分视图：从全屏/独占视图拖出时当前视图原样保留，
+    // 只把浮动窗口浮到上方（原逻辑会把拆分视图弹出来，右侧多出一块画板）
   }
 
   /** 拖出浏览器窗口 = 拆出为独立浏览器窗口（可拖到另一台显示器）：文档挂 detachId 后先落盘，
@@ -1462,16 +1490,20 @@ export function AtlasPage() {
       flipTimersRef.current.set(
         el,
         window.setTimeout(() => {
-          el.style.transition = ''
-          el.style.transform = ''
+          // 拖动进行中样式归拖动视觉态管理，不能清（防刚换位完 240ms 内起新拖时被抹掉跟手 transform）
+          if (!dragVisualRef.current) {
+            el.style.transition = ''
+            el.style.transform = ''
+          }
           flipTimersRef.current.delete(el)
         }, 240),
       )
     }
   })
 
-  /** 🔴 改动 2026-10-15 · Chrome 式 Tab 换位：boards/pinned 同步移动 + 拆分树叶 tab 下标全树重映射
+  /** 🔴 改动 2026-10-15 · Chrome 式 Tab 换位（数据层）：boards/pinned 同步移动 + 拆分树叶 tab 下标全树重映射
    *  （主画板叶 tab:-1 不受映射影响）；solo / 选中浮动窗口按下标联动重映射。
+   *  仅在松手时调用一次；拖动过程走 dragVisualRef 纯视觉，不触发重渲染。
    *  pinPosMap（浮动窗口位置）按下标存：换位后位置跟随新下标，略有偏移可再拖，属低频可接受 */
   const reorderTab = (from: number, to: number) => {
     const prev = atlasSplitRef.current
@@ -1488,50 +1520,138 @@ export function AtlasPage() {
     }
     const remapTree = (node: SplitNode): SplitNode =>
       node.kind === 'board' ? { ...node, tab: remap(node.tab) } : { ...node, first: remapTree(node.first), second: remapTree(node.second) }
-    // 🔴 改动 2026-10-15 · FLIP 动效起点：换位前记录全部拆分 Tab 当前可视位置（含正在拖的那枚，Chrome 式一起滑）
-    const olds = new Map<HTMLButtonElement, DOMRect>()
-    dockTabRefs.current.forEach((el) => olds.set(el, el.getBoundingClientRect()))
-    flipRectsRef.current = olds
     commitSplit({ ...prev, activeSplit: remap(prev.activeSplit), boards, root: remapTree(prev.root), pinned })
     setSoloTab((s) => (s === null ? null : remap(s)))
     setPinnedSelected((s) => (s === null ? null : remap(s)))
   }
 
+  /** 🔴 改动 2026-10-15 · 拖动视觉态（复刻 Chrome 丝滑手感的核心）：拖动期间**不动数据模型**——
+   *  拖着的标签 translate 1:1 跟随指针（无过渡），被越过的标签按插入位平滑滑开/让位（短过渡），
+   *  零 React 重渲染、零画板窗格重挂；松手才一次性提交逻辑换位（reorderTab）并经 FLIP 滑入终位 */
+  const dragVisualRef = useRef<{
+    dragEl: HTMLButtonElement
+    startX: number
+    homeIndex: number
+    dragWidth: number
+    /** 各标签未变换布局位置（home = 完整数组下标，拖动过程不变） */
+    base: Map<HTMLButtonElement, { home: number; mid: number }>
+    /** 当前视觉插入位 = 排在拖动标签前的其它标签个数（0..n-1） */
+    insert: number
+  } | null>(null)
+
+  /** 视觉态初始化：清掉上次中断残留的 transform，记录各标签布局位置与拖动起点 */
+  const beginDragVisual = (index: number, clientX: number) => {
+    dockTabRefs.current.forEach((el) => {
+      el.style.transition = ''
+      el.style.transform = ''
+      el.style.zIndex = ''
+    })
+    const dragEl = dockTabRefs.current.get(index)
+    if (!dragEl) return
+    const base = new Map<HTMLButtonElement, { home: number; mid: number }>()
+    dockTabRefs.current.forEach((el, i) => {
+      const r = el.getBoundingClientRect()
+      base.set(el, { home: i, mid: r.left + r.width / 2 })
+    })
+    const dr = dragEl.getBoundingClientRect()
+    dragVisualRef.current = { dragEl, startX: clientX, homeIndex: index, dragWidth: dr.width, base, insert: index }
+    dragEl.style.transition = 'none'
+    dragEl.style.zIndex = '20'
+  }
+
+  /** 按当前插入位重排其它标签的 transform：向右拖 → 途经标签左移让出空位；向左拖 → 右移（Chrome 式滑开） */
+  const applyDragShift = () => {
+    const dv = dragVisualRef.current
+    if (!dv) return
+    const { base, dragEl, homeIndex: h, dragWidth: w, insert: s } = dv
+    base.forEach((info, el) => {
+      if (el === dragEl) return
+      let dx = 0
+      if (s > h) {
+        if (info.home > h && info.home <= s) dx = -w
+      } else if (s < h) {
+        if (info.home >= s && info.home < h) dx = w
+      }
+      el.style.transition = 'transform 130ms cubic-bezier(0.3, 0.7, 0.4, 1)'
+      el.style.transform = dx ? `translateX(${dx}px)` : 'translateX(0)'
+    })
+  }
+
+  /** 结束视觉态：清内联样式（drop 到坞内且已记录 FLIP 起点时由 layout effect 接管动画） */
+  const clearDragVisual = () => {
+    dragVisualRef.current = null
+    dockTabRefs.current.forEach((el) => {
+      el.style.transition = ''
+      el.style.transform = ''
+      el.style.zIndex = ''
+    })
+  }
+
   /** Tab 撕离/换位拖拽统一入口（SplitDockTab 上报 start/move/end） */
   const handleTearDrag = (index: number, label: string) => (phase: 'start' | 'move' | 'end', e: { clientX: number; clientY: number; screenX: number; screenY: number }) => {
-    if (phase === 'end') {
-      const zone = tearZoneOf(e.clientX, e.clientY)
-      setTabDrag(null)
-      // 🔴 改动 2026-10-15 · 坞内落点无需处理：换位在拖动过程中已实时完成（复刻 Chrome）。
-      // 实时换位后下标已变：画中画 / 拆出窗口必须用 ref 最新下标，闭包 index 已过期
-      const cur = tabDragRef.current?.index ?? index
-      if (zone === 'board') pinTabAt(cur, e.clientX, e.clientY)
-      else if (zone === 'outside') tearOffTab(cur, e.screenX, e.screenY)
+    const zone = tearZoneOf(e.clientX, e.clientY)
+    if (phase === 'start') {
+      beginDragVisual(index, e.clientX)
+      tabDragRef.current = { index, label, x: e.clientX, y: e.clientY, zone }
+      setTabDrag(tabDragRef.current)
       return
     }
-    const zone = tearZoneOf(e.clientX, e.clientY)
-    // 🔴 改动 2026-10-15 · 实时换位中拖动下标已变：一律以 tabDragRef 的最新下标为准（闭包里的 index 已过期）
-    const cur = tabDragRef.current?.index ?? index
-    if (phase === 'move' && zone === 'dock') {
-      // 插入位 = 指针越过中线的非拖动 Tab 个数（越过即换位，标签实时让位）
-      let to = 0
-      const len = atlasSplitRef.current?.boards.length ?? 0
-      for (let i = 0; i < len; i++) {
-        if (i === cur) continue
-        const el = dockTabRefs.current.get(i)
-        if (!el) continue
-        const r = el.getBoundingClientRect()
-        if (e.clientX > r.left + r.width / 2) to += 1
+    if (phase === 'end') {
+      const dv = dragVisualRef.current
+      setTabDrag(null)
+      if (zone === 'board') {
+        clearDragVisual()
+        pinTabAt(index, e.clientX, e.clientY)
+      } else if (zone === 'outside') {
+        clearDragVisual()
+        tearOffTab(index, e.screenX, e.screenY)
+      } else if (dv) {
+        // 坞内落点：记录各标签当前可视位置（含 transform）→ 清样式 → 提交逻辑换位 → FLIP 滑入最终位
+        const olds = new Map<HTMLButtonElement, DOMRect>()
+        dockTabRefs.current.forEach((el) => olds.set(el, el.getBoundingClientRect()))
+        const from = dv.homeIndex
+        const to = dv.insert
+        clearDragVisual()
+        if (to !== from) {
+          flipRectsRef.current = olds
+          reorderTab(from, to)
+        } else {
+          // 回到原位：拖着的标签从指针位置滑回（其它标签已回到 0）
+          const el = dv.dragEl
+          const dx = e.clientX - dv.startX
+          if (dx) {
+            el.style.transition = 'none'
+            el.style.transform = `translateX(${dx}px)`
+            void el.getBoundingClientRect()
+            el.style.transition = 'transform 150ms cubic-bezier(0.25, 0.8, 0.3, 1)'
+            el.style.transform = 'translateX(0)'
+            window.setTimeout(() => {
+              el.style.transition = ''
+              el.style.transform = ''
+              el.style.zIndex = ''
+            }, 200)
+          }
+        }
       }
-      if (to !== cur) {
-        reorderTab(cur, to)
-        // 同步 ref：re-render 前到达的后续 pointermove 也要读到新下标（防高频事件用过期 from 连续错位）
-        tabDragRef.current = { index: to, label, x: e.clientX, y: e.clientY, zone }
-        setTabDrag(tabDragRef.current)
-        return
+      return
+    }
+    // move：拖着的标签 1:1 跟随指针（无过渡，零延迟跟手）
+    const dv = dragVisualRef.current
+    if (dv) {
+      dv.dragEl.style.transform = `translateX(${e.clientX - dv.startX}px)`
+      if (zone === 'dock') {
+        // 插入位 = 布局中线在指针左侧的其它标签个数（用未变换的 base 判定，不受滑开 transform 干扰）
+        let s = 0
+        dv.base.forEach((info, el) => {
+          if (el !== dv.dragEl && e.clientX > info.mid) s += 1
+        })
+        if (s !== dv.insert) {
+          dv.insert = s
+          applyDragShift()
+        }
       }
     }
-    tabDragRef.current = { index: cur, label, x: e.clientX, y: e.clientY, zone }
+    tabDragRef.current = { index, label, x: e.clientX, y: e.clientY, zone }
     setTabDrag(tabDragRef.current)
   }
 
@@ -2007,6 +2127,7 @@ export function AtlasPage() {
       {/* 🔴 改动 2026-10-13 · 顶部 Tab 坞：主画板标签 + 拆分 Tab（技能激活的子画板带「钉」点）。
            主画板可删除（安全弹窗），删除后右侧第一个画板自动成为主画板并全展开 */}
       <div
+        ref={dockBarRef}
         aria-label="画板 Tab 坞"
         onContextMenu={(e) => {
           // 空白处右键（标签自身已 stopPropagation）
@@ -2016,6 +2137,8 @@ export function AtlasPage() {
         className={cn(
           'relative z-20 flex h-9 shrink-0 items-end gap-1 border-b px-3',
           dark ? 'border-white/5 bg-sr-d-gray-10' : 'border-black/5 bg-sr-l-gray-0',
+          // 🔴 改动 2026-10-15 · 画中画拖回坞的落点高亮（整栏亮边提示「松手回到这里」）
+          pinDragOverDock && (dark ? 'bg-sr-d-gray-8 shadow-[inset_0_-2px_0_0_#4da3ff]' : 'bg-sr-l-gray-1 shadow-[inset_0_-2px_0_0_#1f7aec]'),
         )}
       >
         <SplitDockTab
@@ -2056,7 +2179,10 @@ export function AtlasPage() {
           onCancelEdit={() => {}}
           onOpenMenu={(x, y) => setTabMenu({ x, y, target: { kind: 'map' } })}
         />
-        {splitBoards.map((b, i) => (
+        {/* 🔴 改动 2026-10-15 · 属于其它画板的子画板（isSubBoard：技能激活/抽取）不在坞里显示标签，
+            只以屏幕钉浮动窗口存在；删除走浮动窗口 X（确认弹窗）或全屏时的画板右键「删除画板」 */}
+        {splitBoards.map((b, i) =>
+          b.isSubBoard ? null : (
           <SplitDockTab
             // 🔴 改动 2026-10-15 · tid 稳定 key：拖动换位时组件实例随标签移动，指针捕获不断（Chrome 式实时换位的前提）
             key={b.tid ?? `${i}-${b.title}`}
@@ -2077,7 +2203,8 @@ export function AtlasPage() {
             onOpenMenu={(x, y) => setTabMenu({ x, y, target: { kind: 'tab', index: i } })}
             onTearDrag={handleTearDrag(i, b.title || `Tab${i + 1}`)}
           />
-        ))}
+          ),
+        )}
       </div>
 
       {/* 🔴 改动 2026-10-13 · Tab 右键菜单：重命名 / 成为主画板 / 新建 Tab / 删除（主画板删除走安全弹窗） */}
@@ -2223,9 +2350,10 @@ export function AtlasPage() {
 
         {/* 🔴 改动 2026-10-13 · 屏幕钉子画板：画中画浮动窗口（每 Tab 一个，可多个并存；
             技能激活默认钉 / Tab 拖到画板上即钉）。
-            框选重叠或左键点击 → 选中（蓝色四边分隔线）→ 左键拖头部/分隔线移动；右键任意部位直接拖动 */}
+            框选重叠或左键点击 → 选中（蓝色四边分隔线）→ 左键拖头部/分隔线移动；右键任意部位直接拖动
+            🔴 改动 2026-10-15 · 不再绑定拆分视图：全屏/独占视图下钉出的浮动窗口同样悬浮（原逻辑只在拆分视图渲染，
+            配合 pinTabAt/handleChainActivated 不强制打开拆分视图的修改） */}
         {!mapOpen &&
-          splitOpen &&
           atlasSplit &&
           splitBoards.map((b, i) =>
             splitPinned[i] !== true ? null : (
@@ -2242,12 +2370,26 @@ export function AtlasPage() {
                 }}
                 onSelect={() => setPinnedSelected(i)}
                 onMove={(dx, dy) => movePinned(i, dx, dy)}
+                closeLabel={b.isSubBoard ? `删除 ${b.title || `Tab${i + 1}`}` : undefined}
+                // 🔴 改动 2026-10-15 · 拖回 Tab 坞：悬停时坞栏亮边提示，松手取消屏幕钉并独占全屏显示
+                onDragMove={(x, y) => setPinDragOverDock(pointerOverDock(x, y))}
+                onDragEnd={(x, y) => {
+                  setPinDragOverDock(false)
+                  // 拖回坞：取消屏幕钉 + 叶子复位，并独占全屏显示该画板（forceSolo 覆盖拆分视图态）
+                  if (pointerOverDock(x, y)) handleSelectTab(i, true)
+                }}
                 onPersist={(d) => {
                   const prev = atlasSplitRef.current
                   if (!prev) return
                   commitSplit({ ...prev, boards: prev.boards.map((x) => (x === d ? d : x)) })
                 }}
                 onCollapse={() => {
+                  // 🔴 改动 2026-10-15 · 子画板的浮动窗口不在坞里显示标签：「收起」会让它永久不可见，
+                  // 因此子画板 X = 删除（确认弹窗）；普通拆分 Tab 的 X 维持收起语义（点 Tab 可复位）
+                  if (b.isSubBoard) {
+                    setDeleteTarget({ kind: 'tab', index: i })
+                    return
+                  }
                   const prev = atlasSplitRef.current
                   if (!prev) return
                   setPinnedSelected((sel) => (sel === i ? null : sel))

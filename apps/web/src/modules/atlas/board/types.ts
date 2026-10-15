@@ -131,6 +131,9 @@ export interface BoardDoc {
   /** 🔴 改动 2026-10-15 · Tab 稳定身份（坞内拖动换位 / React key）：随文档持久化，
    *  旧数据没有该字段时由 splitStore.loadSplitState 补发 */
   tid?: string
+  /** 🔴 改动 2026-10-15 · 子画板标记（技能激活 / 从其它画板抽取）：属于某个画板的子画板，
+   *  不在 Tab 坞显示标签，只以屏幕钉浮动窗口存在；拖回坞后全屏显示，删除走画板右键「删除画板」 */
+  isSubBoard?: boolean
 }
 
 /** 缩放范围（任务约定约 0.25–4；Evoloop 原为 0.25–3） */
