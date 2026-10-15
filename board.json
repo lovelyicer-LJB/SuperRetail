@@ -213,15 +213,20 @@
       "x": 424.3331298828125,
       "y": -81.66668701171875,
       "w": 240,
-      "h": 573,
+      "h": 602,
       "text": "",
       "meta": {
         "title": "超零售线程",
         "items": [
           {
-            "text": "肯定在steam",
+            "text": "确定要在steam上架",
             "done": true,
             "mission": false
+          },
+          {
+            "text": "确定要",
+            "done": false,
+            "depth": 0
           },
           {
             "text": "骑士宇宙-人类命运共同体",
