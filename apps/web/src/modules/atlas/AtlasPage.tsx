@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 // 🔴 改动 2026-10-10 · 版图页最底层接入无限画板（复刻 Evoloop：z-0，低于地球/放置组件/浮窗/预览）。
 // 🔴 改动 2026-10-12 · 已放置组件（图表浮窗拖入的组件/图表）选中 + Del/Backspace 删除：
 // 画板框架「一切可拖入画板的东西都必须支持 Del 删除」约定的页面层实现（另一套是引擎卡片删除，
@@ -1434,6 +1434,42 @@ export function AtlasPage() {
   /** 🔴 改动 2026-10-15 · 坞内拖动换位的 Tab 元素引用（下标 → DOM，用于指针 x 越过中线的插入位判定） */
   const dockTabRefs = useRef(new Map<number, HTMLButtonElement>())
 
+  /** 🔴 改动 2026-10-15 · 换位即时交换动效（复刻 Chrome）：FLIP 技术——换位前记录各 Tab 可视位置，
+   *  提交换位后先按旧位置反向 translate 锁住起点（无过渡跳变），再释放过渡滑回 0，
+   *  被越过的标签像被推开一样滑入新位；连续快速换位时上一条动画的定时清理被取消，从新起点续滑 */
+  const flipRectsRef = useRef<Map<HTMLButtonElement, DOMRect> | null>(null)
+  const flipTimersRef = useRef(new Map<HTMLButtonElement, number>())
+  useLayoutEffect(() => {
+    const olds = flipRectsRef.current
+    flipRectsRef.current = null
+    if (!olds) return
+    for (const [el, old] of olds) {
+      if (!el.isConnected) continue
+      const now = el.getBoundingClientRect()
+      const dx = old.left - now.left
+      const prevTimer = flipTimersRef.current.get(el)
+      if (prevTimer) window.clearTimeout(prevTimer)
+      if (!dx) {
+        el.style.transition = ''
+        el.style.transform = ''
+        continue
+      }
+      el.style.transition = 'none'
+      el.style.transform = `translateX(${dx}px)`
+      void el.getBoundingClientRect() // 强制回流，锁住动画起点
+      el.style.transition = 'transform 170ms cubic-bezier(0.25, 0.8, 0.3, 1)'
+      el.style.transform = 'translateX(0)'
+      flipTimersRef.current.set(
+        el,
+        window.setTimeout(() => {
+          el.style.transition = ''
+          el.style.transform = ''
+          flipTimersRef.current.delete(el)
+        }, 240),
+      )
+    }
+  })
+
   /** 🔴 改动 2026-10-15 · Chrome 式 Tab 换位：boards/pinned 同步移动 + 拆分树叶 tab 下标全树重映射
    *  （主画板叶 tab:-1 不受映射影响）；solo / 选中浮动窗口按下标联动重映射。
    *  pinPosMap（浮动窗口位置）按下标存：换位后位置跟随新下标，略有偏移可再拖，属低频可接受 */
@@ -1452,6 +1488,10 @@ export function AtlasPage() {
     }
     const remapTree = (node: SplitNode): SplitNode =>
       node.kind === 'board' ? { ...node, tab: remap(node.tab) } : { ...node, first: remapTree(node.first), second: remapTree(node.second) }
+    // 🔴 改动 2026-10-15 · FLIP 动效起点：换位前记录全部拆分 Tab 当前可视位置（含正在拖的那枚，Chrome 式一起滑）
+    const olds = new Map<HTMLButtonElement, DOMRect>()
+    dockTabRefs.current.forEach((el) => olds.set(el, el.getBoundingClientRect()))
+    flipRectsRef.current = olds
     commitSplit({ ...prev, activeSplit: remap(prev.activeSplit), boards, root: remapTree(prev.root), pinned })
     setSoloTab((s) => (s === null ? null : remap(s)))
     setPinnedSelected((s) => (s === null ? null : remap(s)))
