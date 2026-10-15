@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Classes\superretail]
+@="URL:SuperRetail Protocol"
+"URL Protocol"=""
+
+[HKEY_CURRENT_USER\Software\Classes\superretail\shell]
+
+[HKEY_CURRENT_USER\Software\Classes\superretail\shell\open]
+
+[HKEY_CURRENT_USER\Software\Classes\superretail\shell\open\command]
+@="\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File \"D:\\LJB_Plan\\GitHub_ProjectManager\\SuperRetail\\tools\\superretail-launcher.ps1\" \"%1\""

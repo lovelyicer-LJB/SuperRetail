@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_de516ce8-f974-44bd-8191-856efb8082e8",
+    "title": "个人效率",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "dashboard-tutorial:zh-CN:widget:template-efficiency",
+      "sourceBundleId": "bundle_dashboard-tutorial-20"
+    },
+    "createdAt": "2026-10-13T02:47:05.254Z",
+    "updatedAt": "2026-10-13T02:47:05.254Z"
+  }
+}

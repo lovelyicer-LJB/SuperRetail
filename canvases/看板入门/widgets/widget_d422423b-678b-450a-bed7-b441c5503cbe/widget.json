@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_d422423b-678b-450a-bed7-b441c5503cbe",
+    "title": "关心的事 实时呈现",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "dashboard-tutorial:zh-CN:widget:tools-tile",
+      "sourceBundleId": "bundle_dashboard-tutorial-20"
+    },
+    "createdAt": "2026-10-13T02:47:05.245Z",
+    "updatedAt": "2026-10-13T02:47:05.245Z"
+  }
+}

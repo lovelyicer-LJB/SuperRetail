@@ -1,0 +1,477 @@
+/* 🔴 改动 2026-10-13 · 工坊「收益线程」样式：金色虚线框、节点工作流、技能拖放激活与源头→最终节点的连线级联动效。
+   金色三档与工坊 asset-runes.css / 画板 board.css 收益连线保持一致（深 #d4ad57 / 浅 #a77a28）。 */
+
+.rt {
+  --rt-gold-mid: #d4ad57;
+  --rt-gold-light: #eed193;
+  --rt-gold-deep: #b88a3b;
+  --rt-canvas: #0e151c;
+  --rt-panel: #121a22;
+  --rt-node: linear-gradient(150deg, #202b33, #131b23 60%, #17202a);
+  --rt-text: #dce7ed;
+  --rt-muted: #8e9aa5;
+  --rt-rail: #425462;
+  --rt-wire-dormant: #5b6c7a;
+  --rt-frame-fill: rgba(212, 173, 87, 0.05);
+  --rt-flow-material: #cbab7a;
+  --rt-flow-recipe: #a6a2e4;
+  --rt-flow-chef: #72bbda;
+  --rt-flow-dish: #69c2ac;
+  --rt-flow-trade: #a6bcca;
+  --rt-flow-fund: #69c2ac;
+}
+.rt.is-light {
+  --rt-gold-mid: #a77a28;
+  --rt-gold-light: #c69b48;
+  --rt-gold-deep: #90661f;
+  --rt-canvas: #e5ecef;
+  --rt-panel: #f4f7f9;
+  --rt-node: linear-gradient(145deg, #fbfdff, #e4ebef);
+  --rt-text: #243847;
+  --rt-muted: #526c7c;
+  --rt-rail: #9db1bc;
+  --rt-wire-dormant: #a9bcc6;
+  --rt-frame-fill: rgba(167, 122, 40, 0.06);
+  --rt-flow-material: #986932;
+  --rt-flow-recipe: #7664ad;
+  --rt-flow-chef: #347995;
+  --rt-flow-dish: #2c8875;
+  --rt-flow-trade: #557689;
+  --rt-flow-fund: #2c8875;
+}
+
+/* ---- 面板与图例 ---- */
+.rt-panel {
+  border: 1px solid rgba(128, 148, 160, 0.28);
+  border-radius: 18px;
+  background: var(--rt-panel);
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+.rt.is-light .rt-panel {
+  border-color: rgba(90, 110, 120, 0.28);
+  box-shadow: 0 10px 26px rgba(21, 50, 67, 0.10);
+}
+.rt-legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 22px;
+  border-bottom: 1px solid rgba(128, 148, 160, 0.22);
+  font-size: 10px;
+  color: var(--rt-muted);
+  flex-wrap: wrap;
+}
+/* 🔴 改动 2026-10-13 · 形态切换：收益循环（回连源头）/ 收益线程（单向止于收益节点） */
+.rt-modes {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid rgba(128, 148, 160, 0.3);
+  border-radius: 11px;
+  background: rgba(128, 148, 160, 0.07);
+}
+.rt-modes button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rt-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.rt-modes button:hover { color: var(--rt-text); }
+.rt-modes button[aria-pressed='true'] {
+  background: rgba(212, 173, 87, 0.14);
+  color: var(--rt-gold-mid);
+  box-shadow: inset 0 0 0 1px var(--rt-gold-mid), 0 0 10px rgba(212, 173, 87, 0.18);
+}
+.rt.is-light .rt-modes button[aria-pressed='true'] {
+  background: rgba(167, 122, 40, 0.13);
+  box-shadow: inset 0 0 0 1px var(--rt-gold-mid), 0 0 8px rgba(167, 122, 40, 0.15);
+}
+.rt-legend-divider { width: 1px; height: 16px; background: rgba(128, 148, 160, 0.3); }
+.rt-legend-flow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+.rt-legend-flow::before {
+  content: '';
+  width: 18px;
+  height: 0;
+  border-top: 2px solid currentColor;
+  border-radius: 2px;
+}
+.rt-flow-material { color: var(--rt-flow-material); }
+.rt-flow-recipe { color: var(--rt-flow-recipe); }
+.rt-flow-chef { color: var(--rt-flow-chef); }
+.rt-flow-dish { color: var(--rt-flow-dish); }
+.rt-flow-trade { color: var(--rt-flow-trade); }
+.rt-flow-fund { color: var(--rt-flow-fund); }
+.rt-state-pill {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border: 1px dashed var(--rt-gold-mid);
+  border-radius: 999px;
+  color: var(--rt-gold-mid);
+  background: var(--rt-frame-fill);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.rt-state-pill i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  background: transparent;
+}
+.rt-state-pill.is-active {
+  border-style: solid;
+  border-color: var(--rt-gold-light);
+  color: var(--rt-gold-light);
+  background: rgba(212, 173, 87, 0.12);
+  box-shadow: 0 0 14px rgba(212, 173, 87, 0.25);
+}
+.rt.is-light .rt-state-pill.is-active { background: rgba(167, 122, 40, 0.10); }
+.rt-state-pill.is-active i {
+  background: var(--rt-gold-light);
+  box-shadow: 0 0 7px var(--rt-gold-light);
+  animation: rt-led-pulse 1.6s ease-in-out infinite;
+}
+@keyframes rt-led-pulse { 50% { opacity: 0.35; } }
+
+/* ---- 舞台与工作流 SVG ---- */
+.rt-stage {
+  position: relative;
+  background-color: var(--rt-canvas);
+  background-image: radial-gradient(rgba(128, 148, 160, 0.32) 0.8px, transparent 0.8px);
+  background-size: 20px 20px;
+  box-shadow: inset 0 1px 0 rgba(145, 190, 213, 0.06), inset 0 0 110px rgba(0, 0, 0, 0.2);
+}
+.rt.is-light .rt-stage { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9); }
+.rt-svg { display: block; width: 100%; height: auto; }
+.rt-stage { touch-action: none; }
+
+/* ---- 金色虚线框 ---- */
+.rt-frame {
+  fill: var(--rt-frame-fill);
+  stroke: var(--rt-gold-mid);
+  stroke-width: 1.6;
+  stroke-dasharray: 10 8;
+  animation: rt-frame-breathe 5s ease-in-out infinite;
+}
+.rt-frame-glow {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 8;
+  opacity: 0;
+  pointer-events: none;
+}
+/* 拖拽技能悬停框内：提亮虚线并加快节奏 */
+.rt-frame-group.is-targeting .rt-frame {
+  stroke: var(--rt-gold-light);
+  stroke-width: 2.2;
+  fill: rgba(212, 173, 87, 0.10);
+  animation: rt-frame-march 0.9s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(212, 173, 87, 0.45));
+}
+.rt-frame-group.is-targeting .rt-frame-glow {
+  opacity: 0.5;
+  stroke: var(--rt-gold-mid);
+  filter: drop-shadow(0 0 12px rgba(212, 173, 87, 0.55));
+}
+/* 激活 = 收益线程：流动金色虚线 + 微光 */
+.rt.is-active .rt-frame {
+  stroke: var(--rt-gold-light);
+  stroke-width: 2;
+  stroke-dasharray: 14 10;
+  fill: rgba(212, 173, 87, 0.07);
+  animation: rt-frame-march 1.6s linear infinite;
+  filter: drop-shadow(0 0 7px rgba(212, 173, 87, 0.35));
+}
+.rt.is-active .rt-frame-glow {
+  opacity: 0.55;
+  stroke: var(--rt-gold-mid);
+  filter: drop-shadow(0 0 14px rgba(238, 209, 147, 0.4));
+}
+@keyframes rt-frame-breathe { 50% { stroke-dashoffset: -9; opacity: 0.85; } }
+@keyframes rt-frame-march { to { stroke-dashoffset: -48; } }
+
+/* 框顶徽标 */
+.rt-frame-badge rect {
+  fill: var(--rt-panel);
+  stroke: var(--rt-gold-mid);
+  stroke-width: 1.2;
+  stroke-dasharray: 5 4;
+}
+.rt-frame-badge text {
+  fill: var(--rt-gold-mid);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+.rt.is-active .rt-frame-badge rect {
+  fill: rgba(212, 173, 87, 0.12);
+  stroke: var(--rt-gold-light);
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 6px rgba(212, 173, 87, 0.4));
+}
+.rt.is-active .rt-frame-badge text { fill: var(--rt-gold-light); }
+
+/* ---- 连线：待激活灰虚 → 激活后全金 + 脉冲自源头向最终节点逐级流动 ---- */
+.rt-wire-base, .rt-wire-gold, .rt-wire-flow-halo, .rt-wire-flow {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.rt-wire-base {
+  stroke: var(--rt-wire-dormant);
+  stroke-width: 2;
+  stroke-dasharray: 4 5;
+  opacity: 0.75;
+}
+.rt-wire-gold, .rt-wire-flow-halo, .rt-wire-flow { opacity: 0; }
+/* 激活：底座换渐变金 */
+.rt.is-active .rt-wire-base {
+  stroke: var(--rt-gold-mid);
+  stroke-width: 2.6;
+  stroke-dasharray: none;
+  opacity: 0.35;
+  filter: drop-shadow(0 0 4px rgba(212, 173, 87, 0.5));
+}
+.rt.is-active .rt-wire-gold {
+  opacity: 1;
+  stroke: url(#rt-gold-grad);
+  stroke-width: 2.4;
+}
+/* 🔴 改动 2026-10-13 · 流动特效参照 UE5 蓝图系统调试工具「可视化执行流」：
+   单枚粗圆头亮脉冲沿执行线自源头冲向目标，外包柔光晕；按拓扑深度错峰，形成源头→最终节点的执行波前。
+   dash 占比由元素 stroke-dasharray 属性按各线路径长度换算（固定脉冲尺寸），CSS 只负责颜色/粗细/动效 */
+.rt.is-active .rt-wire-flow-halo {
+  opacity: 0.3;
+  stroke: #ffd976;
+  stroke-width: 10;
+  stroke-dashoffset: 0;
+  filter: blur(2px);
+  animation: rt-thread-flow 1.4s linear infinite;
+}
+.rt.is-active .rt-wire-flow {
+  opacity: 1;
+  stroke: #fff8dd;
+  stroke-width: 6.5;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 5px rgba(255, 233, 168, 0.95)) drop-shadow(0 0 12px rgba(255, 217, 118, 0.55));
+  animation: rt-thread-flow 1.4s linear infinite;
+}
+.rt.is-light.is-active .rt-wire-flow { stroke: #fff3cd; filter: drop-shadow(0 0 4px rgba(167, 122, 40, 0.8)) drop-shadow(0 0 11px rgba(198, 155, 72, 0.7)); }
+.rt.is-light.is-active .rt-wire-flow-halo { stroke: #c58f2e; opacity: 0.34; }
+@keyframes rt-thread-flow { to { stroke-dashoffset: -100; } }
+@media (prefers-reduced-motion: reduce) {
+  .rt.is-active .rt-wire-flow, .rt.is-active .rt-wire-flow-halo { animation: none; }
+  .rt.is-active .rt-wire-flow-halo { display: none; }
+  .rt.is-active .rt-wire-flow { stroke-dasharray: none; opacity: 0.55; }
+  .rt.is-active .rt-frame, .rt-frame { animation: none; }
+}
+
+/* ---- 节点 ---- */
+.rt-node-body {
+  fill: var(--rt-node);
+  stroke: rgba(133, 155, 163, 0.25);
+  stroke-width: 1;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.28));
+}
+.rt.is-light .rt-node-body { filter: drop-shadow(0 3px 10px rgba(21, 50, 67, 0.14)); }
+.rt-node-brackets {
+  fill: none;
+  stroke: var(--rt-rail);
+  stroke-width: 1.3;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.rt-node-icon-slot {
+  fill: rgba(54, 69, 82, 0.55);
+  stroke: rgba(96, 117, 130, 0.5);
+}
+.rt.is-light .rt-node-icon-slot { fill: #e3ecf0; stroke: #b1c6cf; }
+.rt-node-icon { color: #9fb6c6; }
+.rt-node-title { fill: var(--rt-text); font-size: 13px; font-weight: 600; letter-spacing: 0.015em; }
+.rt-node-kind { fill: var(--rt-muted); font-size: 8.5px; }
+.rt-node-rule { stroke: rgba(102, 129, 142, 0.3); stroke-width: 1; }
+.rt-node-detail { fill: var(--rt-muted); font-size: 9px; }
+.rt-node-led { fill: #3a4b57; }
+.rt-port { fill: #0a1016; stroke: #596975; stroke-width: 1.2; }
+.rt-port-in { stroke-width: 1.5; }
+.rt.is-light .rt-port { fill: #e6eef2; stroke: #7d97a5; }
+/* 卖出中点：收益分支引出点（金） */
+.rt-junction {
+  fill: var(--rt-gold-light);
+  stroke: var(--rt-gold-deep);
+  stroke-width: 1;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 3px rgba(212, 173, 87, 0.6));
+}
+
+/* 节点色相：与工坊 asset-runes 流语义一致 */
+.rt-tone-material { --node-tone: var(--rt-flow-material); }
+.rt-tone-recipe { --node-tone: var(--rt-flow-recipe); }
+.rt-tone-chef { --node-tone: var(--rt-flow-chef); }
+.rt-tone-dish { --node-tone: var(--rt-flow-dish); }
+.rt-tone-buyer { --node-tone: var(--rt-flow-trade); }
+.rt-tone-revenue { --node-tone: var(--rt-gold-mid); }
+
+/* 激活：节点点亮（源头与最终节点强调） */
+.rt.is-active .rt-node .rt-node-icon { color: var(--node-tone); }
+.rt.is-active .rt-node .rt-node-brackets { stroke: var(--node-tone); opacity: 0.9; }
+.rt.is-active .rt-node .rt-node-led { fill: var(--node-tone); filter: drop-shadow(0 0 4px var(--node-tone)); }
+.rt.is-active .rt-node .rt-port { stroke: var(--node-tone); }
+.rt.is-active .rt-node.is-source .rt-node-body {
+  stroke: var(--rt-gold-mid);
+  filter: drop-shadow(0 0 10px rgba(212, 173, 87, 0.28));
+}
+.rt.is-active .rt-node.is-final .rt-node-body {
+  stroke: var(--rt-gold-light);
+  stroke-width: 1.4;
+  filter: drop-shadow(0 0 14px rgba(238, 209, 147, 0.4));
+}
+.rt.is-active .rt-node.is-final .rt-node-icon-slot {
+  fill: rgba(212, 173, 87, 0.18);
+  stroke: var(--rt-gold-mid);
+}
+.rt.is-active .rt-node.is-final .rt-node-icon { color: var(--rt-gold-light); }
+
+/* ---- 技能拖放 ---- */
+.rt-dock {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 22px;
+  border-top: 1px solid rgba(128, 148, 160, 0.22);
+  flex-wrap: wrap;
+}
+.rt-skill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--rt-gold-mid);
+  color: var(--rt-gold-light);
+  background: linear-gradient(135deg, rgba(212, 173, 87, 0.16), rgba(184, 138, 59, 0.08));
+  box-shadow: 0 0 0 3px rgba(212, 173, 87, 0.08), inset 0 1px 0 rgba(238, 209, 147, 0.25);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.rt-skill small {
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.65;
+  letter-spacing: 0;
+}
+.rt-skill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(212, 173, 87, 0.14), 0 4px 16px rgba(212, 173, 87, 0.25);
+}
+.rt-skill.is-dragging {
+  position: fixed;
+  z-index: 60;
+  transform: translate(-50%, -50%) scale(1.06);
+  cursor: grabbing;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 18px rgba(212, 173, 87, 0.5);
+  opacity: 0.9;
+}
+.rt.is-light .rt-skill { color: #7c5a16; }
+.rt-skill-ghost {
+  position: fixed;
+  z-index: 59;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px dashed var(--rt-gold-light);
+  color: var(--rt-gold-light);
+  background: rgba(10, 14, 18, 0.85);
+  font-size: 12px;
+}
+.rt-drop-hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 55;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(10, 14, 18, 0.9);
+  border: 1px solid var(--rt-gold-mid);
+  color: var(--rt-gold-light);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.rt-skill-applied {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--rt-gold-light);
+  color: var(--rt-gold-light);
+  background: rgba(212, 173, 87, 0.12);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 0 14px rgba(212, 173, 87, 0.22);
+}
+.rt-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(128, 148, 160, 0.4);
+  color: var(--rt-muted);
+  background: transparent;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.rt-reset:hover { border-color: var(--rt-muted); color: var(--rt-text); }
+.rt-dock-note { font-size: 11px; color: var(--rt-muted); line-height: 1.7; }
+
+/* ---- 三步说明 ---- */
+.rt-steps { color: var(--rt-text); }
+.rt-step {
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(128, 148, 160, 0.22);
+  background: var(--rt-panel);
+}
+.rt-step-index {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 1px solid var(--rt-gold-mid);
+  color: var(--rt-gold-mid);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+.rt-step h3 { margin: 12px 0 6px; font-size: 13px; font-weight: 600; }
+.rt-step p { font-size: 12px; line-height: 1.8; color: var(--rt-muted); }

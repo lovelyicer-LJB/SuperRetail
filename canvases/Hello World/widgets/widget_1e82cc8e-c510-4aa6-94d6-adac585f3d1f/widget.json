@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_1e82cc8e-c510-4aa6-94d6-adac585f3d1f",
+    "title": "Kimi Tech Blog",
+    "description": "运行时读取 Kimi 官方技术博客。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "slots": {
+      "main": {
+        "kind": "json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "updatedAt": {
+              "type": "string"
+            },
+            "live": {
+              "type": "boolean"
+            },
+            "error": {
+              "type": "string"
+            },
+            "items": {
+              "type": "array"
+            }
+          },
+          "required": [
+            "updatedAt",
+            "live",
+            "items"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    "status": "error",
+    "error": {
+      "code": "render_smoke_failed",
+      "message": "main face threw during Binding smoke test: fetch is not defined",
+      "issues": [
+        {
+          "code": "render_smoke_failed",
+          "path": "widget.faces.main.html.script[0]",
+          "message": "main face threw during Binding smoke test: fetch is not defined"
+        }
+      ]
+    },
+    "lastRun": {
+      "runId": "run_eaf97552-9042-465e-94fd-ebdb72092b65",
+      "status": "failed",
+      "startedAt": "2026-09-15T01:00:17.215Z",
+      "completedAt": "2026-09-15T01:00:18.025Z"
+    },
+    "bindings": {
+      "main": "binding_7671d7cc-0f5e-43f9-a984-9dd093126e92"
+    },
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:kimi-blog",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.055Z",
+    "updatedAt": "2026-09-15T01:00:18.070Z"
+  }
+}

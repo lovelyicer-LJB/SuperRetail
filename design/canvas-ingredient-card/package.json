@@ -1,0 +1,9 @@
+{
+  "name": "canvas-ingredient-card-design",
+  "private": true,
+  "version": "0.1.0",
+  "description": "原材料画布卡 v0.1 设计评审稿（安集海辣皮子）",
+  "scripts": {
+    "dev": "node server.js"
+  }
+}

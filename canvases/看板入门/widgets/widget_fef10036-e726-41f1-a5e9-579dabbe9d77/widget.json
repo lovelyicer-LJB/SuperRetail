@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_fef10036-e726-41f1-a5e9-579dabbe9d77",
+    "title": "来点酷的",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "dashboard-tutorial:zh-CN:widget:template-cool",
+      "sourceBundleId": "bundle_dashboard-tutorial-20"
+    },
+    "createdAt": "2026-10-13T02:47:05.256Z",
+    "updatedAt": "2026-10-13T02:47:05.256Z"
+  }
+}

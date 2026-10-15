@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_a78b35a4-1cff-4e03-8903-39d83bfa892a",
+    "title": "Kimi Work 介绍",
+    "description": "卡片内播放 Kimi Work 官方宣传视频。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:video-library",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.067Z",
+    "updatedAt": "2026-09-08T14:49:56.067Z"
+  }
+}

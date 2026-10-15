@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_afae7442-fee3-4521-9e7f-290570dcea11",
+    "title": "黑胶唱片机",
+    "description": "播放 Internet Archive 的早期公版录音。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:music-player",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.066Z",
+    "updatedAt": "2026-09-08T14:49:56.066Z"
+  }
+}

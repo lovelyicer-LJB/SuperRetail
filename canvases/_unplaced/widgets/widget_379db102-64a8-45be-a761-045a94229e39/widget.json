@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_379db102-64a8-45be-a761-045a94229e39",
+    "title": "待办卡片 · Milanote",
+    "description": "复刻 Milanote 风格的待办清单卡片：可编辑标题、勾选划线、拖拽排序、悬停删除、回车新增，本地持久化。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "inputState": {
+      "draftInput": {
+        "title": "待办清单",
+        "items": [
+          {
+            "id": "imtzfvdsm0",
+            "text": "收集灵感素材",
+            "done": false
+          },
+          {
+            "id": "imtzfvdsm1",
+            "text": "整理项目情绪板",
+            "done": false
+          },
+          {
+            "id": "imtzfvdsm2",
+            "text": "列出本周三个优先任务",
+            "done": false
+          },
+          {
+            "id": "imtzfvdsm3",
+            "text": "给初稿留出批注时间",
+            "done": false
+          }
+        ]
+      },
+      "currentInput": {
+        "title": "待办清单",
+        "items": [
+          {
+            "id": "imtzfvdsm0",
+            "text": "收集灵感素材",
+            "done": false
+          },
+          {
+            "id": "imtzfvdsm1",
+            "text": "整理项目情绪板",
+            "done": false
+          },
+          {
+            "id": "imtzfvdsm2",
+            "text": "列出本周三个优先任务",
+            "done": false
+          },
+          {
+            "id": "imtzfvdsm3",
+            "text": "给初稿留出批注时间",
+            "done": false
+          }
+        ]
+      },
+      "updatedAt": "2026-09-13T06:34:55.390Z"
+    },
+    "status": "idle",
+    "createdAt": "2026-09-13T06:33:10.147Z",
+    "updatedAt": "2026-09-13T06:34:55.390Z"
+  }
+}

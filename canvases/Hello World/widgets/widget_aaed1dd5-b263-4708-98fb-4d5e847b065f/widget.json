@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_aaed1dd5-b263-4708-98fb-4d5e847b065f",
+    "title": "导览 · ① 真实信息，运行时刷新",
+    "description": "汇率、行情与技术文章均来自运行时数据。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:section-schedules",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.050Z",
+    "updatedAt": "2026-09-08T14:49:56.050Z"
+  }
+}

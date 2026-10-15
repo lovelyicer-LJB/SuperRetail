@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_074f43e7-f106-4641-a51b-574c09b58936",
+    "title": "BEETBOX · 合成器",
+    "description": "纯 WebAudio 本地合成器。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:beetbox",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.070Z",
+    "updatedAt": "2026-09-08T14:49:56.070Z"
+  }
+}

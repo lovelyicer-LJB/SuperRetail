@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_64cd6956-21b9-497b-8ff7-636a01efe365",
+    "title": "演示 · 拖一拖",
+    "description": "拖动卡片体验 Canvas 布局。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:drag",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.043Z",
+    "updatedAt": "2026-09-08T14:49:56.043Z"
+  }
+}

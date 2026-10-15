@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_fa749192-4bf0-4e70-af58-64644eacbfe0",
+    "title": "电脑剩余空间",
+    "description": "通过 managed Python 读取真实磁盘容量。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "slots": {
+      "main": {
+        "kind": "json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "scannedAt": {
+              "type": "string"
+            },
+            "pathLabel": {
+              "type": "string"
+            },
+            "mount": {
+              "type": "string"
+            },
+            "platform": {
+              "type": "string"
+            },
+            "totalBytes": {
+              "type": "number"
+            },
+            "usedBytes": {
+              "type": "number"
+            },
+            "freeBytes": {
+              "type": "number"
+            },
+            "usedPct": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "scannedAt",
+            "totalBytes",
+            "usedBytes",
+            "freeBytes",
+            "usedPct"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    "events": {
+      "submit": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        }
+      }
+    },
+    "status": "idle",
+    "bindings": {
+      "main": "binding_1563f65a-ae48-4bd9-a9fa-6ec05ed36709"
+    },
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:storage",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.062Z",
+    "updatedAt": "2026-09-08T14:49:56.110Z"
+  }
+}

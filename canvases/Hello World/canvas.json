@@ -1,0 +1,273 @@
+{
+  "canvasId": "canvas_7c295802-8b38-427d-a369-2e4cf3811d14",
+  "title": "Hello World",
+  "purpose": "一块统一蓝黑白画风的 Hello Dashboard 教程。",
+  "placements": [
+    {
+      "mountId": "mount_071b255b-2507-45bc-9447-499672627308",
+      "widgetId": "widget_0d93ada8-2455-4c26-ae82-86bd296aa9cd",
+      "title": "导览 · ② 本地数据，自己管",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 45,
+        "w": 12,
+        "h": 7
+      },
+      "zOrder": 16,
+      "exported": true
+    },
+    {
+      "mountId": "mount_1773a793-54e2-4f8b-af00-b80b5ae67014",
+      "widgetId": "widget_fa749192-4bf0-4e70-af58-64644eacbfe0",
+      "title": "电脑剩余空间",
+      "layout": {
+        "mode": "grid",
+        "x": 8,
+        "y": 52,
+        "w": 4,
+        "h": 12
+      },
+      "zOrder": 18,
+      "exported": true
+    },
+    {
+      "mountId": "mount_25468bdf-f174-4579-9976-101beba92978",
+      "widgetId": "widget_aaed1dd5-b263-4708-98fb-4d5e847b065f",
+      "title": "导览 · ① 真实信息，运行时刷新",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 7
+      },
+      "zOrder": 15,
+      "exported": true
+    },
+    {
+      "mountId": "mount_326e2ace-4d82-47b1-bc5a-080037ffe725",
+      "widgetId": "widget_c34933ad-4dda-4fa0-a216-6af5798b46bc",
+      "title": "番茄钟",
+      "layout": {
+        "mode": "grid",
+        "x": 4,
+        "y": 52,
+        "w": 4,
+        "h": 12
+      },
+      "zOrder": 4,
+      "exported": true
+    },
+    {
+      "mountId": "mount_35355005-b1f8-4954-bf99-eca65fee58b9",
+      "widgetId": "widget_27b1f197-a414-40cb-9109-f1fa7dc512c0",
+      "title": "历史上的今天",
+      "layout": {
+        "mode": "grid",
+        "x": 7,
+        "y": 85,
+        "w": 5,
+        "h": 13
+      },
+      "zOrder": 19,
+      "exported": true
+    },
+    {
+      "mountId": "mount_3ee669a3-030a-4300-8424-04e0bc166fa1",
+      "widgetId": "widget_6edea9a5-73fb-4f2b-a310-9a481e6d0419",
+      "title": "演示 · 拉一拉",
+      "layout": {
+        "mode": "grid",
+        "x": 4,
+        "y": 6,
+        "w": 4,
+        "h": 6
+      },
+      "zOrder": 12,
+      "exported": true
+    },
+    {
+      "mountId": "mount_4a5c90e4-14e2-4694-9e5c-6b8104825598",
+      "widgetId": "widget_d1b155d6-1c73-4a58-acbf-44842dc20a78",
+      "title": "导览 · ③ 和外面的世界握手",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 64,
+        "w": 12,
+        "h": 7
+      },
+      "zOrder": 17,
+      "exported": true
+    },
+    {
+      "mountId": "mount_5529afbb-1a33-4a96-9ece-945a5e16d40d",
+      "widgetId": "widget_afae7442-fee3-4521-9e7f-290570dcea11",
+      "title": "黑胶唱片机",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 71,
+        "w": 12,
+        "h": 14
+      },
+      "zOrder": 7,
+      "exported": true
+    },
+    {
+      "mountId": "mount_64978a9d-c4b1-478e-b4fd-f1044e49175b",
+      "widgetId": "widget_73cbecbc-331f-4db3-b459-44a81868bf48",
+      "title": "实时汇率",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 25,
+        "w": 6,
+        "h": 8
+      },
+      "zOrder": 8,
+      "exported": true
+    },
+    {
+      "mountId": "mount_81b24f33-fe7d-47ef-acbc-b948d068a46c",
+      "widgetId": "widget_9967df81-a612-4f0c-a54a-d5d1431c6896",
+      "title": "A股盯盘",
+      "layout": {
+        "mode": "grid",
+        "x": 6,
+        "y": 25,
+        "w": 6,
+        "h": 8
+      },
+      "zOrder": 1,
+      "exported": true
+    },
+    {
+      "mountId": "mount_82fee85b-ee41-41e0-85c2-7cc2cbd5ed0a",
+      "widgetId": "widget_64cd6956-21b9-497b-8ff7-636a01efe365",
+      "title": "演示 · 拖一拖",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 6,
+        "w": 4,
+        "h": 6
+      },
+      "zOrder": 11,
+      "exported": true
+    },
+    {
+      "mountId": "mount_96ea0be1-b2ce-4d82-92d7-47bb888b5ff2",
+      "widgetId": "widget_a78b35a4-1cff-4e03-8903-39d83bfa892a",
+      "title": "Kimi Work 介绍",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 85,
+        "w": 7,
+        "h": 13
+      },
+      "zOrder": 21,
+      "exported": true
+    },
+    {
+      "mountId": "mount_9f20853f-b63f-4aca-b54a-aacec123fbfd",
+      "widgetId": "widget_789339a0-a20d-456a-ae39-928719d8c14f",
+      "title": "导览 · 你好 Dashboard",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 6
+      },
+      "zOrder": 9,
+      "exported": true
+    },
+    {
+      "mountId": "mount_b2b42378-d510-4db0-878c-d75e64a53c7a",
+      "widgetId": "widget_89663c89-b09f-4e69-bce3-da64af1946e7",
+      "title": "演示 · 点一下运行",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 6
+      },
+      "zOrder": 14,
+      "exported": true
+    },
+    {
+      "mountId": "mount_bbf596dd-a7ee-48af-b16a-82322518f525",
+      "widgetId": "widget_074f43e7-f106-4641-a51b-574c09b58936",
+      "title": "BEETBOX · 合成器",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 98,
+        "w": 12,
+        "h": 11
+      },
+      "zOrder": 22,
+      "exported": true
+    },
+    {
+      "mountId": "mount_d4b00976-d1ce-44f2-9936-50168a60541a",
+      "widgetId": "widget_1e82cc8e-c510-4aa6-94d6-adac585f3d1f",
+      "title": "Kimi Tech Blog",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 33,
+        "w": 12,
+        "h": 12
+      },
+      "zOrder": 6,
+      "exported": true
+    },
+    {
+      "mountId": "mount_d9537526-7b2d-4cc0-8d98-4fe4150c7ce4",
+      "widgetId": "widget_f28a1785-83f8-400e-8307-494a0d707232",
+      "title": "演示 · 点开看",
+      "layout": {
+        "mode": "grid",
+        "x": 8,
+        "y": 6,
+        "w": 4,
+        "h": 6
+      },
+      "zOrder": 13,
+      "exported": true
+    },
+    {
+      "mountId": "mount_dde134da-03c3-4869-8141-e7a43d5c9193",
+      "widgetId": "widget_77e5a6e8-9e5b-4f86-a665-a26917b977cc",
+      "title": "待办 + 打卡",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 52,
+        "w": 4,
+        "h": 12
+      },
+      "zOrder": 5,
+      "exported": true
+    },
+    {
+      "mountId": "mount_f1452479-f813-4729-8c97-263f5bd94804",
+      "widgetId": "widget_7bf9c221-6e97-4637-95c1-87fca4f1bb85",
+      "title": "便签 · 复刻咒语",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 109,
+        "w": 12,
+        "h": 8
+      },
+      "zOrder": 3,
+      "exported": true
+    }
+  ]
+}

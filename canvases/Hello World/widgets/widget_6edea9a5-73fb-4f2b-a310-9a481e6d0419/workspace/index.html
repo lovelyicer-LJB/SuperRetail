@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>拉一拉</title>
+<style>
+  :root{
+
+    --bg:#FFFFFF;
+    --ink:#000000;
+    --ink-2:rgba(0,0,0,.60); --ink-3:rgba(0,0,0,.44); --ink-4:rgba(0,0,0,.28);
+    --line:rgba(0,0,0,.13);
+    --accent:#007CFF;
+    --accent-deep:#007CFF;
+    --accent-soft:rgba(0,124,255,.07);
+    --accent-line:rgba(0,124,255,.4);
+    --panel:transparent; --spark:#000000;
+
+    --f1:#D9EDFF; --f2:#91D4FF; --f3:#00A1FF;
+    --f4:#007CFF; --f5:#002E58;
+    --sans:var(--kimi-font-sans,"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","MiSans","Microsoft YaHei",sans-serif);
+    --mono:var(--kimi-font-mono,"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace);
+    --r:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--sans); color:var(--ink); background:transparent; overflow:hidden; -webkit-font-smoothing:antialiased;}
+
+  .card{
+    --padx:clamp(16px,3vw,30px); --pady:clamp(14px,2.4vw,26px);
+    position:relative; height:100vh;
+    border-radius:var(--r); overflow:hidden;
+    background:
+      radial-gradient(100% 90% at 96% 96%, #D9EDFF 0%, rgba(217,237,255,0) 58%),
+      linear-gradient(170deg, #FFFFFF 0%, #F3F9FF 100%);
+  }
+  .card::before{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+    background-image:radial-gradient(rgba(0,124,255,.30) 1px, transparent 1.5px);
+    background-size:12px 12px;
+    -webkit-mask:radial-gradient(circle at 96% 96%, #000 0 34%, transparent 68%);
+            mask:radial-gradient(circle at 96% 96%, #000 0 34%, transparent 68%);
+  }
+  .card::after{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.045'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .stage{
+    position:absolute; inset:0; z-index:1;
+    padding:calc(var(--pady) + 14px) var(--padx) var(--pady);
+    display:flex; flex-direction:column;
+  }
+
+  .head{position:relative; z-index:2; flex:none;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; width:max-content; margin-bottom:10px;
+    font-family:var(--mono); font-size:clamp(10px,.95vw,12px); letter-spacing:.16em;
+    text-transform:uppercase; color:var(--ink-3);
+  }
+  .eyebrow::before{content:""; width:14px; height:8px; background:var(--accent); border-radius:2px;}
+  .hero{
+    margin:0; font-weight:800;
+    font-size:clamp(30px,10vw,60px);
+    line-height:1.02; letter-spacing:-.03em; color:var(--ink);
+  }
+
+  .center{
+    position:relative; z-index:1; flex:1 1 auto; min-height:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; pointer-events:none;
+  }
+  .size{
+    margin:0;
+    font-family:var(--mono); font-weight:650;
+    font-size:clamp(36px,13vw,88px);
+    line-height:1.05; letter-spacing:-.03em; color:var(--ink);
+    white-space:nowrap;
+  }
+  .size .x{color:var(--ink-4); font-weight:400; padding:0 10px;}
+  #w,#h,.bp{display:inline-block;}
+  .pop{animation:pop .28s cubic-bezier(.3,1.4,.5,1);}
+  @keyframes pop{50%{transform:scale(1.18)}}
+  .bp{
+    display:inline-flex; align-items:center; gap:7px;
+    width:max-content; margin-top:clamp(6px,1.4vh,12px);
+    font-family:var(--mono); font-size:11px; letter-spacing:.14em;
+    font-weight:600; color:var(--accent-deep);
+  }
+  .bp::before{content:""; width:6px; height:6px; border-radius:2px; background:var(--accent);}
+  .caption{
+    margin:8px 0 0; font-size:clamp(12px,1.3vw,14px); line-height:1.55;
+    color:var(--ink-2); font-weight:500;
+  }
+  .caption b{color:var(--accent-deep); font-weight:650;}
+
+
+  .guide{position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0;}
+  .chev{
+    position:absolute;
+    font-family:var(--mono); font-weight:700; line-height:1;
+    transform:translate(-50%,-50%) rotate(45deg);
+    animation:flow 2.2s ease-in-out infinite;
+  }
+  .chev.g1{left:62%; top:56%; font-size:clamp(14px,2.2vw,20px); color:var(--f2); animation-delay:0s;}
+  .chev.g2{left:72%; top:67%; font-size:clamp(17px,2.8vw,26px); color:var(--f3); animation-delay:.22s;}
+  .chev.g3{left:82%; top:78%; font-size:clamp(21px,3.6vw,34px); color:var(--f4); animation-delay:.44s;}
+  .chev.g4{left:91%; top:88%; font-size:clamp(26px,4.6vw,44px); color:var(--f5); animation-delay:.66s;}
+  @keyframes flow{
+    0%,100%{opacity:.2; transform:translate(-50%,-50%) rotate(45deg) scale(.94);}
+    35%{opacity:1; transform:translate(-50%,-50%) rotate(45deg) scale(1.06);}
+  }
+
+
+  .hotzone{
+    position:fixed; right:6px; bottom:6px;
+    width:44px; height:44px;
+    border-right:2px dashed rgba(0,124,255,.7);
+    border-bottom:2px dashed rgba(0,124,255,.7);
+    border-bottom-right-radius:10px;
+    pointer-events:none; z-index:2;
+    animation:pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+  .hotdot{
+    position:fixed; right:10px; bottom:10px;
+    width:10px; height:10px; border-radius:999px;
+    background:var(--accent);
+    pointer-events:none; z-index:2;
+    animation:ripple 2.2s ease-out infinite;
+  }
+  @keyframes ripple{
+    0%{box-shadow:0 0 0 0 rgba(0,124,255,.45)}
+    100%{box-shadow:0 0 0 16px rgba(0,124,255,0)}
+  }
+  .hotarrow{
+    position:fixed; right:26px; bottom:26px;
+    font-family:var(--mono); font-weight:700;
+    font-size:17px; line-height:1; color:var(--accent);
+    pointer-events:none; z-index:2;
+    animation:nudge 1.6s ease-in-out infinite;
+  }
+  @keyframes nudge{
+    0%,100%{transform:translate(0,0); opacity:.55;}
+    50%{transform:translate(5px,5px); opacity:1;}
+  }
+  .signoff{
+    position:absolute; left:var(--padx); bottom:calc(var(--pady) - 2px); z-index:2;
+    font-family:var(--mono); font-size:clamp(10px,.9vw,11px); letter-spacing:.16em;
+    text-transform:uppercase; color:var(--ink-4); white-space:nowrap;
+  }
+  @media (max-width:320px){ .size{font-size:clamp(28px,15vw,44px)} .guide{display:none} }
+
+  .card { --padx: 24px; --pady: 24px; }
+  .stage { padding: 24px; }
+  .hotzone { right: 24px; bottom: 24px; }
+  .hotdot { right: 28px; bottom: 28px; }
+  .hotarrow { right: 44px; bottom: 44px; }
+  .signoff { left: 24px; bottom: 24px; }
+
+  .hero { font-size: 22px !important; font-weight: 800; line-height: 1.08; letter-spacing: 0; }
+  .eyebrow, .bp, .signoff { font-size: 12px !important; line-height: 1.4; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+</head>
+<body>
+<div class="card">
+  <main class="stage" aria-label="拉一拉演示">
+    <div class="guide" aria-hidden="true">
+      <span class="chev g1">❯</span>
+      <span class="chev g2">❯</span>
+      <span class="chev g3">❯</span>
+      <span class="chev g4">❯</span>
+    </div>
+    <div class="head">
+      <h1 class="hero">拉一拉</h1>
+      <p class="caption">拖<b>右下角</b> · 数字跟着变</p>
+    </div>
+    <div class="center">
+      <div class="size"><span id="w">?</span><span class="x">×</span><span id="h">?</span></div>
+      <span class="bp" id="bp"></span>
+    </div>
+  </main>
+  <div class="hotzone"></div>
+  <div class="hotdot"></div>
+  <div class="hotarrow" aria-hidden="true">↘</div>
+  <div class="signoff">GESTURE · 02 RESIZE</div>
+</div>
+<script>
+"use strict";
+var wEl = document.getElementById("w"), hEl = document.getElementById("h"), bpEl = document.getElementById("bp");
+var lastW = -1, lastH = -1, lastBp = "";
+function popEl(el) { el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
+function label(w) {
+    if (w < 300)
+        return "迷你视图";
+    if (w < 520)
+        return "紧凑视图";
+    if (w < 760)
+        return "常规视图";
+    return "宽屏视图";
+}
+function update() {
+    var w = document.documentElement.clientWidth;
+    var h = document.documentElement.clientHeight;
+    if (w !== lastW) {
+        wEl.textContent = w;
+        popEl(wEl);
+        lastW = w;
+    }
+    if (h !== lastH) {
+        hEl.textContent = h;
+        popEl(hEl);
+        lastH = h;
+    }
+    var bp = label(w);
+    if (bp !== lastBp) {
+        bpEl.textContent = bp;
+        popEl(bpEl);
+        lastBp = bp;
+    }
+}
+if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(update).observe(document.documentElement);
+}
+window.addEventListener("resize", update);
+update();
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_e2cc80a7-f7a0-4078-9950-db6f1783f337",
+    "title": "让 Kimi 搭建你的专属看板",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "dashboard-tutorial:zh-CN:widget:clone-prompt",
+      "sourceBundleId": "bundle_dashboard-tutorial-20"
+    },
+    "createdAt": "2026-10-13T02:47:05.259Z",
+    "updatedAt": "2026-10-13T02:47:05.259Z"
+  }
+}

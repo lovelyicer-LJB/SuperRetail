@@ -1,0 +1,136 @@
+/* 🔴 改动 2026-10-12 · 数量玻璃标签直接与图标底边对齐，保留内容自适应宽度。 */
+
+/* 连续木纹与圆弧雕刻，外框和图像都遵循同一圆角矩形。 */
+.asset-rune { --rune-ink:#b67d4b; border:0; border-radius:24%; background:repeating-linear-gradient(92deg,#14090024 0 1px,transparent 1px 4px,#e8b88026 4px 5px,transparent 5px 9px),repeating-linear-gradient(8deg,transparent 0 12px,#351a0b24 12px 14px,transparent 14px 24px),linear-gradient(135deg,#a47146,#593721 32%,#71462a 65%,#aa794d); box-shadow:0 3px 7px #0006,inset 0 1px 2px #e8bb8670,inset 0 -2px 3px #2b140db0; isolation:isolate; }
+.asset-rune[data-rune-tone=red],.asset-rune[data-rune-tone=gold],.asset-rune[data-rune-tone=silver] { --rune-ink:#bb8656; }
+.asset-rune > img { position:absolute; inset:6%; width:88%; height:88%; border-radius:20.45%; clip-path:none; }
+.rune-ornament { position:absolute; inset:0; width:100%; height:100%; fill:none; pointer-events:none; z-index:3; color:var(--rune-ink,#b59969); }
+.rune-ornament path,.rune-ornament rect { vector-effect:non-scaling-stroke; }
+.rune-outer { stroke:currentColor; stroke-width:1; opacity:.62; }
+.rune-inner { stroke:currentColor; stroke-width:.7; opacity:.35; }
+.rune-corners { stroke:currentColor; stroke-width:.8; opacity:.65; }
+.rune-inscription { stroke:currentColor; stroke-width:.75; opacity:.8; }
+.asset-rune.is-energized { box-shadow:0 0 0 1px color-mix(in srgb,var(--rune-ink),transparent 65%),0 0 20px color-mix(in srgb,var(--rune-ink),transparent 87%),0 4px 12px #0006; }
+.asset-rune.is-energized .rune-corners { stroke:#d4a16d; }
+.asset-rune > .asset-icon-dot { z-index:4; border-color:#292b28; }
+.asset-rune.asset-icon-board { overflow:hidden; }
+.asset-rune .asset-icon-glass { z-index:4; top:0; transform:none; min-height:22px; height:22%; padding:2px 6px; background:linear-gradient(130deg,#fff3,transparent 42%,#c7dcf51f),#141a2070; border-top:0; border-bottom-color:#eee1c92e; }
+.asset-rune .asset-icon-glass > span { color:#fff5e5; }
+.asset-rune[data-mini=true] .rune-inscription,.asset-rune[data-mini=true] .rune-inner { display:none; }
+.asset-board-icon-stage { padding-top:8px; gap:0; background:radial-gradient(ellipse at 50% 42%,#c19c7210,transparent 65%); }
+.rune-display-socket { position:relative; width:210px; height:210px; display:flex; align-items:center; flex-direction:column; padding-top:41px; }
+.rune-display-socket::before { content:''; position:absolute; top:25px; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle,#16191c 45%,#0b0e10 66%,#3b353029 67%,transparent 70%); box-shadow:0 0 30px #0002; }
+.rune-orbit { position:absolute; top:0; left:0; width:210px; height:210px; fill:none; stroke:#a08f73; stroke-width:.7; opacity:.45; pointer-events:none; }
+.rune-orbit-diamond { fill:#bfa67c; stroke:none; }
+.asset-board-icon-picker { margin-top:20px; }
+.asset-board-icon-picker button[aria-pressed=true] { border-color:#ae967653; background:linear-gradient(#9e855a10,#9e855a06); }
+.asset-board-icon-picker .asset-picker-check { background:#baa07b; color:#171a1d; }
+.asset-board-token { position:relative; display:inline-flex; flex-direction:column; align-items:center; gap:8px; max-width:100%; vertical-align:middle; }
+.asset-board-token > .asset-icon-board { width:100%!important; height:auto!important; aspect-ratio:1; flex-shrink:0; }
+.asset-quantity-glass { display:inline-flex; align-items:baseline; justify-content:center; align-self:center; gap:5px; width:max-content; max-width:100%; white-space:nowrap; padding:3px 11px; border:1px solid #e9e3d336; border-radius:8px; background:linear-gradient(125deg,#ffffff25,#ffffff08 48%,#dbe5f218),#1d222752; -webkit-backdrop-filter:blur(12px) saturate(155%); backdrop-filter:blur(12px) saturate(155%); box-shadow:inset 0 1px 0 #ffffff2e,inset 0 -1px 0 #ffffff08,0 2px 6px #0002; color:#efebe4; font-size:11px; line-height:15px; font-variant-numeric:tabular-nums; }
+.asset-quantity-glass strong { font-size:inherit!important; font-weight:500; }
+.asset-icon-board > .asset-quantity-glass { position:absolute; z-index:5; bottom:0; left:50%; transform:translateX(-50%); max-width:80%; }
+.asset-quantity-glass > span { font-size:10px; opacity:.65; }
+.asset-board-icon-picker .asset-quantity-glass { padding:2px 9px; font-size:10px; line-height:14px; border-radius:7px; }
+.asset-board-icon-picker .asset-icon-glass { padding:2px 3px; }
+.asset-icon-board > .asset-icon-dot { top:auto; bottom:10%; right:10%; }
+.asset-lab.is-light .asset-quantity-glass { color:#3d3025; border-color:#ffffffb0; background:linear-gradient(125deg,#ffffffa3,#ffffff40 55%,#f0e6d975),#c4b8a921; box-shadow:inset 0 1px 0 #fff,0 2px 7px #47352512; }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .asset-quantity-glass { background:#363a3f; } .asset-lab.is-light .asset-quantity-glass { background:#e9e3db; } }
+.asset-lab.is-light .rune-display-socket::before { background:radial-gradient(circle,#ebe5d9 45%,#d6cfc4 65%,#b8a98c5e 66%,transparent 70%); box-shadow:none; }
+.asset-lab.is-light .asset-rune { box-shadow:0 3px 8px #4437292b; }
+.asset-lab.is-light .asset-rune.is-energized { box-shadow:0 0 0 1px #a68a58,0 0 17px #bda37640; }
+
+/* 天赋节点：冷调合金底座、圆角括号描边、沉槽接口与通电状态。 */
+/* 🔴 改动 2026-10-12 · 描边只描圆角：整圈 track 与中线 trace 移除，四角圆弧括号保留。 */
+.talent-network { --talent-surface:#161e25; --talent-muted:#8e9aa5; --talent-rail:#425462; --talent-text:#dce7ed; border-color:#354650; }
+.talent-network .flow-material { --flow:#cbab7a; }
+.talent-network .flow-recipe { --flow:#a6a2e4; }
+.talent-network .flow-chef { --flow:#72bbda; }
+.talent-network .flow-trade { --flow:#a6bcca; }
+.talent-network .flow-fund { --flow:#69c2ac; }
+.talent-state-key { display:flex; align-items:center; gap:20px; padding:0 22px 14px; color:var(--al-muted); font-size:9px; }
+.talent-state-key > span { display:flex; align-items:center; gap:6px; }
+.talent-state-key i { width:7px; height:7px; border:1px solid #668391; border-radius:1px; box-shadow:inset 0 0 0 1px var(--al-bg); }
+.talent-state-key i.linked { background:#72828c; }
+.talent-state-key i.active { background:#91d8e3; border-color:#a7e2ec; box-shadow:0 0 6px #84d6e577; }
+.talent-state-key small { margin-left:auto; letter-spacing:.14em; font-size:8px; opacity:.5; }
+.talent-network .asset-graph-viewport { background-color:#0e151c; box-shadow:inset 0 1px 0 #91bed510,inset 0 0 110px #0003; }
+.talent-network .asset-node { border:0; border-radius:15px; color:var(--talent-text); background:radial-gradient(ellipse at 80% 0%,#8cbbcc0b,transparent 60%),linear-gradient(150deg,#202b33,#131b23 60%,#17202a); box-shadow:0 6px 18px #0004; }
+.talent-network .asset-node::before { content:''; position:absolute; inset:6px; border:1px solid #859ba310; border-radius:10px; pointer-events:none; }
+.talent-frame { position:absolute; inset:0; width:100%; height:100%; fill:none; pointer-events:none; z-index:1; }
+.talent-frame-brackets { stroke:var(--talent-rail); stroke-width:1.4; }
+.talent-network .asset-node.is-powered { box-shadow:0 6px 18px #0004,0 0 16px color-mix(in srgb,var(--flow),transparent 95%); }
+.asset-node.is-powered .talent-frame-brackets { stroke:var(--flow); opacity:.85; }
+.talent-network .asset-node header { position:relative; border-bottom:1px solid #66818e29; height:68px; padding:12px 17px; gap:11px; }
+.talent-network .asset-node header > span:nth-child(2) { display:grid; gap:6px; min-width:0; }
+.talent-network .asset-node header small { color:var(--talent-muted); font-size:8px; letter-spacing:.02em; }
+.talent-network .asset-node header strong { color:var(--talent-text); font-size:13px; letter-spacing:.015em; }
+.talent-network .asset-node-thumbnail { position:relative; width:36px; height:36px; background:linear-gradient(135deg,#364552,#172029); border:1px solid #60758250; border-radius:9px; color:#9fb6c6; box-shadow:inset 0 1px 0 #8aa4b418,0 0 0 3px #070e123b; }
+.talent-network .asset-node.is-powered .asset-node-thumbnail { color:var(--flow); border-color:color-mix(in srgb,var(--flow),transparent 60%); }
+.talent-network .rune-thumbnail { --rune-ink:#b5a184; border:0; background:#171b1f; }
+.talent-network .rune-thumbnail img { width:82%; height:82%; border-radius:4px; }
+.talent-network .rune-thumbnail .rune-inscription { display:none; }
+.talent-node-led { position:absolute; right:14px; top:17px; width:3px; height:12px; background:#3a4b57; border-radius:1px; }
+.asset-node.is-powered .talent-node-led { background:var(--flow); box-shadow:0 0 7px color-mix(in srgb,var(--flow),transparent 45%); }
+.talent-network .asset-port { z-index:2; color:var(--talent-muted); gap:7px; font-size:10px; }
+.talent-network .asset-port.input { left:-7px; }
+.talent-network .asset-port.output { right:-7px; }
+.talent-network .asset-port > i { display:grid; place-items:center; width:13px; height:13px; border:1px solid #596975; border-radius:3px; background:linear-gradient(135deg,#0a1016,#22313c); box-shadow:0 0 0 2px #0b1218,inset 0 1px 3px #000b; }
+.talent-network .asset-port > i > span { width:5px; height:5px; border-radius:1px; border:1px solid #6b7f8b70; transform:rotate(45deg); }
+.talent-network .asset-port.linked > i { border-color:color-mix(in srgb,var(--flow),#21303a 45%); }
+.talent-network .asset-port.linked > i > span { background:color-mix(in srgb,var(--flow),#26323c 55%); border-color:transparent; }
+.talent-network .asset-port.powered > i { border-color:var(--flow); box-shadow:0 0 0 2px #0b1218,0 0 8px color-mix(in srgb,var(--flow),transparent 60%); }
+.talent-network .asset-port.powered > i > span { background:var(--flow); box-shadow:0 0 5px var(--flow); }
+.talent-network .asset-port:hover > i,.talent-network .asset-port.pending > i { border-color:#e6f4fa; box-shadow:0 0 0 3px #a8d4e426,0 0 14px color-mix(in srgb,var(--flow),transparent 50%); }
+.talent-network .asset-port:hover,.talent-network .asset-port.pending { color:#edf8ff; }
+.talent-network .asset-node footer { border-top-color:#66818e29; color:var(--talent-muted); padding:9px 15px; font-size:8px; }
+.talent-network .asset-node footer .ready { color:var(--flow); }
+.talent-network .asset-node footer .talent-dependency-slots { display:flex; gap:5px; padding-right:1px; }
+.talent-network .talent-dependency-slots i { width:7px; height:7px; border:1px solid #617380; border-radius:1px; background:#0d151c; transform:rotate(45deg); }
+.talent-network .talent-dependency-slots i.filled { border-color:var(--flow); background:color-mix(in srgb,var(--flow),#12212c 70%); }
+.talent-network .is-powered .talent-dependency-slots i.filled { background:var(--flow); box-shadow:0 0 5px color-mix(in srgb,var(--flow),transparent 60%); }
+
+/* 连线有通道、芯线与稀疏能量脉冲；动画随就绪状态出现，支持减少动态效果。 */
+.talent-wire-channel,.talent-wire-aura,.talent-wire-energy { fill:none; pointer-events:none; vector-effect:non-scaling-stroke; stroke-linecap:round; }
+.talent-wire-channel { stroke:#050b10; stroke-width:5; opacity:.85; }
+.talent-wire-aura { stroke:var(--flow); stroke-width:6; opacity:0; }
+.talent-network .asset-wire { stroke-width:1.6; opacity:.4; }
+.talent-network .is-powered .asset-wire { opacity:.88; }
+.talent-network .is-powered .talent-wire-aura { opacity:.09; }
+.talent-wire-energy { stroke:color-mix(in srgb,var(--flow),white 48%); stroke-width:1.4; stroke-dasharray:3 115; opacity:.8; animation:talent-energy 9s linear infinite; }
+.talent-network .selected .talent-wire-aura { opacity:.25; }
+.talent-network .is-dormant .asset-wire { stroke:#657888; stroke-dasharray:3 5; opacity:.48; }
+/* 🔴 改动 2026-10-12 · 连续金属金主线、低亮光晕与缓慢流光，圆角由自动路由生成。 */
+.asset-revenue-branch { --revenue-gold-mid:#d4ad57; --revenue-gold-light:#eed193; --revenue-gold-deep:#b88a3b; pointer-events:none; }
+.talent-network .asset-revenue-wire { stroke-dasharray:none; stroke-width:1.9; opacity:1; stroke-linecap:round; stroke-linejoin:round; }
+.asset-revenue-aura,.asset-revenue-shimmer { fill:none; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+.asset-revenue-aura { stroke:var(--revenue-gold-mid); stroke-width:5; opacity:.11; filter:drop-shadow(0 0 3px #dfb65d80); }
+.asset-revenue-shimmer { stroke:#fff1c5; stroke-width:1; stroke-dasharray:12 188; opacity:.48; animation:revenue-shimmer 8s linear infinite; }
+.asset-revenue-branch[data-active=false] .asset-revenue-shimmer { display:none; }
+.talent-network .asset-revenue-junction { fill:var(--revenue-gold-light); stroke:var(--revenue-gold-deep); stroke-width:1; filter:drop-shadow(0 0 2px #dfb65d60); }
+.asset-lab.is-light .asset-revenue-branch { --revenue-gold-mid:#a77a28; --revenue-gold-light:#c69b48; --revenue-gold-deep:#90661f; }
+.asset-lab.is-light .asset-revenue-shimmer { stroke:#efce80; opacity:.65; }
+.asset-lab.is-light .asset-revenue-aura { opacity:.08; }
+@keyframes revenue-shimmer { from { stroke-dashoffset:12; } to { stroke-dashoffset:-188; } }
+@media(prefers-reduced-motion:reduce) { .asset-revenue-shimmer { animation:none; display:none; } }
+@keyframes talent-energy { to { stroke-dashoffset:-236; } }
+@media(prefers-reduced-motion:reduce) { .talent-wire-energy { animation:none; stroke-dasharray:none; opacity:.2; } }
+
+/* 浅色主题使用银灰底座，状态对比保持同等清晰。 */
+.asset-lab.is-light .talent-network { --talent-surface:#edf2f5; --talent-muted:#526c7c; --talent-text:#243847; --talent-rail:#9db1bc; border-color:#aebdc5; }
+.asset-lab.is-light .talent-network .asset-graph-viewport { background-color:#e5ecef; box-shadow:inset 0 1px 0 #fff8; }
+.asset-lab.is-light .talent-network .asset-node { background:linear-gradient(145deg,#fbfdff,#e4ebef); box-shadow:0 3px 12px #15324315; }
+.asset-lab.is-light .talent-network .asset-node.is-powered { box-shadow:0 3px 12px #15324315,0 0 10px #377b9410; }
+.asset-lab.is-light .talent-network .flow-material { --flow:#986932; }
+.asset-lab.is-light .talent-network .flow-recipe { --flow:#7664ad; }
+.asset-lab.is-light .talent-network .flow-chef { --flow:#347995; }
+.asset-lab.is-light .talent-network .flow-trade { --flow:#557689; }
+.asset-lab.is-light .talent-network .flow-fund { --flow:#2c8875; }
+.asset-lab.is-light .talent-network .asset-node-thumbnail:not(.rune-thumbnail) { background:linear-gradient(145deg,#e3ecf0,#fcffff); box-shadow:inset 0 1px 0 white,0 0 0 3px #b1c6cf20; }
+.asset-lab.is-light .talent-network .asset-port > i { background:#e6eef2; box-shadow:0 0 0 2px #d9e3e9,inset 0 1px 2px #456e7d22; }
+.asset-lab.is-light .talent-network .asset-port:hover { color:#183f55; }
+.asset-lab.is-light .talent-wire-channel { stroke:#b6cbd5; opacity:.6; }
+.asset-lab.is-light .talent-wire-energy { stroke:var(--flow); }
+.asset-lab.is-light .talent-network .talent-dependency-slots i:not(.filled) { background:#dbe5eb; }
+.asset-lab.is-light .talent-state-key i.active { background:#347c91; border-color:#347c91; }
+@media(max-width:740px) { .talent-state-key { padding:0 14px 12px; gap:12px; flex-wrap:wrap; font-size:8px; } .talent-state-key small { display:none; } }

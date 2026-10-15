@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>导览 · 你好 Canvas</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #FFFFFF; }
+  body {
+    font-family: var(--kimi-font-sans,"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","MiSans","Microsoft YaHei",sans-serif);
+    color: #121212; overflow: hidden;
+  }
+  .stage { position: relative; width: 100%; height: 100%; min-height: 140px; overflow: hidden; }
+  .el { position: absolute; }
+
+  h1.head { font-weight: 800; line-height: 1.0; letter-spacing: -0.01em; color: #121212; white-space: nowrap; }
+  h1.head .brk { display: block; }
+  h1.head.one .brk { display: none; }
+  h1.head i.q { font-style: normal; color: #1A88FF; }
+
+  .cap { color: #8E9390; font-size: 16px !important; font-weight: 400; white-space: nowrap; }
+  .cap .hex { color: #007CFF; animation: hexpulse 2.8s ease-in-out infinite; }
+  @keyframes hexpulse { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+
+  .legend { display: flex; align-items: flex-end; overflow: hidden;
+            font-family: Menlo, "SF Mono", "DejaVu Sans Mono", monospace; }
+  .legend span { flex: 1; text-align: center; color: #8E9390; transition: color .18s linear; }
+  .legend span.on { color: #002E58; }
+
+  .ascii { overflow: hidden; cursor: crosshair; }
+  .ascii canvas { width: 100%; height: 100%; display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cap .hex { animation: none; opacity: 1; }
+    .legend span { transition: none; }
+  }
+
+  h1.head { font-size: 48px !important; font-weight: 800; line-height: 1.08; letter-spacing: 0; }
+  .legend { font-size: 12px !important; line-height: 1.4; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+</head>
+<body>
+<main class="stage" aria-label="你好 Canvas 导览">
+  <h1 class="el head" data-z="head"><span>一块</span><span class="brk"></span><span><i class="q">活</i>的看板</span></h1>
+  <div class="el cap" data-z="cap"><span class="hex">⬢</span> 独立工作、任何事情、自由排版</div>
+  <div class="el legend" data-z="legend" aria-hidden="true"></div>
+  <div class="el ascii" data-z="ascii" aria-hidden="true"><canvas></canvas></div>
+</main>
+
+<script>
+"use strict";
+const SORTED = " -+/()*▲K#⬢";
+const CELL = 13;
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function cellHash(a, b) {
+    let h = (Math.imul(a + 1, 374761393) + Math.imul(b + 1, 668265263)) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+const texState = { on: false, ctx: null, w: 0, h: 0, cols: 0, rows: 0, offY: 0 };
+const P = { x: -1e4, y: -1e4, t: -1e4 };
+function setupTex(w, h) {
+    const cv = document.querySelector(".ascii canvas");
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.max(1, Math.round(w * dpr));
+    cv.height = Math.max(1, Math.round(h * dpr));
+    const ctx = cv.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    texState.ctx = ctx;
+    texState.w = w;
+    texState.h = h;
+    texState.cols = Math.ceil(w / CELL);
+    texState.rows = Math.max(1, Math.floor(h / CELL));
+    texState.offY = (h - texState.rows * CELL) / 2;
+    texState.on = true;
+}
+function drawTex(t) {
+    if (!texState.on)
+        return;
+    const { ctx, w, h, cols, rows, offY } = texState;
+    ctx.clearRect(0, 0, w, h);
+    const TAIL = Math.max(6, cols * 1.22);
+    const breathe = 0.85 + 0.25 * Math.sin(t * 0.18 + 1);
+    let rip = null;
+    const dt = t - P.t;
+    if (dt >= 0 && dt < 1.5) {
+        const sig = CELL * 2.6;
+        rip = { amp: 0.55 * Math.exp(-dt * 2.0), phase: dt * 9, s2: 2 * sig * sig };
+    }
+    const buckets = [[], []];
+    for (let r = 0; r < rows; r++) {
+        const y = offY + r * CELL + CELL / 2;
+        for (let c = 0; c < cols; c++) {
+            const dr = cols - 1 - c;
+            const u = Math.max(0, 1 - dr / TAIL);
+            const amp = (0.11 + 0.26 * (4 * u * (1 - u))) * breathe;
+            let d = Math.pow(u, 1.35) * 1.18 - 0.04
+                + amp * (0.50 * Math.sin(dr * 0.33 + r * 0.19 - t * 0.85)
+                    + 0.32 * Math.sin(dr * 0.13 - r * 0.29 + t * 0.55 + 2.0)
+                    + 0.18 * Math.sin((dr + r) * 0.21 - t * 1.25 + 4.2))
+                + (cellHash(dr * 3 + 1, r * 7 + 3) - 0.5) * 0.09;
+            const x = w - dr * CELL - CELL / 2;
+            if (rip) {
+                const dx = x - P.x, dy = y - P.y;
+                const q = (dx * dx + dy * dy) / rip.s2;
+                if (q < 9)
+                    d += rip.amp * Math.exp(-q) * Math.cos(rip.phase - Math.sqrt(q) * 3);
+            }
+            if (d <= 0.045)
+                continue;
+            const idx = Math.floor(Math.min(1, d) * (SORTED.length - 1));
+            if (idx <= 0)
+                continue;
+            buckets[cellHash(dr, r) < 0.5 ? 0 : 1].push(x, y, SORTED[idx], idx <= 2 ? "#91D4FF" : idx <= 5 ? "#00A1FF" : idx <= 8 ? "#007CFF" : "#002E58");
+        }
+    }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const sizes = [Math.max(12, CELL * 0.8), Math.max(12, CELL * 0.62)];
+    for (let b = 0; b < 2; b++) {
+        ctx.font = sizes[b] + 'px Menlo, "SF Mono", "DejaVu Sans Mono", monospace';
+        const a = buckets[b];
+        for (let i = 0; i < a.length; i += 4) {
+            ctx.fillStyle = a[i + 3];
+            ctx.fillText(a[i + 2], a[i], a[i + 1] + sizes[b] * 0.03);
+        }
+    }
+}
+const LEG = SORTED.slice(1);
+const legendEl = document.querySelector(".legend");
+LEG.split("").forEach(ch => {
+    const s = document.createElement("span");
+    s.textContent = ch;
+    legendEl.appendChild(s);
+});
+let legOn = -1;
+function tickLegend(t) {
+    const k = Math.floor((t * 2.6) % LEG.length);
+    if (k === legOn)
+        return;
+    const spans = legendEl.children;
+    if (legOn >= 0)
+        spans[legOn].classList.remove("on");
+    spans[k].classList.add("on");
+    legOn = k;
+}
+let raf = 0, lastF = 0;
+function loop(now) {
+    raf = requestAnimationFrame(loop);
+    if (now - lastF < 66)
+        return;
+    lastF = now;
+    drawTex(now / 1000);
+    tickLegend(now / 1000);
+}
+function start() { if (!raf && !REDUCED && !document.hidden)
+    raf = requestAnimationFrame(loop); }
+function stop() { if (raf) {
+    cancelAnimationFrame(raf);
+    raf = 0;
+} }
+document.addEventListener("visibilitychange", () => { document.hidden ? stop() : start(); });
+const asciiEl = document.querySelector(".ascii");
+asciiEl.addEventListener("pointermove", e => {
+    if (REDUCED)
+        return;
+    const rc = asciiEl.getBoundingClientRect();
+    P.x = e.clientX - rc.left;
+    P.y = e.clientY - rc.top;
+    P.t = performance.now() / 1000;
+}, { passive: true });
+const HEAD_FULL = "一块活的看板";
+const HEAD_A = "一块", HEAD_B = "活的看板";
+const CAP = "⬢ 独立工作、任何事情、自由排版";
+const FF = getComputedStyle(document.body).fontFamily;
+const mc = document.createElement("canvas").getContext("2d");
+const tw = (s, fs, w) => { mc.font = `${w} ${fs}px ${FF}`; return mc.measureText(s).width; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function pickCols(W, H) {
+    const a = W / H;
+    if (a >= 2.6)
+        return { n: 10, vert: false };
+    if (a >= 2.1)
+        return { n: 8, vert: false };
+    if (a >= 1.55)
+        return { n: 6, vert: false };
+    if (a >= 1.15)
+        return { n: 4, vert: false };
+    return { n: 5, vert: true };
+}
+function gridMetrics(W, H, n) {
+    const mx = 0.05 * W, my = 0.05 * H, g = 0.01 * W;
+    const iw = W - 2 * mx, ih = H - 2 * my;
+    const sCols = (iw - (n - 1) * g) / n;
+    const m = Math.max(1, Math.round((ih + g) / (sCols + g)));
+    const sRows = (ih - (m - 1) * g) / m;
+    const s = Math.min(sCols, sRows);
+    const ox = mx + (iw - n * s - (n - 1) * g) / 2;
+    const oy = my + (ih - m * s - (m - 1) * g) / 2;
+    return { n, m, s, g, ox, oy };
+}
+function zones(n, m, vert) {
+    if (vert)
+        return {
+            head: [0, 0, 5, 1],
+            cap: [0, m - 1, 3, 1],
+            legend: m >= 3 ? [3, m - 1, 2, 1] : null,
+            tex: m > 2 ? [0, 1, 5, m - 2] : null
+        };
+    switch (n) {
+        case 10: return { head: [0, 0, 4, 2], cap: [0, m - 1, 3, 1], legend: [3, m - 1, 1, 1], tex: [4, 0, 6, m] };
+        case 8: return { head: [0, 0, 3, 2], cap: [0, m - 1, 2, 1], legend: [2, m - 1, 1, 1], tex: [3, 0, 5, m] };
+        case 6: return { head: [0, 0, 2, 2], cap: [0, m - 1, 2, 1], legend: null, tex: [2, 0, 4, m] };
+        default: return { head: [0, 0, 2, Math.min(2, Math.max(1, m - 1))], cap: [0, m - 1, 2, 1], legend: null, tex: [2, 0, 2, m] };
+    }
+}
+const $ = s => document.querySelector(s);
+function layout() {
+    const stage = $(".stage");
+    const W = stage.clientWidth, H = stage.clientHeight;
+    if (!W || !H)
+        return;
+    const { n, vert } = pickCols(W, H);
+    const gm = gridMetrics(W, H, n);
+    const z = zones(n, gm.m, vert);
+    const { s, g, ox, oy } = gm;
+    const X = i => ox + i * (s + g);
+    const Y = j => oy + j * (s + g);
+    const rect = ([i, j, cs, rs]) => ({ x: X(i), y: Y(j), w: cs * s + (cs - 1) * g, h: rs * s + (rs - 1) * g });
+    const hr = rect(z.head);
+    const head = $(".head");
+    const fitFs = (lines) => {
+        const wMax = Math.max(...lines.map(l => tw(l, 100, 800) / 100));
+        return Math.min(hr.w * 0.98 / wMax, hr.h * 0.98 / lines.length);
+    };
+    const fs1 = fitFs([HEAD_FULL]);
+    const fs2 = fitFs([HEAD_A, HEAD_B]);
+    const two = fs2 > fs1;
+    let headFs = 48;
+    const lines = two ? 2 : 1;
+    head.classList.toggle("one", !two);
+    const cr = rect(z.cap);
+    const tr = z.tex ? rect(z.tex) : null;
+    let capFs = clamp(headFs / 5, 12, 28);
+    capFs = Math.min(capFs, cr.w * 0.98 / (tw(CAP, 100, 500) / 100));
+    const capTop = cr.y + cr.h - capFs * 1.1;
+    head.style.fontSize = headFs + "px";
+    head.style.left = hr.x + "px";
+    head.style.top = (tr && !vert ? tr.y : hr.y) + "px";
+    const cap = $(".cap");
+    cap.style.fontSize = capFs + "px";
+    cap.style.left = cr.x + "px";
+    cap.style.top = (cr.y + cr.h - cap.offsetHeight) + "px";
+    const leg = $(".legend");
+    if (z.legend) {
+        const lr = rect(z.legend);
+        const legFs = clamp(Math.min(lr.h * 0.5, (lr.w / LEG.length) * 1.3), 12, 22);
+        leg.style.display = "";
+        leg.style.fontSize = legFs + "px";
+        leg.style.left = lr.x + "px";
+        leg.style.width = lr.w + "px";
+        leg.style.height = (legFs * 1.25) + "px";
+        leg.style.top = (lr.y + lr.h - legFs * 1.25) + "px";
+    }
+    else
+        leg.style.display = "none";
+    if (tr) {
+        const e = $(".ascii");
+        e.style.display = "";
+        e.style.left = tr.x + "px";
+        e.style.top = tr.y + "px";
+        e.style.width = tr.w + "px";
+        e.style.height = tr.h + "px";
+        setupTex(tr.w, tr.h);
+        drawTex(typeof _tFix === "number" && _tFix !== null ? _tFix : performance.now() / 1000);
+    }
+    else {
+        texState.on = false;
+        $(".ascii").style.display = "none";
+    }
+}
+const _q = new URLSearchParams(location.search);
+if (_q.has("w") && _q.has("h")) {
+    const st = document.querySelector(".stage");
+    st.style.width = _q.get("w") + "px";
+    st.style.height = _q.get("h") + "px";
+}
+const _tFix = _q.has("t") ? (parseFloat(_q.get("t")) || 0) : null;
+if (_tFix !== null)
+    window.__drawAt = () => { drawTex(_tFix); tickLegend(_tFix); };
+window.addEventListener("resize", layout);
+new ResizeObserver(layout).observe(document.querySelector(".stage"));
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => {
+    layout();
+    if (window.__drawAt)
+        window.__drawAt();
+});
+layout();
+if (_tFix !== null)
+    window.__drawAt();
+else if (REDUCED) {
+    drawTex(0.7);
+    tickLegend(0.7);
+}
+else
+    start();
+</script>
+</body>
+</html>

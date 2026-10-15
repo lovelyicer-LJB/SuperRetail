@@ -1,0 +1,20 @@
+# 依赖与构建产物
+node_modules/
+dist/
+build/
+.vite/
+
+# 临时与输出目录（体积大、可再生）
+tmp_shots/
+tmp_export/
+tmp_webbridge/
+output/
+.bennote/
+
+# 大型二进制设计稿（57MB，另行备份）
+*.fig
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.log

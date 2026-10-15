@@ -1,0 +1,102 @@
+/**
+ * CandleChartC —— Pixso Charts | 图表页 Candle chart
+ * (节点 63:658, 1460×438.5, 透明底)
+ *
+ * 设计值（DSL + SVG 导出实测）:
+ *  - 网格线 8 条 y=11/61/.../361, x0..1459, Gray-9 #1E1E24
+ *  - 辉光 2 团 1034×540: 紫 rgba(44.8,30,215,.3) @ (580,-87), 绿 rgba(132,246,17,.3) @ (-88,-83),
+ *    节点 opacity .5, 径向 rx517 ry270 (中心在椭圆左缘中点)
+ *  - 蜡烛 101 根: 绿 #00FFCB / 紫 #6300FF, 影线 1px 居中, 实体 r1,
+ *    20 根带 6 层绿辉光 rgba(21,255,59,...) (此处取 2 层近似)
+ *  - 迷你柱图 @ y360.5: 65 柱 Gray-8 #2C2C35; 月份标签 @ y422.5 (中心 430.5),
+ *    Text 14/16 Gray-3 #A9A9B7 opacity .6; 尾刻度 13×1 Gray-5 #70707C @ (1452.87, 412.5)
+ */
+
+__CANDLES_TS__
+
+__COLS_TS__
+
+__MONTHS_TS__
+
+const FONT = 'HarmonyOS Sans SC, Noto Sans SC, sans-serif'
+
+/** 网格线 y（Chart lines 帧内 0.5~350.5 + 帧偏移 10.5） */
+const GRID_Y = [11, 61, 111, 161, 211, 261, 311, 361]
+
+/** 蜡烛辉光（Pixso 6 层取头尾 2 层近似） */
+const CANDLE_GLOW =
+  'drop-shadow(0 2.77px 2.21px rgba(21,255,59,.0984)) drop-shadow(0 12.52px 10.02px rgba(21,255,59,.175)) drop-shadow(0 41.78px 33.42px rgba(21,255,59,.2516)) drop-shadow(0 100px 80px rgba(21,255,59,.35))'
+
+export function CandleChartC() {
+  return (
+    <div className="sr-cdc relative h-full w-full select-none overflow-hidden font-sans" style={{ containerType: 'size' }}>
+      <svg viewBox="0 0 1460 438.5" className="h-full w-full" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <radialGradient id="sr-cdc-glow1" gradientUnits="userSpaceOnUse" cx={0} cy={0} r={517} gradientTransform="translate(580,183) scale(1,0.5222)">
+            <stop offset={0} stopColor="rgba(45,30,215,0.3)" />
+            <stop offset={1} stopColor="rgba(0,0,0,0.3)" />
+          </radialGradient>
+          <radialGradient id="sr-cdc-glow2" gradientUnits="userSpaceOnUse" cx={0} cy={0} r={517} gradientTransform="translate(-88,187) scale(1,0.5222)">
+            <stop offset={0} stopColor="rgba(132,246,17,0.3)" />
+            <stop offset={1} stopColor="rgba(0,0,0,0)" />
+          </radialGradient>
+        </defs>
+
+        {/* 网格线 */}
+        {GRID_Y.map((y) => (
+          <line key={y} className="sr-cdc-fade" x1={0} y1={y} x2={1459} y2={y} stroke="#1E1E24" strokeWidth={1} />
+        ))}
+
+        {/* 蜡烛 101 根 */}
+        {CANDLES.map(([x, y, h, oy, oh, green, glow], i) => (
+          <g
+            key={i}
+            className="sr-cdc-candle"
+            style={{ animationDelay: `${i * 7}ms`, filter: glow ? CANDLE_GLOW : undefined }}
+          >
+            <rect x={x + 3} y={y} width={1} height={h} fill={green ? '#00FFCB' : '#6300FF'} />
+            <rect x={x} y={y + oy} width={7} height={oh} rx={1} fill={green ? '#00FFCB' : '#6300FF'} />
+          </g>
+        ))}
+
+        {/* 辉光 2 团（蜡烛之上, 节点 opacity .5） */}
+        <ellipse className="sr-cdc-glow" cx={1097} cy={183} rx={517} ry={270} fill="url(#sr-cdc-glow1)" opacity={0.5} />
+        <ellipse className="sr-cdc-glow" cx={429} cy={187} rx={517} ry={270} fill="url(#sr-cdc-glow2)" opacity={0.5} style={{ animationDelay: '.15s' }} />
+
+        {/* 迷你柱图 @ y360.5 */}
+        <g transform="translate(0,360.5)">
+          {COLUMNS.map(([x, y, w, h], i) => (
+            <rect key={i} className="sr-cdc-col" x={x} y={y} width={w} height={h} fill="#2C2C35" style={{ animationDelay: `${200 + i * 10}ms` }} />
+          ))}
+          {/* 尾刻度 */}
+          <line className="sr-cdc-fade" x1={1452.87} y1={52} x2={1465.87} y2={52} stroke="#70707C" strokeWidth={1} />
+          {/* 月份标签 */}
+          {MONTHS.map(([t, cx]) => (
+            <text key={t} className="sr-cdc-fade" x={cx} y={70.5} textAnchor="middle" dominantBaseline="central" fontSize={14} fontWeight={400} fill="#A9A9B7" opacity={0.6} style={{ fontFamily: FONT }}>
+              {t}
+            </text>
+          ))}
+        </g>
+      </svg>
+      <style>{`
+        .sr-cdc-candle { opacity: 0; animation: sr-cdc-pop .45s ease-out forwards; }
+        @keyframes sr-cdc-pop {
+          from { opacity: 0; transform: scaleY(.4); transform-origin: center; transform-box: fill-box; }
+          to   { opacity: 1; transform: scaleY(1); transform-origin: center; transform-box: fill-box; }
+        }
+        .sr-cdc-fade { opacity: 0; animation: sr-cdc-fadein .7s ease-out .3s forwards; }
+        @keyframes sr-cdc-fadein { to { opacity: 1; } }
+        .sr-cdc-glow { opacity: 0; animation: sr-cdc-glowin 1.2s ease-out forwards; }
+        @keyframes sr-cdc-glowin { from { opacity: 0; } to { opacity: .5; } }
+        .sr-cdc-col { transform: scaleY(0); transform-origin: bottom; transform-box: fill-box; animation: sr-cdc-grow .5s cubic-bezier(.22,1,.36,1) forwards; }
+        @keyframes sr-cdc-grow { to { transform: scaleY(1); } }
+        @media (prefers-reduced-motion: reduce) {
+          .sr-cdc-candle { animation: none !important; opacity: 1; }
+          .sr-cdc-fade { animation: none !important; opacity: 1; }
+          .sr-cdc-glow { animation: none !important; opacity: .5; }
+          .sr-cdc-col { animation: none !important; transform: none; }
+        }
+      `}</style>
+    </div>
+  )
+}

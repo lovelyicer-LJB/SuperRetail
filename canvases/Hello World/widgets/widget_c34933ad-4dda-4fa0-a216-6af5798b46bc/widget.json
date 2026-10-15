@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_c34933ad-4dda-4fa0-a216-6af5798b46bc",
+    "title": "番茄钟",
+    "description": "本地番茄钟工具。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:pomodoro",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.061Z",
+    "updatedAt": "2026-09-08T14:49:56.061Z"
+  }
+}

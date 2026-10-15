@@ -1,0 +1,9 @@
+const imgJimeng202609251645logo1 = "http://localhost:3845/assets/0f7d8208faa4db91f465b0c2eed575b7744ddc4d.png";
+
+export default function Jimeng202609251645logo() {
+  return (
+    <div className="relative size-full" data-node-id="46:74" data-name="jimeng-2026-09-25-1645-设计一款具有国际顶级品牌视觉水准的原创商业LOGO，品牌名称「超零售」，英文名称 1">
+      <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgJimeng202609251645logo1} />
+    </div>
+  );
+}

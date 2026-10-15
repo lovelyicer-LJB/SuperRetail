@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_9967df81-a612-4f0c-a54a-d5d1431c6896",
+    "title": "A股盯盘",
+    "description": "运行时请求腾讯证券公开 A 股行情。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:stocks",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.053Z",
+    "updatedAt": "2026-09-08T14:49:56.053Z"
+  }
+}

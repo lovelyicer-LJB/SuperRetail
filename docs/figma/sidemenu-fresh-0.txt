@@ -1,0 +1,182 @@
+const imgAvatar1 = "http://localhost:3845/assets/a6a07b3e12a2254beafbe6a43895fd6a8e731044.png";
+const imgAvatar2 = "http://localhost:3845/assets/84cc09df02e67dddc048e2a359bdecac5e9a7fe1.png";
+const imgAvatar3 = "http://localhost:3845/assets/b5bf0900aec63d1001eaa0f0e204a6f5de2ad3f7.png";
+const imgAvatar4 = "http://localhost:3845/assets/7142056f8c91b6996cff08ee5dea53a0111ef9b1.png";
+const imgAvatar5 = "http://localhost:3845/assets/f22a318239442e6bb428e32b33e65e03d9179762.png";
+const imgDashboard = "http://localhost:3845/assets/e0ad792a8b6c3eac27bb6d5a0e93b4211521ac53.svg";
+const imgTag = "http://localhost:3845/assets/9eea2a30c772defaba2b0f8d3f1545ab28031939.svg";
+const imgCrown = "http://localhost:3845/assets/8f4697ac6d374f0e68e8736e241557882eecee44.svg";
+const imgTrendUp = "http://localhost:3845/assets/f1b777239b54048b042ccaac2eaa9500bdc5c9be.svg";
+const imgSafe = "http://localhost:3845/assets/789c4fdc36ade9a376ab04be7ae5b5a125430279.svg";
+const imgSetting = "http://localhost:3845/assets/9ebf3a89b7782ee932e55ea22be1c8d36f20ecd1.svg";
+const imgAvatar = "http://localhost:3845/assets/6932a1e56e502665ec696f39fd599c63dc7ed92e.svg";
+const imgBackground = "http://localhost:3845/assets/1dac4c3f8dce7c76f8c3654f7d7ee1b2c92e729c.svg";
+const imgProgress = "http://localhost:3845/assets/ddfc388469c908832f22babe48be029ca94b8bf0.svg";
+const imgProgress1 = "http://localhost:3845/assets/e85215ef2135eb8f49853b218185b5a86c97a1e4.svg";
+const imgProgress2 = "http://localhost:3845/assets/21423a3c668885f3b182ead3042c75076c8f13ae.svg";
+
+export default function SideMenu() {
+  return (
+    <div className="relative size-full" data-node-id="93:20567" data-name="Side menu">
+      <div className="absolute bg-black inset-0" data-node-id="I93:20567;647:11473" data-name="BG" />
+      <div className="absolute content-stretch flex flex-col gap-[53px] items-start left-[24px] top-[123px]" data-node-id="I93:20567;867:15066" data-name="Menu layout">
+        <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7702" data-name="Main menu">
+          <div className="h-[36px] relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7703" data-name="Menu">
+            <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Medium'] font-medium justify-center leading-[0] left-[40px] not-italic text-[#f5f5ff] text-[16px] top-[18px] tracking-[-0.144px] whitespace-nowrap" data-node-id="I93:20567;648:7704">
+              <p className="leading-[16px]">Products</p>
+            </div>
+            <div className="absolute left-0 size-[24px] top-[6px]" data-node-id="I93:20567;648:7705" data-name="Dashboard">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgDashboard} />
+            </div>
+          </div>
+          <div className="h-[36px] relative shrink-0 w-full" data-node-id="I93:20567;648:7706" data-name="Menu">
+            <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Medium'] font-medium justify-center leading-[0] left-[40px] not-italic text-[#f5f5ff] text-[16px] top-[18px] tracking-[-0.144px] whitespace-nowrap" data-node-id="I93:20567;648:7707">
+              <p className="leading-[16px]">Statement</p>
+            </div>
+            <div className="absolute left-0 size-[24px] top-[6px]" data-node-id="I93:20567;648:7708" data-name="Coin 2">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgTag} />
+            </div>
+          </div>
+          <div className="h-[36px] relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7710" data-name="Menu">
+            <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Medium'] font-medium justify-center leading-[0] left-[40px] not-italic text-[#f5f5ff] text-[16px] top-[18px] tracking-[-0.144px] whitespace-nowrap" data-node-id="I93:20567;648:7711">
+              <p className="leading-[16px]">Achievement</p>
+            </div>
+            <div className="absolute left-0 size-[24px] top-[6px]" data-node-id="I93:20567;648:7712" data-name="Tag">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgCrown} />
+            </div>
+          </div>
+          <div className="h-[36px] relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7713" data-name="Menu">
+            <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Medium'] font-medium justify-center leading-[0] left-[40px] not-italic text-[#f5f5ff] text-[16px] top-[18px] tracking-[-0.144px] whitespace-nowrap" data-node-id="I93:20567;648:7714">
+              <p className="leading-[16px]">Product status</p>
+            </div>
+            <div className="absolute left-0 size-[24px] top-[6px]" data-node-id="I93:20567;648:7715" data-name="Wallet">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgTrendUp} />
+            </div>
+          </div>
+          <div className="h-[36px] relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7716" data-name="Menu">
+            <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Medium'] font-medium justify-center leading-[0] left-[40px] not-italic text-[#f5f5ff] text-[16px] top-[18px] tracking-[-0.144px] whitespace-nowrap" data-node-id="I93:20567;648:7717">
+              <p className="leading-[16px]">Security</p>
+            </div>
+            <div className="absolute left-0 size-[24px] top-[6px]" data-node-id="I93:20567;648:7718" data-name="Charts">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSafe} />
+            </div>
+          </div>
+          <div className="h-[36px] relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7719" data-name="Menu">
+            <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Medium'] font-medium justify-center leading-[0] left-[40px] not-italic text-[#f5f5ff] text-[16px] top-[18px] tracking-[-0.144px] whitespace-nowrap" data-node-id="I93:20567;648:7720">
+              <p className="leading-[16px]">Settings</p>
+            </div>
+            <div className="absolute left-0 size-[24px] top-[6px]" data-node-id="I93:20567;648:7721" data-name="Chat">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSetting} />
+            </div>
+          </div>
+          <div className="h-[36px] relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7723" data-name="Menu">
+            <div className="-translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Medium'] font-medium justify-center leading-[0] left-[40px] not-italic text-[#f5f5ff] text-[16px] top-[18px] tracking-[-0.144px] whitespace-nowrap" data-node-id="I93:20567;648:7724">
+              <p className="leading-[16px]">Accounts</p>
+            </div>
+            <div className="absolute left-0 size-[24px] top-[6px]" data-node-id="I93:20567;648:7725" data-name="Avatar">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgAvatar} />
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7740" data-name="Last transfers">
+          <div className="[word-break:break-word] flex flex-col font-['Inter:Regular'] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-white whitespace-nowrap" data-node-id="I93:20567;648:7741">
+            <p className="leading-[16px]">All members</p>
+          </div>
+          <div className="content-stretch flex items-start relative shrink-0 w-full" data-node-id="I93:20567;648:7742" data-name="Layout">
+            <div className="content-stretch flex gap-[14px] items-start relative shrink-0" data-node-id="I93:20567;1046:17850" data-name="Person menu">
+              <div className="relative shrink-0 size-[32px]" data-node-id="I93:20567;1046:17851" data-name="Avatar">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" height="32" src={imgAvatar1} width="32" />
+              </div>
+              <div className="relative shrink-0 size-[32px]" data-node-id="I93:20567;1046:17852" data-name="Avatar">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" height="32" src={imgAvatar2} width="32" />
+              </div>
+              <div className="relative shrink-0 size-[32px]" data-node-id="I93:20567;1046:17853" data-name="Avatar">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" height="32" src={imgAvatar3} width="32" />
+              </div>
+              <div className="relative shrink-0 size-[32px]" data-node-id="I93:20567;1046:17854" data-name="Avatar">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" height="32" src={imgAvatar4} width="32" />
+              </div>
+              <div className="relative shrink-0 size-[32px]" data-node-id="I93:20567;1046:17855" data-name="Avatar">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" height="32" src={imgAvatar5} width="32" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-col gap-[41px] items-start relative shrink-0" data-node-id="I93:20567;867:14633" data-name="Charts">
+          <div className="h-[80px] relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7752" data-name="Informer">
+            <div className="absolute left-0 size-[80px] top-0" data-node-id="I93:20567;648:7753" data-name="Chart">
+              <div className="absolute left-0 size-[80px] top-0" data-node-id="I93:20567;648:7754" data-name="Background">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgBackground} />
+              </div>
+              <div className="absolute left-0 size-[80px] top-0" data-node-id="I93:20567;648:7755" data-name="Progress">
+                <div className="absolute inset-[0_-100%_-225%_-65.65%]">
+                  <img alt="" className="block max-w-none size-full" src={imgProgress} />
+                </div>
+              </div>
+              <div className="-translate-x-1/2 -translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Semi_Bold'] font-semibold h-[19px] justify-center leading-[0] left-[40px] not-italic text-[20px] text-center text-white top-[calc(50%+0.5px)] w-[44px]" data-node-id="I93:20567;648:7756">
+                <p className="leading-[18px]">56%</p>
+              </div>
+            </div>
+            <div className="[word-break:break-word] absolute content-stretch flex flex-col gap-[6px] h-[50px] items-start leading-[0] left-[96px] not-italic overflow-clip top-[15px] w-[94px]" data-node-id="I93:20567;648:7757" data-name="Info">
+              <div className="flex flex-col font-['Inter:Bold'] font-bold justify-center relative shrink-0 text-[#f5f5ff] text-[0px] whitespace-nowrap" data-node-id="I93:20567;648:7758">
+                <p>
+                  <span className="leading-[22px] text-[18px]">6 task</span>
+                  <span className="[word-break:break-word] font-['Inter:Regular'] font-normal leading-[16px] not-italic text-[#70707c] text-[12px]">{` / day`}</span>
+                </p>
+              </div>
+              <div className="flex flex-col font-['Inter:Regular'] font-normal h-[22.6px] justify-center relative shrink-0 text-[14px] text-white w-[92.661px]" data-node-id="I93:20567;648:7759">
+                <p className="leading-[16px]">Dynamics</p>
+              </div>
+            </div>
+          </div>
+          <div className="h-[80px] relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7760" data-name="Informer">
+            <div className="absolute left-0 size-[80px] top-0" data-node-id="I93:20567;648:7761" data-name="Chart">
+              <div className="absolute left-0 size-[80px] top-0" data-node-id="I93:20567;648:7762" data-name="Background">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgBackground} />
+              </div>
+              <div className="absolute left-0 size-[80px] top-0" data-node-id="I93:20567;648:7763" data-name="Progress">
+                <div className="absolute inset-[0_-100%_-225%_-100%]">
+                  <img alt="" className="block max-w-none size-full" src={imgProgress1} />
+                </div>
+              </div>
+              <div className="-translate-x-1/2 -translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Semi_Bold'] font-semibold h-[19px] justify-center leading-[0] left-[40px] not-italic text-[20px] text-center text-white top-[calc(50%+0.5px)] w-[44px]" data-node-id="I93:20567;648:7764">
+                <p className="leading-[18px]">83%</p>
+              </div>
+            </div>
+            <div className="[word-break:break-word] absolute content-stretch flex flex-col gap-[6px] h-[50px] items-start leading-[0] left-[96px] not-italic overflow-clip text-white top-[15px] w-[144px]" data-node-id="I93:20567;648:7765" data-name="Info">
+              <div className="flex flex-col font-['Inter:Bold'] font-bold justify-center relative shrink-0 text-[18px] w-[144px]" data-node-id="I93:20567;648:7766">
+                <p className="leading-[22px]">13 complite</p>
+              </div>
+              <div className="flex flex-col font-['Inter:Regular'] font-normal h-[22.6px] justify-center relative shrink-0 text-[14px] w-[92.661px]" data-node-id="I93:20567;648:7767">
+                <p className="leading-[16px]">Tasks</p>
+              </div>
+            </div>
+          </div>
+          <div className="h-[80px] relative shrink-0 w-[240px]" data-node-id="I93:20567;648:7768" data-name="Informer">
+            <div className="absolute left-0 size-[80px] top-0" data-node-id="I93:20567;648:7769" data-name="Chart">
+              <div className="absolute left-0 size-[80px] top-0" data-node-id="I93:20567;648:7770" data-name="Background">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgBackground} />
+              </div>
+              <div className="absolute left-0 size-[80px] top-0" data-node-id="I93:20567;648:7771" data-name="Progress">
+                <div className="absolute inset-[0_-88.47%_-148.19%_-53.75%]">
+                  <img alt="" className="block max-w-none size-full" src={imgProgress2} />
+                </div>
+              </div>
+              <div className="-translate-x-1/2 -translate-y-1/2 [word-break:break-word] absolute flex flex-col font-['Inter:Semi_Bold'] font-semibold h-[19px] justify-center leading-[0] left-[40px] not-italic text-[20px] text-center text-white top-[calc(50%+0.5px)] w-[44px]" data-node-id="I93:20567;648:7772">
+                <p className="leading-[18px]">12%</p>
+              </div>
+            </div>
+            <div className="[word-break:break-word] absolute content-stretch flex flex-col gap-[6px] h-[50px] items-start leading-[0] left-[96px] not-italic overflow-clip text-white top-[15px] w-[94px]" data-node-id="I93:20567;648:7773" data-name="Info">
+              <div className="flex flex-col font-['Inter:Bold'] font-bold justify-center relative shrink-0 text-[18px] whitespace-nowrap" data-node-id="I93:20567;648:7774">
+                <p className="leading-[22px]">2 month</p>
+              </div>
+              <div className="flex flex-col font-['Inter:Regular'] font-normal h-[22.6px] justify-center relative shrink-0 text-[14px] w-[92.661px]" data-node-id="I93:20567;648:7775">
+                <p className="leading-[16px]">Deadline</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

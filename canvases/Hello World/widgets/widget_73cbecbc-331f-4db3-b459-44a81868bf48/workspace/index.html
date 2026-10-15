@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>汇率卡 · 每分钟</title>
+<style>
+  :root{
+
+    --ink:#FFFFFF;
+    --ink-2:rgba(255,255,255,.72); --ink-3:rgba(255,255,255,.5); --ink-4:rgba(255,255,255,.34);
+    --navy:#002E58;
+    --navy-line:rgba(0,46,88,.5);
+    --k-sans:var(--kimi-font-sans,"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","MiSans","Microsoft YaHei",sans-serif);
+    --k-mono:var(--kimi-font-mono,"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace);
+    --k-r:12px;
+
+    --ink2:var(--ink-3); --up:#00A1FF; --down:#9BA1A6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--k-sans); color:var(--ink); background:transparent; overflow:hidden; -webkit-font-smoothing:antialiased;}
+
+
+  .card{
+    container-type:size;
+    --padx:clamp(14px,3vw,24px); --pady:clamp(12px,2.6vh,20px);
+    position:relative; height:100vh;
+    border-radius:var(--k-r); overflow:hidden;
+    padding:var(--pady) var(--padx);
+    background:
+      radial-gradient(90% 85% at 6% 0%, rgba(255,255,255,.07), transparent 54%),
+      radial-gradient(130% 120% at 82% 0%, #17242F 0%, #070A0E 62%, #000000 100%);
+    display:flex; flex-direction:column;
+    color:var(--ink);
+  }
+  .card::after{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.45;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .card > *{position:relative; z-index:1;}
+
+
+  .texture{
+    position:absolute; inset:0; z-index:0 !important; pointer-events:none;
+    display:flex; flex-direction:column; align-items:flex-start;
+    overflow:hidden;
+  }
+  .trow{white-space:nowrap; line-height:1; height:13px;}
+  .tc{
+    display:inline-block; width:8px; height:13px;
+    font-family:var(--k-mono); font-size:11px; line-height:13px;
+    text-align:center; font-style:normal;
+  }
+  .tc1{color:rgba(0,0,0,.09)} .tc2{color:rgba(0,0,0,.15)}
+  .tc3{color:rgba(0,0,0,.22)} .tc4{color:rgba(0,0,0,.32)}
+  .tck{color:rgba(255,255,255,.78); font-weight:600;}
+
+
+  .head{
+    flex:none;
+    display:flex; flex-direction:column; align-items:flex-start; gap:6px;
+  }
+  .chip-label{
+    display:inline-flex; align-items:center; gap:8px; width:max-content;
+    font-family:var(--k-mono); font-size:clamp(10px,1.6cqi,11px); font-weight:500; letter-spacing:.16em;
+    text-transform:uppercase; color:rgba(255,255,255,.55); line-height:1; white-space:nowrap;
+  }
+  .chip-label::before{content:""; width:14px; height:8px; background:#007CFF; border-radius:2px;}
+  .h-title{
+    font-family:var(--k-sans);
+    font-size:clamp(22px,6.5cqi,34px);
+    font-weight:800; line-height:1.02; letter-spacing:-.03em; color:#FFFFFF;
+  }
+
+
+  .rows{
+    flex:1; min-height:0; overflow:hidden;
+    margin-top:clamp(9px,2cqb,14px);
+    display:flex; flex-direction:column; gap:0;
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;
+  }
+  .row{
+    position:relative;
+    flex:1; min-height:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto auto;
+    grid-template-areas:"ident spark rate";
+    align-items:center;
+    column-gap:12px;
+    padding:clamp(6px,1.4cqb,11px) 2px;
+  }
+  .row + .row{border-top:1px solid rgba(255,255,255,.12);}
+  .row > *{position:relative; z-index:1;}
+
+  .ident{grid-area:ident; display:flex; align-items:baseline; gap:8px; min-width:0;}
+  .flag{display:none;}
+  .pair{
+    font-size:clamp(12px,2.4cqi,13.5px); font-weight:700; color:var(--ink);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+  }
+  .unit{
+    font-family:var(--k-mono); font-size:10px; letter-spacing:.01em; color:var(--ink-3);
+    white-space:nowrap; flex:none;
+  }
+
+  .spark{grid-area:spark; width:clamp(60px,16cqi,120px); height:20px; opacity:.9;}
+  .spark svg{display:block; width:100%; height:100%;}
+  .spark polyline{stroke:var(--dir, #91D4FF);}
+  .spark .fill{fill:var(--dir, #91D4FF); opacity:.09;}
+  .row.up{--dir:var(--up);}
+  .row.down{--dir:var(--down);}
+
+  .rate-box{grid-area:rate; text-align:right; white-space:nowrap;}
+  .rate{font-size:clamp(16px,3.2cqi,20px); font-weight:800; line-height:1.15; color:var(--ink); letter-spacing:-.01em;}
+  .delta{font-family:var(--k-mono); font-size:10px; font-weight:600;}
+  .delta.up{color:var(--up);}
+  .delta.down{color:var(--down);}
+  .delta.flat{color:var(--ink-3);}
+
+  .row.skeleton{opacity:.8;}
+  .row.skeleton .spark{
+    height:8px; border-radius:999px; background:rgba(255,255,255,.1);
+  }
+  .row.skeleton .spark::before{
+    content:""; display:block; width:54%; height:100%;
+    border-radius:inherit; background:rgba(255,255,255,.28);
+  }
+
+
+  .foot{
+    flex:none;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-top:clamp(7px,1.6cqb,10px);
+  }
+  .status{display:flex; align-items:center; gap:6px; min-width:0; font-family:var(--k-mono); font-size:10px; color:rgba(255,255,255,.55);}
+  .status span:last-child{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .dot{width:6px; height:6px; border-radius:50%; background:#91D4FF; flex:none;}
+  .dot.err{background:rgba(255,255,255,.35);}
+  .dot.loading{background:#91D4FF; animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:.3;}}
+  .signoff{flex:none; font-family:var(--k-mono); font-size:10px; letter-spacing:.14em; color:rgba(0,46,88,.5); white-space:nowrap;}
+
+  @container (max-width: 339px){
+    .spark{display:none;}
+    .unit{display:none;}
+    .signoff{display:none;}
+  }
+  @container (max-height: 279px){
+    .row{padding-block:4px; column-gap:8px;}
+    .rate{font-size:14px;}
+    .h-title{font-size:22px;}
+    .foot{margin-top:5px;}
+  }
+
+  .chip-label{display:none !important;}
+
+  .h-title { font-size: 22px !important; font-weight: 800; line-height: 1.08; letter-spacing: 0; }
+  .tc, .chip-label, .unit, .delta, .status, .signoff { font-size: 12px !important; line-height: 1.4; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+</head>
+<body>
+<main class="card" aria-label="汇率卡">
+
+  <header class="head">
+    <span class="chip-label">FX · 1 MIN</span>
+    <span class="h-title">汇率</span>
+  </header>
+
+  <section class="rows" id="rows">
+    <div class="row skeleton">
+      <div class="ident"><span class="pair">EUR / CNY</span><span class="unit">loading</span></div>
+      <div class="spark"></div>
+      <div class="rate-box"><div class="rate">—</div><div class="delta flat">WAIT</div></div>
+    </div>
+    <div class="row skeleton">
+      <div class="ident"><span class="pair">USD / CNY</span><span class="unit">loading</span></div>
+      <div class="spark"></div>
+      <div class="rate-box"><div class="rate">—</div><div class="delta flat">WAIT</div></div>
+    </div>
+    <div class="row skeleton">
+      <div class="ident"><span class="pair">JPY / CNY</span><span class="unit">loading</span></div>
+      <div class="spark"></div>
+      <div class="rate-box"><div class="rate">—</div><div class="delta flat">WAIT</div></div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <div class="status">
+      <span class="dot loading" id="dot"></span>
+      <span id="statusText">加载中…</span>
+    </div>
+    <span class="signoff"></span>
+  </div>
+</main>
+
+<script>
+"use strict";
+(() => {
+    "use strict";
+    const PAIRS = [
+        { code: "EUR", flag: "🇪🇺", label: "EUR / CNY", unit: 1, note: "1 欧元" },
+        { code: "USD", flag: "🇺🇸", label: "USD / CNY", unit: 1, note: "1 美元" },
+        { code: "JPY", flag: "🇯🇵", label: "JPY / CNY", unit: 100, note: "100 日元" },
+        { code: "KRW", flag: "🇰🇷", label: "KRW / CNY", unit: 100, note: "100 韩元" }
+    ];
+    const LIVE_API = "https://open.er-api.com/v6/latest/CNY";
+    const REFRESH = 60;
+    const HIST_CACHE_KEY = "daimon_fx_hist30_v2";
+    const rowsEl = document.getElementById("rows");
+    const dot = document.getElementById("dot");
+    const statusText = document.getElementById("statusText");
+    let hist = null;
+    let live = null;
+    let countdown = REFRESH;
+    const fmt = (n, d) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+    const dstr = d => d.toISOString().slice(0, 10);
+    async function loadHistory() {
+        try {
+            const cached = JSON.parse(localStorage.getItem(HIST_CACHE_KEY));
+            if (cached && cached.day === dstr(new Date()) && cached.series) {
+                hist = cached.series;
+                return;
+            }
+        }
+        catch (e) { }
+        const end = new Date();
+        const start = new Date(Date.now() - 30 * 864e5);
+        const url = "https://api.frankfurter.dev/v1/" + dstr(start) + ".." + dstr(end) +
+            "?base=CNY&symbols=" + PAIRS.map(p => p.code).join(",");
+        const res = await fetch(url, { cache: "no-store" });
+        const data = await res.json();
+        if (!data || !data.rates)
+            throw new Error("no history");
+        const days = Object.keys(data.rates).sort();
+        const series = {};
+        PAIRS.forEach(p => {
+            series[p.code] = days
+                .map(d => data.rates[d][p.code])
+                .filter(v => v > 0)
+                .map(v => Number(((1 / v) * p.unit).toFixed(5)));
+        });
+        hist = series;
+        try {
+            localStorage.setItem(HIST_CACHE_KEY, JSON.stringify({ day: dstr(new Date()), series: series }));
+        }
+        catch (e) { }
+    }
+    function sparkSvg(points) {
+        if (!points || points.length < 2)
+            return "";
+        let lo = Infinity, hi = -Infinity;
+        points.forEach(v => { lo = Math.min(lo, v); hi = Math.max(hi, v); });
+        const span = (hi - lo) || (hi * 0.001) || 1;
+        const pts = points.map((v, i) => {
+            const x = (i / (points.length - 1)) * 100;
+            const y = 2.5 + (1 - (v - lo) / span) * 16;
+            return x.toFixed(1) + "," + y.toFixed(1);
+        });
+        return '<svg viewBox="0 0 100 22" preserveAspectRatio="none">' +
+            '<polygon class="fill" points="0,22 ' + pts.join(" ") + ' 100,22" />' +
+            '<polyline fill="none" stroke-width="1.4" vector-effect="non-scaling-stroke" points="' + pts.join(" ") + '" />' +
+            '</svg>';
+    }
+    function render() {
+        rowsEl.innerHTML = "";
+        PAIRS.forEach(p => {
+            const daily = (hist && hist[p.code]) || [];
+            const cur = live && live[p.code] != null ? live[p.code] : (daily.length ? daily[daily.length - 1] : null);
+            const series = cur != null ? daily.concat([cur]) : daily;
+            let deltaHtml = '<span class="delta flat">—</span>';
+            let dirCls = "";
+            if (cur != null && daily.length) {
+                const prev = daily[daily.length - 1];
+                const d = cur - prev;
+                const cls = Math.abs(d) < 1e-5 ? "flat" : d > 0 ? "up" : "down";
+                dirCls = cls === "flat" ? "" : cls;
+                const arrow = cls === "flat" ? "·" : d > 0 ? "▲" : "▼";
+                deltaHtml = '<span class="delta ' + cls + '" title="较昨日">' + arrow + " " + fmt(Math.abs(d), 4) + '</span>';
+            }
+            const div = document.createElement("div");
+            div.className = "row " + dirCls;
+            div.innerHTML =
+                '<div class="ident"><span class="flag">' + p.flag + '</span>' +
+                    '<span class="pair">' + p.label + '</span>' +
+                    '<span class="unit">' + p.note + '</span></div>' +
+                    '<div class="spark" aria-hidden="true" title="近 30 日走势">' + sparkSvg(series) + '</div>' +
+                    '<div class="rate-box"><div class="rate">' + (cur == null ? "--" : "¥ " + fmt(cur, 4)) + '</div>' +
+                    deltaHtml + '</div>';
+            rowsEl.appendChild(div);
+        });
+    }
+    function tickStatus(text, cls) {
+        dot.className = "dot" + (cls ? " " + cls : "");
+        statusText.textContent = text;
+    }
+    async function fetchLive() {
+        tickStatus("刷新中…", "loading");
+        try {
+            const res = await fetch(LIVE_API, { cache: "no-store" });
+            const data = await res.json();
+            if (!data || data.result !== "success" || !data.rates)
+                throw new Error("bad payload");
+            const vals = {};
+            PAIRS.forEach(p => {
+                if (data.rates[p.code])
+                    vals[p.code] = Number(((1 / data.rates[p.code]) * p.unit).toFixed(5));
+            });
+            live = vals;
+            render();
+            const t = new Date();
+            const hh = String(t.getHours()).padStart(2, "0");
+            const mm = String(t.getMinutes()).padStart(2, "0");
+            const ss = String(t.getSeconds()).padStart(2, "0");
+            tickStatus("更新于 " + hh + ":" + mm + ":" + ss + " · 每分钟自动刷新", "");
+        }
+        catch (e) {
+            tickStatus("获取失败 · 显示上次数据，每分钟自动重试", "err");
+        }
+        countdown = REFRESH;
+    }
+    setInterval(() => {
+        countdown -= 1;
+        if (countdown <= 0)
+            fetchLive();
+    }, 1000);
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && countdown < REFRESH - 5)
+            fetchLive();
+    });
+    (async () => {
+        try {
+            await loadHistory();
+        }
+        catch (e) { }
+        render();
+        fetchLive();
+    })();
+})();
+</script>
+<script>
+"use strict";
+(() => {
+    "use strict";
+    var CW = 8, CH = 13, tex = document.getElementById("tex");
+    if (!tex)
+        return;
+    var POOLS = [[" ", " ", " "], ["-", "·", " ", " "], ["+", "/", "(", ")"], ["(", ")", "*", "/", "+"], ["*", "▲", "#", "(", ")"], ["#", "●", "▲", "*", "K"]];
+    function cls(b, ch) {
+        if (ch === "K")
+            return "tc tck";
+        if (b <= 1)
+            return "tc tc1";
+        if (b === 2)
+            return "tc tc2";
+        if (b <= 4)
+            return "tc tc3";
+        return "tc tc4";
+    }
+    function build() {
+        var W = tex.clientWidth, H = tex.clientHeight;
+        if (W < 40 || H < 40)
+            return;
+        var cols = Math.floor(W / CW), rows = Math.floor(H / CH);
+        tex.innerHTML = "";
+        var cx = cols * 0.86, cy = rows * 0.14, rx = cols * 0.36, ry = rows * 0.6;
+        for (var y = 0; y < rows; y++) {
+            var r = document.createElement("div");
+            r.className = "trow";
+            for (var x = 0; x < cols; x++) {
+                var nx = (x - cx) / rx, ny = (y - cy) / ry;
+                var d = 1 - Math.sqrt(nx * nx + ny * ny);
+                d += (Math.random() - 0.5) * 0.12;
+                var b = Math.max(0, Math.min(5, Math.floor(d * 6)));
+                var p = POOLS[b], ch = p[Math.floor(Math.random() * p.length)];
+                var s = document.createElement("i");
+                s.className = cls(b, ch);
+                s.textContent = ch;
+                r.appendChild(s);
+            }
+            tex.appendChild(r);
+        }
+    }
+    var t = 0;
+    function sched() { clearTimeout(t); t = setTimeout(build, 150); }
+    if (typeof ResizeObserver !== "undefined")
+        new ResizeObserver(sched).observe(tex);
+    window.addEventListener("resize", sched);
+    setTimeout(build, 50);
+})();
+</script>
+</body>
+</html>

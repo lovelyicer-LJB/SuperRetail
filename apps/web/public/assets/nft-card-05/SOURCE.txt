@@ -1,0 +1,4 @@
+Rendered from the user's open NFT Cards Maker After Effects project on 2026-10-09.
+Original template author text: Atamotion. Source composition: Card 5 Holographic.
+See output/nft-card-05/README.md for reference and implementation details.
+Original assets remain subject to their existing license.

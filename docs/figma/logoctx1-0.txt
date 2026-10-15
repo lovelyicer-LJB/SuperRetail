@@ -1,0 +1,9 @@
+const imgJimeng202609252971logo1 = "http://localhost:3845/assets/edee72a987c585e4738d4f916fbf2d486c4ff7a4.png";
+
+export default function Jimeng202609252971logo() {
+  return (
+    <div className="relative size-full" data-node-id="44:20" data-name="jimeng-2026-09-25-2971-设计一款具有国际顶级品牌视觉水准的原创商业LOGO，以汉字「超」为唯一视觉母体， 1">
+      <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgJimeng202609252971logo1} />
+    </div>
+  );
+}

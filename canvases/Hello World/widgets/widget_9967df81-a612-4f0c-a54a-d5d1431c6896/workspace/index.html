@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Market watch</title>
+<style>
+  :root{
+
+    --ink:#000000;
+    --ink-2:rgba(0,0,0,.64); --ink-3:rgba(0,0,0,.48); --ink-4:rgba(0,0,0,.32);
+    --blue:#007CFF; --navy:#002E58;
+    --panel-line:rgba(0,46,88,.14);
+    --k-sans:var(--kimi-font-sans,"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","MiSans","Microsoft YaHei",sans-serif);
+    --k-mono:var(--kimi-font-mono,"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace);
+    --k-r:12px;
+
+    --ink2:var(--ink-3); --up:#007CFF; --down:#3A3D42; --line:rgba(0,46,88,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--k-sans); color:var(--ink); background:transparent; overflow:hidden; -webkit-font-smoothing:antialiased;}
+
+
+  .card{
+    container-type:size;
+    --padx:clamp(14px,3vw,24px); --pady:clamp(12px,2.6vh,20px);
+    position:relative; height:100vh;
+    border-radius:var(--k-r); overflow:hidden;
+    padding:var(--pady) var(--padx);
+    border:1px solid rgba(0,0,0,.08);
+    background:
+      radial-gradient(90% 80% at 96% 0%, rgba(255,255,255,.9), rgba(255,255,255,0) 55%),
+      linear-gradient(172deg, #F7F8FA 0%, #EDEFF2 100%);
+    display:flex; flex-direction:column;
+    color:var(--ink);
+  }
+  .card::after{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.45;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .card > *{position:relative; z-index:1;}
+
+
+  .texture{
+    position:absolute; inset:0; z-index:0 !important; pointer-events:none;
+    display:flex; flex-direction:column; align-items:flex-start;
+    overflow:hidden;
+  }
+  .trow{white-space:nowrap; line-height:1; height:13px;}
+  .tc{
+    display:inline-block; width:8px; height:13px;
+    font-family:var(--k-mono); font-size:11px; line-height:13px;
+    text-align:center; font-style:normal;
+  }
+  .tc1{color:#D9EDFF} .tc2{color:#C4E5FF}
+  .tc3{color:#91D4FF} .tc4{color:#00A1FF}
+  .tck{color:#007CFF; font-weight:600;}
+
+
+  .head{
+    flex:none;
+    display:flex; flex-direction:column; align-items:flex-start; gap:6px;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; width:max-content;
+    font-family:var(--k-mono); font-size:clamp(10px,1.6cqi,11px); font-weight:500; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--ink-3); line-height:1; white-space:nowrap;
+  }
+  .eyebrow::before{content:""; width:14px; height:8px; background:var(--blue); border-radius:2px;}
+  .h-title{
+    font-family:var(--k-sans);
+    font-size:clamp(22px,6.5cqi,34px);
+    font-weight:800; line-height:1.02; letter-spacing:-.03em; color:var(--ink);
+  }
+
+
+  .rows{
+    flex:1; min-height:0; overflow:hidden;
+    margin-top:clamp(9px,2cqb,14px);
+    display:flex; flex-direction:column; gap:0;
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;
+  }
+  .row{
+    position:relative;
+    flex:1; min-height:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto auto;
+    grid-template-areas:"ident spark price";
+    align-items:center;
+    column-gap:12px;
+    padding:clamp(6px,1.4cqb,11px) 2px;
+  }
+  .row + .row{border-top:1px solid rgba(0,0,0,.10);}
+  .row > *{position:relative; z-index:1;}
+  .row.no-spark{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"ident price";
+  }
+  .row.up{--dir:var(--up);}
+  .row.down{--dir:var(--down);}
+
+  .ident{grid-area:ident; display:flex; align-items:center; gap:10px; min-width:0;}
+  .badge{
+    flex:none; min-width:24px; height:24px; padding:0 4px;
+    display:grid; place-items:center;
+    border-radius:6px; background:#EFF8FF; border:1px solid rgba(0,124,255,.2); color:var(--navy);
+    font-size:10px; font-weight:700;
+  }
+  .copy{min-width:0;}
+  .name{
+    font-size:clamp(12px,2.4cqi,13.5px); font-weight:700; color:var(--ink);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+  }
+  .code{
+    display:block; margin-top:2px;
+    font-family:var(--k-mono); font-size:10.5px; letter-spacing:.01em; color:var(--ink-3);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  .spark{grid-area:spark; width:clamp(60px,16cqi,120px); height:20px; opacity:.9;}
+  .spark svg{display:block; width:100%; height:100%;}
+  .spark polyline{stroke:var(--dir, var(--line));}
+  .spark .fill{fill:var(--dir, var(--line)); opacity:.09;}
+  .spark.empty{
+    display:grid; place-items:center; width:auto; min-width:62px;
+    padding:3px 8px; border-radius:999px; background:#EFF8FF;
+    font-family:var(--k-mono); color:var(--ink-3); font-size:10px; white-space:nowrap;
+  }
+
+  .price-box{grid-area:price; text-align:right; white-space:nowrap;}
+  .price{font-size:clamp(16px,3.2cqi,20px); font-weight:800; line-height:1.15; color:var(--ink); letter-spacing:-.01em;}
+  .delta{
+    display:inline-flex; align-items:center; gap:3px; margin-top:3px;
+    font-family:var(--k-mono); font-size:10.5px; font-weight:650;
+    color:var(--dir);
+  }
+
+
+  .foot{
+    flex:none;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-top:clamp(7px,1.6cqb,10px);
+    padding-top:clamp(7px,1.4cqb,9px);
+    border-top:1px solid rgba(0,46,88,.10);
+  }
+  .status{display:flex; align-items:center; gap:6px; min-width:0; font-family:var(--k-mono); font-size:10px; color:var(--ink-3);}
+  .statusText{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .dot{width:6px; height:6px; border-radius:50%; background:var(--blue); flex:none;}
+  .dot.err{background:rgba(0,46,88,.35);}
+  .dot.loading{background:var(--blue); animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:.3;}}
+  .signoff{flex:none; font-family:var(--k-mono); font-size:10px; letter-spacing:.14em; color:var(--ink-3); white-space:nowrap;}
+
+  .turn{font-family:var(--k-mono); font-size:11px; color:var(--ink-3);}
+
+  @container (max-width: 419px){
+    .spark{display:none;}
+    .row{grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"ident price"; column-gap:8px;}
+    .signoff{display:none;}
+  }
+  @container (max-width: 299px){
+    .badge{display:none;}
+    .price{font-size:15px;}
+  }
+  @container (max-height: 279px){
+    .row{padding-block:4px; column-gap:8px;}
+    .price{font-size:14px;}
+    .h-title{font-size:22px;}
+    .foot{margin-top:5px; padding-top:5px;}
+  }
+
+  .head .eyebrow{display:none !important;}
+
+  .h-title { font-size: 22px !important; font-weight: 800; line-height: 1.08; letter-spacing: 0; }
+  .tc, .eyebrow, .badge, .code, .spark.empty, .delta, .status, .signoff, .turn { font-size: 12px !important; line-height: 1.4; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+</head>
+<body>
+<main class="card" aria-label="Market watch">
+
+  <header class="head">
+    <span class="eyebrow" id="chip">WATCHLIST</span>
+    <span class="h-title" id="title">A股盯盘</span>
+  </header>
+
+  <section class="rows" id="rows">
+    <div class="row">
+      <div class="ident"><span class="name">Market</span><span class="code">LIVE</span></div>
+      <div class="turn" id="loading">Fetching a live quote…</div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <div class="status">
+      <span class="dot loading" id="dot"></span>
+      <span class="statusText" id="statusText">Tencent Finance · runtime API</span>
+    </div>
+    <span class="signoff"></span>
+  </div>
+</main>
+
+<script>
+"use strict";
+(() => {
+    "use strict";
+    const locale = "zh-CN";
+    const isZh = locale.slice(0, 2) === "zh";
+    const CONFIG = isZh ? {
+        chip: "A-SHARES",
+        title: "A股盯盘",
+        source: "实时 A 股行情 · 每个交易日自动刷新",
+        loading: "正在请求 A 股真实行情…",
+        unavailable: "真实 A 股行情暂时不可用",
+        latest: "最新报价",
+        volume: "成交",
+        currency: "¥",
+        rows: [
+            { code: "sh600519", label: "600519", badge: "沪", name: "贵州茅台" },
+            { code: "sz300750", label: "300750", badge: "深", name: "宁德时代" },
+            { code: "sz002594", label: "002594", badge: "深", name: "比亚迪" }
+        ]
+    } : {
+        chip: "US STOCKS",
+        title: "US watchlist",
+        source: "Tencent Finance · US market quotes",
+        loading: "Fetching live US quotes…",
+        unavailable: "Live US quotes unavailable",
+        latest: "Latest quote",
+        volume: "Volume",
+        currency: "$",
+        rows: [
+            { code: "usAAPL", label: "AAPL · NASDAQ", badge: "AP", name: "Apple" },
+            { code: "usNVDA", label: "NVDA · NASDAQ", badge: "NV", name: "NVIDIA" },
+            { code: "usMSFT", label: "MSFT · NASDAQ", badge: "MS", name: "Microsoft" }
+        ]
+    };
+    const rowsEl = document.getElementById("rows");
+    const dot = document.getElementById("dot");
+    const statusText = document.getElementById("statusText");
+    document.getElementById("chip").textContent = CONFIG.chip;
+    document.getElementById("title").textContent = CONFIG.title;
+    document.getElementById("loading").textContent = CONFIG.loading;
+    statusText.textContent = CONFIG.source + " · runtime API";
+    const fmt = (n, d = 2) => Number(n).toLocaleString(isZh ? "zh-CN" : "en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+    const compact = (n) => Number(n || 0).toLocaleString(isZh ? "zh-CN" : "en-US", { notation: "compact", maximumFractionDigits: 1 });
+    function sparkSvg(closes) {
+        if (!Array.isArray(closes) || closes.length < 3) {
+            return '<span class="spark empty">' + CONFIG.latest + '</span>';
+        }
+        let lo = Infinity, hi = -Infinity;
+        closes.forEach(c => { lo = Math.min(lo, c); hi = Math.max(hi, c); });
+        const span = (hi - lo) || 1;
+        const pts = closes.map((c, i) => {
+            const x = (i / Math.max(1, closes.length - 1)) * 100;
+            const y = 3 + (1 - (c - lo) / span) * 22;
+            return x.toFixed(1) + "," + y.toFixed(1);
+        });
+        return '<div class="spark" aria-hidden="true"><svg viewBox="0 0 100 28" preserveAspectRatio="none">' +
+            '<polygon class="fill" points="0,28 ' + pts.join(" ") + ' 100,28" />' +
+            '<polyline fill="none" stroke-width="1.5" vector-effect="non-scaling-stroke" points="' + pts.join(" ") + '" />' +
+            '</svg></div>';
+    }
+    function loadScript(url) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = url;
+            script.async = true;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error("script load failed"));
+            document.head.appendChild(script);
+        });
+    }
+    function parseKline(row, payload) {
+        const data = payload && payload.data && payload.data[row.code];
+        if (!data)
+            throw new Error(row.code + " missing");
+        const qt = data.qt && data.qt[row.code] || [];
+        const series = (data.qfqday || data.day || []).map(item => Number(item[2])).filter(Number.isFinite);
+        const price = Number(qt[3]);
+        const change = Number(qt[31]);
+        const pct = Number(qt[32]);
+        if (!Number.isFinite(price) || !Number.isFinite(change) || !Number.isFinite(pct)) {
+            throw new Error(row.code + " invalid quote");
+        }
+        return {
+            name: row.name,
+            label: row.label,
+            badge: row.badge,
+            price,
+            change,
+            pct,
+            volume: Number(qt[36] || qt[6] || 0),
+            time: String(qt[30] || (data.qfqday || data.day || []).at(-1)?.[0] || ""),
+            series
+        };
+    }
+    function renderRow(quote) {
+        const dir = quote.change >= 0 ? "up" : "down";
+        const sign = quote.change >= 0 ? "+" : "";
+        const hasSpark = Array.isArray(quote.series) && quote.series.length >= 3;
+        return '<div class="row ' + dir + (hasSpark ? "" : " no-spark") + '">' +
+            '<div class="ident"><div class="copy"><span class="name">' + quote.name + '</span><span class="code">' + quote.label + '</span></div></div>' +
+            (hasSpark ? sparkSvg(quote.series) : "") +
+            '<div class="price-box"><div class="price">' + CONFIG.currency + fmt(quote.price) + '</div><span class="delta">' + (quote.change >= 0 ? "▲" : "▼") + " " + sign + fmt(quote.pct) + '%</span></div></div>';
+    }
+    function tickStatus(text, cls) {
+        dot.className = "dot" + (cls ? " " + cls : "");
+        statusText.textContent = text;
+    }
+    Promise.all(CONFIG.rows.map(row => {
+        const varName = "kline_" + row.code;
+        const url = "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=" + varName +
+            "&param=" + encodeURIComponent(row.code + ",day,,,30,qfq") + "&r=" + Date.now();
+        return loadScript(url).then(() => parseKline(row, window[varName]));
+    })).then(quotes => {
+        rowsEl.innerHTML = quotes.map(renderRow).join("");
+        tickStatus(CONFIG.source + " · " + new Date().toLocaleTimeString(isZh ? "zh-CN" : "en-US"), "");
+    }).catch(error => {
+        rowsEl.innerHTML = '<div class="row"><div class="ident"><div class="copy"><span class="name">' + CONFIG.title + '</span><span class="code">LIVE</span></div></div><div class="price-box"><div class="price">--</div><span class="delta">' + CONFIG.unavailable + '</span></div></div>';
+        tickStatus(CONFIG.source + " · " + error.message, "err");
+    });
+})();
+</script>
+<script>
+"use strict";
+(() => {
+    "use strict";
+    var CW = 8, CH = 13, tex = document.getElementById("tex");
+    if (!tex)
+        return;
+    var POOLS = [[" ", " ", " "], ["-", "·", " ", " "], ["+", "/", "(", ")"], ["(", ")", "*", "/", "+"], ["*", "▲", "#", "(", ")"], ["#", "●", "▲", "*", "K"]];
+    function cls(b, ch) {
+        if (ch === "K")
+            return "tc tck";
+        if (b <= 1)
+            return "tc tc1";
+        if (b === 2)
+            return "tc tc2";
+        if (b <= 4)
+            return "tc tc3";
+        return "tc tc4";
+    }
+    function build() {
+        var W = tex.clientWidth, H = tex.clientHeight;
+        if (W < 40 || H < 40)
+            return;
+        var cols = Math.floor(W / CW), rows = Math.floor(H / CH);
+        tex.innerHTML = "";
+        var cx = cols * 0.88, cy = rows * 0.12, rx = cols * 0.34, ry = rows * 0.58;
+        for (var y = 0; y < rows; y++) {
+            var r = document.createElement("div");
+            r.className = "trow";
+            for (var x = 0; x < cols; x++) {
+                var nx = (x - cx) / rx, ny = (y - cy) / ry;
+                var d = 1 - Math.sqrt(nx * nx + ny * ny);
+                d += (Math.random() - 0.5) * 0.12;
+                var b = Math.max(0, Math.min(5, Math.floor(d * 6)));
+                var p = POOLS[b], ch = p[Math.floor(Math.random() * p.length)];
+                var s = document.createElement("i");
+                s.className = cls(b, ch);
+                s.textContent = ch;
+                r.appendChild(s);
+            }
+            tex.appendChild(r);
+        }
+    }
+    var t = 0;
+    function sched() { clearTimeout(t); t = setTimeout(build, 150); }
+    if (typeof ResizeObserver !== "undefined")
+        new ResizeObserver(sched).observe(tex);
+    window.addEventListener("resize", sched);
+    setTimeout(build, 50);
+})();
+</script>
+</body>
+</html>

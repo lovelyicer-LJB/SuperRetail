@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_9d68a869-1b15-4de1-8c62-34a7568a4842",
+    "title": "随心摆放 组合看板",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "dashboard-tutorial:zh-CN:widget:compose-tile",
+      "sourceBundleId": "bundle_dashboard-tutorial-20"
+    },
+    "createdAt": "2026-10-13T02:47:05.261Z",
+    "updatedAt": "2026-10-13T02:47:05.261Z"
+  }
+}

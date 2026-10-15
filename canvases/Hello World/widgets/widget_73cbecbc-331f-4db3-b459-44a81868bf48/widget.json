@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_73cbecbc-331f-4db3-b459-44a81868bf48",
+    "title": "实时汇率",
+    "description": "运行时请求公开汇率接口；失败时不展示伪造数据。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:exchange-rates",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.051Z",
+    "updatedAt": "2026-09-08T14:49:56.051Z"
+  }
+}

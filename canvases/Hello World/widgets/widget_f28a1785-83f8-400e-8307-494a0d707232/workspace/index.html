@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>点开看</title>
+<style>
+  :root{
+    --k-white:#FFFFFF; --k-paper:#F7FBFF; --k-black:#000000; --k-ink:#0A0A0B;
+    --k-ink-2:rgba(0,0,0,.60); --k-ink-3:rgba(0,0,0,.45); --k-ink-4:rgba(0,0,0,.28);
+    --k-line:rgba(0,0,0,.13);
+    --k-fog:#F5F6F7; --k-mist:#ECEEF0; --k-stone:#E1E3E6; --k-gray:#8E9390;
+    --k-fill-1:rgba(0,0,0,.03); --k-fill-2:rgba(0,0,0,.05); --k-fill-3:rgba(0,0,0,.09);
+    --k-blue-bg:#EFF8FF; --k-blue-soft:#D9EDFF; --k-blue-hi:#91D4FF; --k-blue-line:#91D4FF; --k-blue-mid:#007CFF; --k-navy:#002E58;
+    --k-grid:rgba(0,0,0,.06);
+    --k-sans:var(--kimi-font-sans,"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","MiSans","Microsoft YaHei",sans-serif);
+    --k-mono:var(--kimi-font-mono,"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace);
+    --k-r:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--k-sans); color:var(--k-ink); background:transparent; overflow:hidden; -webkit-font-smoothing:antialiased;}
+  .card{
+    --padx:clamp(16px,3vw,30px); --pady:clamp(14px,2.4vw,26px);
+    position:relative; height:100vh;
+    background:radial-gradient(130% 120% at 82% 0%, #17242F 0%, #000000 62%);
+    border-radius:var(--k-r); overflow:hidden;
+  }
+  body.wide .card{ background:var(--k-white); }
+  .teaser .eyebrow{ color:rgba(255,255,255,.55); }
+  .teaser .hero{ color:var(--k-white); }
+
+
+  .field { display: none; }
+  .field i {
+    position: absolute;
+    font-style: normal;
+    font-family: var(--k-mono);
+    font-size: 11px;
+    color: var(--k-stone);
+    transition: color 0.18s;
+    will-change: transform;
+  }
+
+
+
+  .stage {
+    position: absolute; inset: 0;
+    padding: calc(var(--pady) + 14px) var(--padx) var(--pady);
+    z-index: 1;
+    overflow-y: auto;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; width:max-content; margin-bottom:10px;
+    font-family:var(--k-mono); font-size:clamp(10px,.95vw,12px); letter-spacing:.16em;
+    text-transform:uppercase; color:var(--k-ink-3);
+  }
+  .eyebrow::before{content:""; width:14px; height:8px; background:var(--k-blue-hi); border-radius:2px;}
+
+  .hero {
+    font-family: var(--k-sans); font-weight: 700;
+    font-size: clamp(22px, 5.4vw, 36px);
+    line-height: 1.05; letter-spacing: -.02em;
+    margin: 0 0 16px; color: var(--k-ink);
+  }
+  .teaser .hero {
+    font-weight: 800;
+    font-size: clamp(30px, 10vw, 60px);
+    line-height: 1.02; letter-spacing: -.03em;
+    margin: 0 0 12px;
+  }
+
+
+
+  .sticker {
+    position: relative; overflow: hidden;
+    display: inline-block;
+    background: linear-gradient(165deg, #A6DEFF 0%, #91D4FF 55%, #7CC6F6 100%);
+    color: var(--k-ink);
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    padding: 14px 18px;
+    width: min(300px, 84vw);
+    transition: box-shadow 0.25s, transform 0.25s;
+    cursor: zoom-in;
+  }
+  .sticker::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(0,0,0,.22) 1px, transparent 1.5px);
+    background-size:11px 11px; opacity:.5;
+    -webkit-mask:radial-gradient(circle at 90% 18%,#000 0 36%,transparent 70%);
+            mask:radial-gradient(circle at 90% 18%,#000 0 36%,transparent 70%);
+  }
+  .sticker:hover { box-shadow: 0 14px 32px rgba(0, 0, 0, 0.14); border-color: var(--k-blue-hi); background: var(--k-blue-bg); }
+
+  .sticker h2 { position: relative; z-index: 1; margin: 0 0 6px; font-size: clamp(15px, 4.2vw, 18px); font-weight: 700; letter-spacing: -.01em; color: var(--k-ink); }
+  .brief { position: relative; z-index: 1; margin: 0; padding: 0; list-style: none; }
+  .brief li {
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--k-ink-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .brief li b { color: var(--k-ink); font-family: var(--k-mono); font-weight: 500; font-size: 12px; letter-spacing: .02em; }
+  .fold {
+    position: relative; z-index: 1;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,0,0,.25);
+    font-family: var(--k-mono);
+    font-size: 11px;
+    letter-spacing: .02em;
+    color: rgba(0,0,0,.62);
+  }
+
+  .teaser .sticker { margin-top: 14px; }
+
+  .payoff { display: none; }
+  body.wide .teaser { display: none; }
+  body.wide .payoff { display: block; max-width: 1000px; margin: 0 auto; padding: 4px 4px 28px; }
+  .payoff .head { margin-bottom: 16px; }
+  .payoff .hero { font-size: clamp(26px, 3.5vw, 38px); margin-bottom: 5px; }
+  .payoff .hero .fv { font-size: 0.5em; color: var(--k-blue-mid); font-family: var(--k-mono); font-weight: 500; letter-spacing: .04em; }
+  .payoff .sub { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--k-ink-2); }
+  .payoff .sub b { color: var(--k-ink); font-weight: 650; }
+
+  .days {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 14px;
+  }
+  .day {
+    background: var(--k-white);
+    border: 1px solid var(--k-line);
+    border-radius: 10px;
+    padding: 15px 16px;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .day:hover { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.10); border-color: var(--k-blue-line); }
+  .day .dtag {
+    display: inline-block;
+    font-family: var(--k-mono);
+    padding: 3px 9px;
+    border-radius: 4px;
+    background: var(--k-blue-bg);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--k-navy);
+  }
+  .day h3 { margin: 10px 0 7px; font-size: 17px; font-weight: 700; letter-spacing: -.01em; color: var(--k-ink); }
+  .day ul { margin: 0; padding: 0; list-style: none; }
+  .day li {
+    display: flex;
+    gap: 9px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    padding: 5px 0;
+    color: var(--k-ink);
+  }
+  .day li + li { border-top: 1px solid var(--k-line); }
+  .day .t { flex: none; font-family: var(--k-mono); font-weight: 500; width: 46px; color: var(--k-blue-mid); font-size: 12.5px; }
+  .day .note { display: block; font-size: 12px; color: var(--k-ink-3); }
+
+  .tips { margin-top: 16px; display: flex; gap: 9px; flex-wrap: wrap; }
+  .chip {
+    padding: 7px 14px;
+    border-radius: 6px;
+    background: var(--k-blue-bg);
+    border: 1px solid var(--k-line);
+    font-size: 13px;
+    color: var(--k-ink-2);
+    transition: border-color 0.18s;
+    animation: chipIn 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) backwards;
+  }
+  .chip:hover { border-color: var(--k-blue-line); }
+  .chip:nth-child(1) { animation-delay: 0.15s; }
+  .chip:nth-child(2) { animation-delay: 0.28s; }
+  .chip:nth-child(3) { animation-delay: 0.41s; }
+  .chip:nth-child(4) { animation-delay: 0.54s; }
+  @keyframes chipIn { from { opacity: 0; transform: translateY(16px) scale(0.7); } }
+
+  .moral {
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--k-blue-mid);
+    font-weight: 600;
+  }
+
+
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0 16px; }
+  .stat {
+    position: relative; overflow: hidden;
+    background: var(--k-fog);
+    border: 1px solid var(--k-line);
+    border-radius: 8px;
+    padding: 11px 18px 12px;
+    font-size: 12.5px;
+    color: var(--k-ink-2);
+    animation: chipIn 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) backwards;
+  }
+  .stat:first-child { border-left: 5px solid var(--k-blue-hi); }
+  .stat b { display: block; font-size: clamp(20px,2.4vw,26px); letter-spacing: -.02em; color: var(--k-ink); font-weight: 800; }
+  .stat:nth-child(1) { animation-delay: 0.05s; }
+  .stat:nth-child(2) { animation-delay: 0.15s; }
+  .stat:nth-child(3) { animation-delay: 0.25s; }
+  .stat:nth-child(4) { animation-delay: 0.35s; }
+
+
+  .eat {
+    margin-top: 10px;
+    padding: 7px 11px;
+    background: var(--k-fill-1);
+    border-radius: 6px;
+    font-size: 12.5px;
+    color: var(--k-ink-2);
+  }
+
+
+  .extras {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .panel {
+    border: 1px solid var(--k-line);
+    border-radius: 10px;
+    padding: 15px 17px;
+    background: var(--k-white);
+  }
+  .panel h3 { margin: 0 0 7px; font-size: 16px; font-weight: 700; letter-spacing: -.01em; color: var(--k-ink); }
+  .panel .p-sub { margin: -3px 0 10px; font-size: 12px; color: var(--k-ink-3); }
+
+  .check { margin: 0; padding: 0; list-style: none; }
+  .check li {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0;
+    font-size: 13.5px;
+    color: var(--k-ink);
+    cursor: pointer;
+    user-select: none;
+  }
+  .check li + li { border-top: 1px solid var(--k-line); }
+  .check .box {
+    flex: none;
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 1px solid var(--k-stone);
+    display: grid; place-items: center;
+    font-size: 12px; color: var(--k-ink);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .check li.done .box { background: var(--k-blue-hi); border-color: var(--k-blue-hi); }
+  .check li.done .box::after { content: "✓"; }
+  .check li.done .txt { text-decoration: line-through; color: var(--k-ink-3); }
+
+  .budget .row { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 13px; color: var(--k-ink); }
+  .budget .lbl { flex: none; width: 44px; font-weight: 650; }
+  .budget .track { flex: 1; height: 10px; border-radius: 999px; background: var(--k-fill-2); overflow: hidden; }
+  .budget .fill { display: block; height: 100%; border-radius: 999px; animation: barGrow 0.8s cubic-bezier(0.3, 1.2, 0.5, 1) backwards; }
+  .budget .row:nth-child(2) .fill { animation-delay: 0.2s; }
+  .budget .row:nth-child(3) .fill { animation-delay: 0.35s; }
+  .budget .row:nth-child(4) .fill { animation-delay: 0.5s; }
+  .budget .row:nth-child(5) .fill { animation-delay: 0.65s; }
+  @keyframes barGrow { from { width: 0; } }
+  .budget .amt { flex: none; width: 70px; text-align: right; font-family: var(--k-mono); font-weight: 500; color: var(--k-ink-2); }
+
+
+  .hotzone {
+    position: fixed;
+    top: 8px; right: 46px;
+    width: 32px; height: 32px;
+    border: 1.5px dashed var(--k-blue-hi);
+    border-radius: 8px;
+    pointer-events: none;
+    animation: pulse 2.1s ease-in-out infinite;
+    z-index: 2;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.35; }
+  }
+  .hotlabel {
+    position: fixed;
+    top: 46px; right: 46px;
+    font-family: var(--k-mono);
+    font-size: 11px;
+    letter-spacing: .02em;
+    color: rgba(255,255,255,.7);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 2;
+  }
+  body.wide .hotzone, body.wide .hotlabel { display: none; }
+  @media (max-width: 280px) { .hotlabel { display: none; } }
+
+  .signoff {
+    position: absolute; left: var(--padx); bottom: calc(var(--pady) - 2px); z-index: 3;
+    font-family: var(--k-mono); font-size: clamp(10px,.9vw,11px); letter-spacing: .16em;
+    text-transform: uppercase; color: rgba(255,255,255,.38); white-space: nowrap;
+  }
+  body.wide .signoff { color: var(--k-ink-4); }
+
+  @media (max-height: 300px) {
+    .stage { padding-top: calc(var(--pady) + 8px); }
+    .eyebrow { margin-bottom: 5px; }
+    .hero { font-size: 22px; margin-bottom: 4px; }
+    .sticker { padding: 10px 14px; }
+    .sticker h2 { margin: 0 0 5px; }
+    .brief li { line-height: 1.55; }
+    .brief li:nth-child(n + 3) { display: none; }
+    .fold { margin-top: 6px; padding-top: 6px; }
+  }
+
+  .card { --padx: 24px; --pady: 24px; }
+  .stage { padding: 24px; }
+  .teaser .sticker { display: block; width: 100%; max-width: none; }
+  .hotzone { top: 12px; right: 44px; }
+  .hotlabel { top: 50px; right: 12px; }
+  .signoff { left: 24px; bottom: 24px; }
+  @media (max-height: 300px) { .stage { padding: 24px; } }
+
+  .teaser .hero, .payoff .hero { font-size: 22px !important; font-weight: 800; line-height: 1.08; letter-spacing: 0; }
+  .field i, .eyebrow, .fold, .day .dtag, .hotlabel, .signoff { font-size: 12px !important; line-height: 1.4; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+
+</head>
+<body>
+<div class="card">
+  <div class="field" id="field" aria-hidden="true"></div>
+  <main class="stage" aria-label="点开看演示">
+    <div class="teaser">
+            <h1 class="hero">点开看</h1>
+      <div class="sticker">
+        <h2>秋日上海 · 三日行程</h2>
+        <ul class="brief">
+          <li><b>Day 1</b> 外滩 → 豫园 → 苏州河</li>
+          <li><b>Day 2</b> 武康路 → 安福路 → 西岸</li>
+          <li><b>Day 3</b> 陆家嘴 → 轮渡 → 外滩夜景</li>
+        </ul>
+        <div class="fold">还有 20+ 条细节被折叠 · 全屏展开 ↗</div>
+      </div>
+    </div>
+
+    <div class="payoff">
+      <div class="head">
+                <h1 class="hero">秋日上海 · 三日行程 <span class="fv">完整版</span></h1>
+        <p class="sub">刚才小卡上只放得下摘要 —— <b>全屏是同一张卡</b>，细节全在这儿。</p>
+      </div>
+      <div class="stats">
+        <span class="stat"><b>3 天</b>11 月 20 – 22 日</span>
+        <span class="stat"><b>12 个</b>计划地点</span>
+        <span class="stat"><b>¥2,400</b>人均预算</span>
+        <span class="stat"><b>2.1 万步</b>预计日均</span>
+      </div>
+      <div class="days">
+        <div class="day d1">
+          <span class="dtag">DAY 1 · 老城厢</span>
+          <h3>外滩 · 豫园</h3>
+          <ul>
+            <li><span class="t">08:30</span><span>外滩万国建筑群<span class="note">趁旅行团没到，先拍空镜</span></span></li>
+            <li><span class="t">11:00</span><span>豫园 + 城隍庙<span class="note">九曲桥人多，先逛园子里侧</span></span></li>
+            <li><span class="t">14:00</span><span>南京东路 + 和平饭店<span class="note">老年爵士乐队有下午场</span></span></li>
+            <li><span class="t">17:30</span><span>苏州河步道黄昏<span class="note">四行仓库对岸是经典机位</span></span></li>
+            <li><span class="t">19:30</span><span>北外滩远眺陆家嘴<span class="note">灯光秀 19:00 准时亮灯</span></span></li>
+          </ul>
+          <div class="eat">今日一味 · 豫园「南翔馒头店」蟹粉小笼</div>
+        </div>
+        <div class="day d2">
+          <span class="dtag">DAY 2 · 梧桐区</span>
+          <h3>武康路 · 西岸</h3>
+          <ul>
+            <li><span class="t">09:30</span><span>武康大楼晨拍<span class="note">清晨的路口几乎没人</span></span></li>
+            <li><span class="t">11:30</span><span>安福路 + 五原路<span class="note">买手店和咖啡馆集中在这段</span></span></li>
+            <li><span class="t">15:00</span><span>西岸美术馆 + 滨江步道<span class="note">蓬皮杜特展记得提前购票</span></span></li>
+            <li><span class="t">17:45</span><span>龙美术馆看日落<span class="note">滨江西晒，日落前 40 分钟最好</span></span></li>
+            <li><span class="t">20:00</span><span>永康路宵夜<span class="note">小酒馆一条街，营业到深夜</span></span></li>
+          </ul>
+          <div class="eat">今日一味 · 进贤路「兰心餐厅」红烧肉</div>
+        </div>
+        <div class="day d3">
+          <span class="dtag">DAY 3 · 浦江线</span>
+          <h3>陆家嘴 · 外滩</h3>
+          <ul>
+            <li><span class="t">08:00</span><span>滨江大道早餐散步<span class="note">正对外滩天际线</span></span></li>
+            <li><span class="t">10:30</span><span>上海中心「上海之巅」<span class="note">632 米观光厅，线上购票免排队</span></span></li>
+            <li><span class="t">14:00</span><span>船厂1862 + 民生码头筒仓<span class="note">工业遗存改造，很出片</span></span></li>
+            <li><span class="t">18:00</span><span>复兴路轮渡过江<span class="note">2 元看浦江两岸夜景</span></span></li>
+            <li><span class="t">20:30</span><span>外滩灯光夜景<span class="note">22:00 熄灯，别去太晚</span></span></li>
+          </ul>
+          <div class="eat">今日一味 · 四川北路「大壶春」两面黄生煎</div>
+        </div>
+      </div>
+      <div class="extras">
+        <div class="panel">
+          <h3>行前清单</h3>
+          <p class="p-sub">点一下打勾 —— 卡片是可以交互的</p>
+          <ul class="check">
+            <li onclick="this.classList.toggle('done')"><span class="box"></span><span class="txt">身份证（进观光厅要实名）</span></li>
+            <li onclick="this.classList.toggle('done')"><span class="box"></span><span class="txt">上海中心观光厅门票（线上订）</span></li>
+            <li onclick="this.classList.toggle('done')"><span class="box"></span><span class="txt">西岸美术馆特展票</span></li>
+            <li onclick="this.classList.toggle('done')"><span class="box"></span><span class="txt">「Metro 大都会」App 绑卡</span></li>
+            <li onclick="this.classList.toggle('done')"><span class="box"></span><span class="txt">充电宝（日均 2 万步）</span></li>
+            <li onclick="this.classList.toggle('done')"><span class="box"></span><span class="txt">薄外套（11 月均温 13°C）</span></li>
+          </ul>
+        </div>
+        <div class="panel budget">
+          <h3>花费预估</h3>
+          <div class="row"><span class="lbl">餐饮</span><span class="track"><span class="fill" style="width: 78%; background: #91D4FF;"></span></span><span class="amt">¥900</span></div>
+          <div class="row"><span class="lbl">门票</span><span class="track"><span class="fill" style="width: 62%; background: #91D4FF;"></span></span><span class="amt">¥520</span></div>
+          <div class="row"><span class="lbl">交通</span><span class="track"><span class="fill" style="width: 40%; background: #8E9390;"></span></span><span class="amt">¥180</span></div>
+          <div class="row"><span class="lbl">购物</span><span class="track"><span class="fill" style="width: 55%; background: #D9EDFF;"></span></span><span class="amt">¥800</span></div>
+        </div>
+      </div>
+      <div class="tips">
+        <span class="chip">地铁扫码用「Metro 大都会」</span>
+        <span class="chip">十一月均温 13°C，带薄外套</span>
+        <span class="chip">2 元轮渡是最便宜的游江方式</span>
+        <span class="chip">武康大楼要赶早，下午全是人</span>
+      </div>
+      <p class="moral">这就是「点开看」：小卡放摘要，全屏放细节 —— 同一张卡，两种密度。</p>
+    </div>
+  </main>
+  <div class="hotzone" aria-hidden="true"></div>
+  <div class="hotlabel">点击展开卡片 ↑</div>
+  <div class="signoff">GESTURE · 03 OPEN</div>
+</div>
+<script>
+"use strict";
+var performance = (window.performance && window.performance.now) ? window.performance : { now: function () { return Date.now(); } };
+var requestAnimationFrame = window.requestAnimationFrame || function (cb) { return setTimeout(function () { cb(performance.now()); }, 16); };
+var field = document.getElementById("field");
+var N = 40, items = [], centers = [];
+for (var i = 0; i < N; i++) {
+    var s = document.createElement("i");
+    s.textContent = i % 3 === 0 ? "✦" : "·";
+    s.style.left = ((i % 8) * 12.5 + 2 + Math.random() * 7) + "%";
+    s.style.top = (Math.floor(i / 8) * 19 + 3 + Math.random() * 9) + "%";
+    field.appendChild(s);
+    items.push(s);
+}
+function cache() {
+    centers = items.map(function (el) { return [el.offsetLeft + 5, el.offsetTop + 7]; });
+}
+var tx = -9999, ty = -9999, mx = -9999, my = -9999, bx = 0, by = 0, burstT = -9999;
+document.addEventListener("mousemove", function (e) { tx = e.clientX; ty = e.clientY; });
+document.addEventListener("mouseleave", function () { tx = -9999; ty = -9999; });
+document.addEventListener("pointerdown", function (e) { burstT = performance.now(); bx = e.clientX; by = e.clientY; });
+function frame(t) {
+    mx += (tx - mx) * 0.15;
+    my += (ty - my) * 0.15;
+    var age = t - burstT;
+    for (var i = 0; i < N; i++) {
+        var c = centers[i];
+        if (!c)
+            continue;
+        var dx = c[0] - mx, dy = c[1] - my;
+        var dist = Math.sqrt(dx * dx + dy * dy) + 0.01;
+        var k = Math.max(0, (130 - dist) / 130);
+        var ax = -dx * 0.22 * k, ay = -dy * 0.22 * k;
+        var bob = Math.sin(t / 950 + i * 2.1) * 2.6;
+        var tw = 0.55 + Math.sin(t / 700 + i * 1.4) * 0.25;
+        var px = 0, py = 0;
+        if (age < 600) {
+            var bdx = c[0] - bx, bdy = c[1] - by;
+            var bd = Math.sqrt(bdx * bdx + bdy * bdy) + 0.01;
+            var bk = Math.max(0, (170 - bd) / 170) * (1 - age / 600);
+            px = bdx / bd * bk * 30;
+            py = bdy / bd * bk * 30;
+        }
+        items[i].style.transform = "translate(" + (ax + px).toFixed(1) + "px," + (ay + bob + py).toFixed(1) + "px) scale(" + (1 + k * 1.5).toFixed(2) + ") rotate(" + (k * 72).toFixed(0) + "deg)";
+        items[i].style.opacity = (tw + k * 0.4).toFixed(2);
+        items[i].style.color = k > 0.04 ? "rgba(145,212,255," + (0.45 + k * 0.5).toFixed(2) + ")" : "";
+    }
+    requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+var THRESHOLD = 620;
+function update() {
+    var w = document.documentElement.clientWidth;
+    document.body.classList.toggle("wide", w >= THRESHOLD);
+    requestAnimationFrame(cache);
+}
+if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(update).observe(document.documentElement);
+}
+window.addEventListener("resize", update);
+update();
+setTimeout(cache, 60);
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Avatar
+**Node ID:** 65:3437
+
+An avatar is a thumbnail representation of an entity, such as a user or an organization.
+
+## Dark theme
+**Node ID:** 93:2115
+
+Search enables users to specify a word or a phrase to find relevant pieces of content without the use of navigation.

@@ -1,0 +1,18 @@
+[
+  {
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "<canvas id=\"0:1\" name=\"Concept SuperRetail | 超零售概念\" x=\"0\" y=\"0\" width=\"0\" height=\"0\">\n  <rounded-rectangle id=\"44:20\" name=\"jimeng-2026-09-25-2971-设计一款具有国际顶级品牌视觉水准的原创商业LOGO，以汉字「超」为唯一视觉母体， 1\" x=\"-433\" y=\"107\" width=\"298\" height=\"298\" hidden=\"true\" />\n  <rounded-rectangle id=\"46:74\" name=\"jimeng-2026-09-25-1645-设计一款具有国际顶级品牌视觉水准的原创商业LOGO，品牌名称「超零售」，英文名称 1\" x=\"690\" y=\"-93\" width=\"468\" height=\"468\" hidden=\"true\" />\n  <vector id=\"48:2\" name=\"Vector · 圆角修复前备份\" x=\"112.06985473632812\" y=\"16\" width=\"127.5\" height=\"192\" hidden=\"true\" />\n</canvas>"
+        },
+        {
+          "type": "text",
+          "text": "IMPORTANT: After you call this tool, you MUST call get_design_context if trying to implement the design, since this tool only returns metadata. If you do not call get_design_context, the agent will not be able to implement the design."
+        }
+      ]
+    },
+    "jsonrpc": "2.0",
+    "id": 2
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_f28a1785-83f8-400e-8307-494a0d707232",
+    "title": "演示 · 点开看",
+    "description": "展开查看秋日上海三日行程。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:open",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.046Z",
+    "updatedAt": "2026-09-08T14:49:56.046Z"
+  }
+}

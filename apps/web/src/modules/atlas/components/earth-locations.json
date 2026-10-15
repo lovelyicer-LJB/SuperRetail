@@ -1,0 +1,251 @@
+[
+  {
+    "name": "北京",
+    "lat": 40.22077,
+    "lon": -33.23128,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "上海",
+    "lat": 30.8,
+    "lon": -28.5,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "广州",
+    "lat": 24.5,
+    "lon": -36.5,
+    "state": null,
+    "direction": "servertop",
+    "line": null,
+    "count": 1,
+    "brands": [{ "n": "天山醉美辣子鸡（君超中心店）", "a": "辣子", "c": "#c0392b", "x": 1, "logo": "辣子鸡.svg" }]
+  },
+  {
+    "name": "库尔勒",
+    "lat": 41.73,
+    "lon": -63.83,
+    "state": null,
+    "direction": "serverright",
+    "line": null,
+    "count": 15,
+    "brands": [
+      { "n": "北园春城市宴会中心", "a": "北园", "c": "#4e9a51", "x": 1, "logo": "北园春.svg" },
+      { "n": "醉美博湖鱼宴", "a": "博湖", "c": "#3b82c4", "x": 1, "logo": "博湖鱼宴.svg" },
+      { "n": "醉美粥底火锅", "a": "粥底", "c": "#2e8b8b", "x": 1, "logo": "粥底火锅.svg" },
+      { "n": "醉美喜炉", "a": "喜炉", "c": "#d4573b", "x": 1, "logo": "喜炉.svg" },
+      { "n": "姚开花鲜货烧烤", "a": "姚开", "c": "#e08a2e", "x": 1, "logo": "姚开花.svg" },
+      { "n": "郝大方小碗菜", "a": "郝方", "c": "#8a6d4b", "x": 2, "logo": "郝大方.svg" },
+      { "n": "大香梨源味湘菜", "a": "香梨", "c": "#c9a227", "x": 3, "logo": "大香梨.svg" },
+      { "n": "天山醉美辣子鸡", "a": "辣子", "c": "#c0392b", "x": 5, "logo": "辣子鸡.svg" }
+    ]
+  },
+  {
+    "name": "乌鲁木齐",
+    "lat": 43.83,
+    "lon": -62.38,
+    "state": null,
+    "direction": "serverleft",
+    "line": null,
+    "count": 2,
+    "brands": [{ "n": "天山醉美辣子鸡", "a": "辣子", "c": "#c0392b", "x": 2, "logo": "辣子鸡.svg" }]
+  },
+  {
+    "name": "济南",
+    "lat": 36.65,
+    "lon": -33,
+    "state": null,
+    "direction": "serverleft",
+    "line": null,
+    "count": 1,
+    "brands": [{ "n": "双公羊馕坑烤全羊（奥体店）", "a": "双羊", "c": "#a3542f", "x": 1, "logo": "双公羊.svg" }]
+  },
+  {
+    "name": "中国香港",
+    "lat": 22.62,
+    "lon": -35.93,
+    "state": null,
+    "direction": "serverbottom",
+    "line": "line-bottom"
+  },
+  {
+    "name": "深圳",
+    "lat": 23.5,
+    "lon": -35.5,
+    "state": null,
+    "direction": "serverright",
+    "line": "line-right"
+  },
+  {
+    "name": "贵阳",
+    "lat": 27.8,
+    "lon": -42.5,
+    "state": null,
+    "direction": "serverleft",
+    "line": null
+  },
+  {
+    "name": "克拉玛依",
+    "lat": 45.59,
+    "lon": -65.23,
+    "state": null,
+    "direction": "serverleft",
+    "line": null
+  },
+  {
+    "name": "泰国",
+    "lat": 13,
+    "lon": -48.5,
+    "state": null,
+    "direction": "serverleft",
+    "line": null
+  },
+  {
+    "name": "新加坡",
+    "lat": 2.1,
+    "lon": -45.9,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "智利",
+    "lat": -30.78,
+    "lon": 137.55,
+    "state": null,
+    "direction": "serverleft",
+    "line": null
+  },
+  {
+    "name": "秘鲁",
+    "lat": -9.78,
+    "lon": 130.55,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "墨西哥",
+    "lat": 20,
+    "lon": 109.58,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "巴西",
+    "lat": -22.878371188482927,
+    "lon": 161.28,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "南非",
+    "lat": -26.026,
+    "lon": -121.00687047287553,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "阿根廷",
+    "lat": -33.531680982080935,
+    "lon": -209.3768,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "乌兰察布",
+    "lat": 42.034126,
+    "lon": -39.74,
+    "state": null,
+    "direction": "serverleft",
+    "line": null
+  },
+  {
+    "name": "爱尔兰",
+    "lat": 53.26,
+    "lon": 203.85,
+    "state": null,
+    "direction": "serverleft",
+    "line": null
+  },
+  {
+    "name": "印度尼西亚",
+    "lat": -6.08,
+    "lon": -43.55,
+    "state": null,
+    "direction": "serverleft",
+    "line": null
+  },
+  {
+    "name": "土耳其",
+    "lat": 41.02,
+    "lon": -121.42,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "沙特",
+    "lat": 24.39,
+    "lon": -103.56,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "埃及",
+    "lat": 30,
+    "lon": -118.83,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "青岛",
+    "lat": 36.07,
+    "lon": -29.67,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "芜湖",
+    "lat": 31.33,
+    "lon": -31.62,
+    "state": null,
+    "direction": "serverleft",
+    "line": null
+  },
+  {
+    "name": "菲律宾",
+    "lat": 14.37,
+    "lon": -29,
+    "state": null,
+    "direction": "serverright",
+    "line": null
+  },
+  {
+    "name": "尼日利亚",
+    "lat": 9.12,
+    "lon": -142.89,
+    "state": "iec",
+    "direction": "serverleft",
+    "line": null
+  },
+  {
+    "name": "和林格尔",
+    "lat": 40.41,
+    "lon": -41.74,
+    "state": null,
+    "direction": "serverleft",
+    "line": null
+  }
+]

@@ -1,0 +1,104 @@
+/* ==========================================================================
+   超零售 SuperRetail · Design Tokens
+   来源: Figma「All Win Harmony SuperRetail Platform | 和与合超零售平台」
+   提取日期: 2026-10-01 (初版, Figma Dev Mode MCP, node 0:2 / 93:2236)
+             2026-10-10 (补全 Colors 全集, 遍历 34 个页面汇总, 存档 docs/figma/colors-full-2026-10-10.json)
+   维护规则: 设计侧更新变量后, 重新提取并整体替换本文件, 不要手改单个色值
+   ========================================================================== */
+
+:root {
+  /* ---- Dark Theme · Gray（2026-10-10 补全 3/4/7/8/9 档） --------------- */
+  --sr-d-gray-0: #ffffff; /* 文字·主 (dark 模式下最亮) */
+  --sr-d-gray-1: #f5f5ff; /* 文字·次强 */
+  --sr-d-gray-2: #d0d0da; /* 菜单·未选中 */
+  --sr-d-gray-3: #a9a9b7; /* 文字·弱 */
+  --sr-d-gray-4: #8a8a98; /* 文字·辅助 */
+  --sr-d-gray-5: #70707c; /* 文字·辅助 */
+  --sr-d-gray-6: #5b5b65; /* 占位符 */
+  --sr-d-gray-7: #40404a; /* 分隔/描边 */
+  --sr-d-gray-8: #2c2c35; /* 浮层底 */
+  --sr-d-gray-9: #1e1e24; /* 面板底 */
+  --sr-d-gray-10: #0f0f13; /* 外壳/面板底 */
+  --sr-d-gray-11: #000000; /* 页面底 / 搜索框 */
+
+  /* ---- White Theme · Gray（2026-10-10 补全 3/5/6/7/9 档） -------------- */
+  --sr-l-gray-0: #ffffff; /* 外壳底 */
+  --sr-l-gray-1: #f2f3f7; /* 页面底 / 搜索框 */
+  --sr-l-gray-2: #e2e2ea; /* Logo 底 / 分隔 */
+  --sr-l-gray-3: #c6cbd9; /* 描边·弱 */
+  --sr-l-gray-4: #9a9aaf; /* 占位符 */
+  --sr-l-gray-5: #7e7e8f; /* 文字·辅助 */
+  --sr-l-gray-6: #656575; /* 文字·次强 */
+  --sr-l-gray-7: #535362; /* 文字·强 */
+  --sr-l-gray-8: #2e2e3a; /* 菜单·未选中 */
+  --sr-l-gray-9: #262631; /* 浮层底 */
+  --sr-l-gray-11: #07070c; /* 文字·主 */
+
+  /* ---- Colors / Brand Colors（2026-10-10 新增） ------------------------ */
+  --sr-brand-interact-blue: #0ab9e6; /* 互动蓝（与 --sr-logo-bg 同值） */
+  --sr-brand-interact-red: #ff3c28; /* 互动红 */
+  --sr-brand-black: #000000; /* 纯黑 */
+
+  /* ---- Colors / Accent Colors（2026-10-10 补全全集） ------------------- */
+  --sr-accent-persian-blue: #4807ea; /* 波斯蓝 */
+  --sr-accent-frosty-skies: #06d7f6;
+  --sr-accent-alizarin-red: #fd4438;
+  --sr-accent-amethyst: #a162f7;
+  --sr-accent-azure: #0062ff; /* 与 --sr-nav-active 同值 */
+  --sr-accent-sea-green: #15ffab;
+  --sr-accent-spring-green: #62f783;
+  --sr-accent-verdepom: #24ca49;
+  --sr-accent-shiny-orange: #ffb443;
+  --sr-accent-mango-tango: #ff8743;
+  --sr-accent-dark-amber: #fe7e07;
+  --sr-accent-red-orange: #ff7a2f;
+  --sr-accent-strawberry-red: #db3031;
+
+  /* ---- 其他命名色（Colors 集合） --------------------------------------- */
+  --sr-blue: #323eff;
+  --sr-black: #05050f;
+
+  /* ---- Semantic (Top menu 组件实测值) --------------------------------- */
+  --sr-nav-active: #0062ff; /* 导航选中态 */
+  --sr-cta: #3506ef; /* 主按钮 "免费加入" */
+  --sr-logo-bg: #0ab9e6; /* LOGO 底色 (2026-10-01 定为纯色, 原青紫渐 Deprecated) */
+  --sr-logo-gradient: linear-gradient(
+    -36.59deg,
+    #0fedff 3.95%,
+    #8f5bff 99.58%
+  ); /* 历史渐变, 仅保留作参考 */
+
+  /* ---- Typography ------------------------------------------------------
+     UI/品牌: HarmonyOS Sans SC（华为鸿蒙, 全字重 100-900）+ Noto Sans SC 兜底
+     Figma 字号: 菜单 16/20 SemiBold · 搜索 16/16 Medium ·
+     按钮 16/16 Bold · 用户名 14/20 SemiBold · 身份 12/16 Regular */
+  --sr-font-ui:
+    'HarmonyOS Sans SC', 'HarmonyOS Sans', 'Noto Sans SC', 'PingFang SC',
+    'Microsoft YaHei', system-ui, sans-serif;
+  --sr-font-display:
+    'HarmonyOS Sans SC', 'HarmonyOS Sans', 'Noto Sans SC', 'PingFang SC',
+    'Microsoft YaHei', system-ui, sans-serif;
+}
+
+/* ==========================================================================
+   HUD Layout · 版图底部 道具栏/技能栏（2026-10-12 新增 · 布局 Token，非 Figma 色板）
+
+   - 单框基准 --sr-board-icon-size = 96px：资产画板图标（AssetIcon variant="board"）
+     在资产系统页挑选器中的标准展示尺寸（AssetSystemPage.tsx size={96}），正方形
+   - 技能栏固定 --sr-hud-slots = 12 槽：总宽取游戏行业 12 槽主技能条在 1080p 下的
+     常见均值 ≈1150px（约占 1920 屏宽 60%），微调为 1152px = 96 × 12，
+     可整除单框宽度（1152 / 96 = 12）
+   - 道具栏与技能栏同宽；消费侧用 min(1152px, 视口可用宽) 让格位随显示器等比缩放
+   ========================================================================== */
+:root {
+  --sr-board-icon-size: 96px; /* 资产画板图标尺寸 = 单个道具框/技能框边长 */
+  --sr-hud-slots: 12; /* 技能栏固定槽位数（道具栏同宽同格数） */
+  --sr-hud-bar-width: calc(
+    var(--sr-board-icon-size) * var(--sr-hud-slots)
+  ); /* 1152px，行业均值微调后可整除单框 */
+  --sr-hud-bar-gap: 10px; /* 道具栏与技能栏的垂直间距 */
+  --sr-hud-bottom: 14px; /* 技能栏距版图底边 */
+  --sr-hud-side-margin: 24px; /* 窄屏时栏与视口左右的最小留白 */
+  --sr-hud-snap-margin: 28px; /* 道具栏拖放自动吸附判定带：栏包围盒外扩距离（JS hitSnap 同步使用） */
+  --sr-hud-cursor-gold: #f7c948; /* 技能选中态自定义鼠标/连线金色（支出▲ 运行▶ 运转沙漏） */
+}

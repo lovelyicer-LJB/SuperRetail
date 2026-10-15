@@ -1,0 +1,425 @@
+/* 🔴 改动 2026-10-12 · 图表「地图」样式：单层原生高德底图 + 深浅主题。
+   配色对齐版图： azure 常规、金色悬停/热区（同画板收益金的 --bd-gold 系）。
+   🔴 改动 2026-10-14 · 去掉三级 LOD：删除世界封面 / SVG 兜底 / 省级 2.5D / 面包屑等死样式，
+   悬停信息面板与图例等高德引擎样式保留。 */
+
+.sr-map {
+  --map-chip-bg: rgba(16, 24, 40, 0.62);
+  --map-chip-border: rgba(150, 185, 235, 0.35);
+  --map-chip-text: #dce8fa;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* 🔴 改动 2026-10-14 · 地图改直角：撤回 20px 圆角（满画板「地图」Tab 铺满整块画板区，四角不再留圆弧）；
+     图表列表缩略图 / 大图预览卡片仍由各自外层容器（rounded-xl + overflow-hidden）自行裁圆角，外观不变 */
+  border-radius: 0;
+}
+.sr-map.is-light {
+  --map-chip-bg: rgba(255, 255, 255, 0.72);
+  --map-chip-border: rgba(74, 120, 180, 0.3);
+  --map-chip-text: #2b4468;
+}
+
+/* ---- 舞台 ---- */
+.sr-map-stage {
+  position: absolute;
+  inset: 0;
+  animation: srMapLevelIn 0.42s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+@keyframes srMapLevelIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.sr-map-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--map-chip-text);
+  opacity: 0.8;
+}
+
+/* ---- 高德底图容器 ---- */
+.sr-map-amap {
+  position: absolute;
+  inset: 0;
+}
+
+/* 🔴 改动 2026-10-14 · 悬停浮窗覆盖层（地图容器的兄弟节点）：
+   默认 pointer-events:none，滚轮/拖拽/框选全部穿透给底图；仅浮窗自身 auto 可悬停可点击。
+   z-index 5 低于地图控件（2.5D 按钮 6 / 图例 7 / 角标 6），浮窗不会盖住控件。 */
+.sr-map-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.sr-map-overlay .sr-gi-panel {
+  pointer-events: auto;
+}
+
+/* ---- 角标 / 2.5D 俯视按钮 ---- */
+.sr-map-badge {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 6;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 17px;
+  color: var(--map-chip-text);
+  background: var(--map-chip-bg);
+  border: 1px solid var(--map-chip-border);
+  opacity: 0.85;
+  pointer-events: none;
+}
+.sr-map-zoom {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sr-map-zoom button {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 1px solid var(--map-chip-border);
+  background: var(--map-chip-bg);
+  color: var(--map-chip-text);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.sr-map-zoom button:hover {
+  background: rgba(150, 185, 235, 0.22);
+}
+/* 2.5D 俯视显式入口按钮：宽版文字钮 + 俯视态金色高亮 */
+.sr-map-zoom button.is-wide {
+  width: auto;
+  min-width: 30px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.sr-map-zoom button.is-on {
+  border-color: rgba(212, 173, 87, 0.85);
+  color: #e8c877;
+  box-shadow: 0 0 8px rgba(212, 173, 87, 0.35);
+}
+
+/* ---- 🔴 改动 2026-10-13 · GI 地理标志点位层（金色系，对齐画板收益金；高德 DOM 标记引擎） ---- */
+.sr-gi-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e0b45a;
+  border: 1px solid #6b4e12;
+  box-shadow: 0 0 4px rgba(224, 180, 90, 0.8);
+  cursor: pointer;
+}
+.sr-gi-dot.is-agi {
+  background: #7fc98f;
+  border-color: #2e6b42;
+  box-shadow: 0 0 4px rgba(127, 201, 143, 0.8);
+}
+.sr-gi-cluster {
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f2d488, #d4a944);
+  border: 1.5px solid #fff2cf;
+  color: #3d2b06;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+.sr-gi-sr {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffd873;
+  font-size: 15px;
+  text-shadow: 0 0 6px rgba(255, 216, 115, 0.95), 0 0 2px #7a5b1e;
+  cursor: pointer;
+  animation: srGiSrPulse 2s ease-in-out infinite;
+}
+@keyframes srGiSrPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.28); }
+}
+.sr-gi-card {
+  min-width: 150px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(20, 28, 44, 0.92);
+  border: 1px solid rgba(212, 173, 87, 0.6);
+  color: #f0e6cc;
+  font-size: 12px;
+  line-height: 18px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+.sr-gi-card-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffd873;
+}
+.sr-gi-card-meta {
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* ---- 🔴 改动 2026-10-13 · 悬停液态玻璃浮窗（华为风：磨砂玻璃 + 高光描边 + 顶部光泽；
+   聚合泡 / 单个散点 / ✦ 在册资产悬停共用） ---- */
+.sr-gi-panel {
+  position: absolute;
+  z-index: 300;
+  width: 236px;
+  transform: translateY(-50%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 42%, rgba(255, 255, 255, 0.12)),
+    rgba(16, 24, 40, 0.55);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow:
+    0 10px 34px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+  color: #eaf2ff;
+  font-size: 12px;
+  line-height: 18px;
+  overflow: hidden;
+  animation: srGiPanelIn 0.16s ease-out both;
+}
+/* 顶部液态光泽 */
+.sr-gi-panel::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 46%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+@keyframes srGiPanelIn {
+  from { opacity: 0; transform: translateY(-50%) scale(0.94); }
+  to { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+.sr-map.is-light .sr-gi-panel {
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.4) 42%, rgba(255, 255, 255, 0.58)),
+    rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.85);
+  color: #22354f;
+  box-shadow:
+    0 10px 30px rgba(40, 60, 90, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+}
+.sr-gi-panel-head {
+  position: relative;
+  padding: 8px 14px 7px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+.sr-map.is-light .sr-gi-panel-head {
+  border-bottom-color: rgba(40, 60, 90, 0.12);
+}
+.sr-gi-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 5px 7px;
+  max-height: 248px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  position: relative;
+}
+.sr-gi-panel-list::-webkit-scrollbar {
+  width: 5px;
+}
+.sr-gi-panel-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+.sr-map.is-light .sr-gi-panel-list {
+  scrollbar-color: rgba(40, 60, 90, 0.28) transparent;
+}
+.sr-map.is-light .sr-gi-panel-list::-webkit-scrollbar-thumb {
+  background: rgba(40, 60, 90, 0.28);
+}
+.sr-gi-panel-list li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+.sr-gi-panel-list li:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.sr-map.is-light .sr-gi-panel-list li:hover {
+  background: rgba(40, 60, 90, 0.08);
+}
+.sr-gi-panel-list .chip {
+  flex: none;
+  font-style: normal;
+  font-size: 10px;
+  line-height: 15px;
+  padding: 0 4px;
+  border-radius: 5px;
+  background: rgba(224, 180, 90, 0.18);
+  border: 1px solid rgba(224, 180, 90, 0.45);
+  color: #f0d9a0;
+}
+.sr-gi-panel-list .chip.agi {
+  background: rgba(127, 201, 143, 0.16);
+  border-color: rgba(127, 201, 143, 0.45);
+  color: #a9e3b6;
+}
+.sr-map.is-light .sr-gi-panel-list .chip {
+  color: #8a6414;
+  border-color: rgba(176, 134, 40, 0.5);
+  background: rgba(224, 180, 90, 0.16);
+}
+.sr-map.is-light .sr-gi-panel-list .chip.agi {
+  color: #2c6e40;
+  border-color: rgba(60, 140, 85, 0.45);
+  background: rgba(127, 201, 143, 0.14);
+}
+.sr-gi-panel-list .nm {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 🔴 改动 2026-10-14 · 浮窗条目可点击跳转：指针光标 + 金色悬停/聚焦高亮 + 右侧跳转箭头（悬停显现） */
+.sr-gi-panel-list li.pick {
+  cursor: pointer;
+}
+.sr-gi-panel-list li.pick:hover {
+  background: rgba(224, 180, 90, 0.18);
+}
+.sr-gi-panel-list li.pick:focus-visible {
+  outline: 1px solid rgba(224, 180, 90, 0.8);
+  outline-offset: -1px;
+  background: rgba(224, 180, 90, 0.16);
+}
+.sr-map.is-light .sr-gi-panel-list li.pick:hover {
+  background: rgba(224, 180, 90, 0.24);
+}
+.sr-gi-panel-list .go {
+  flex: none;
+  width: 10px;
+  text-align: right;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  color: #e8c877;
+  opacity: 0;
+  transform: translateX(-3px);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+.sr-gi-panel-list li.pick:hover .go,
+.sr-gi-panel-list li.pick:focus-visible .go {
+  opacity: 1;
+  transform: translateX(0);
+}
+.sr-map.is-light .sr-gi-panel-list .go {
+  color: #8a6414;
+}
+
+/* ---- 🔴 改动 2026-10-13 · GI 点位图例（底部居中常驻，AtlasMap 总装层统一渲染，覆盖全部标记含义） ---- */
+.sr-map-gi-legend {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5px 18px;
+  max-width: calc(100% - 28px);
+  padding: 6px 16px;
+  border-radius: 12px;
+  font-size: 11px;
+  line-height: 17px;
+  color: var(--map-chip-text);
+  background: var(--map-chip-bg);
+  border: 1px solid var(--map-chip-border);
+  backdrop-filter: blur(8px);
+  opacity: 0.92;
+  pointer-events: none;
+}
+.sr-map-gi-lg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.sr-map-gi-legend .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e0b45a;
+  border: 1px solid #6b4e12;
+  box-shadow: 0 0 4px rgba(224, 180, 90, 0.8);
+}
+.sr-map-gi-legend .dot.agi {
+  background: #7fc98f;
+  border-color: #2e6b42;
+  box-shadow: 0 0 4px rgba(127, 201, 143, 0.8);
+}
+.sr-map-gi-legend .bub {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 35% 30%, #f2d488, #d4a944);
+  border: 1.5px solid #fff2cf;
+  color: #3d2b06;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+}
+.sr-map-gi-legend .sr {
+  color: #ffd873;
+  font-style: normal;
+  text-shadow: 0 0 4px rgba(255, 216, 115, 0.8);
+}
+/* 🔴 改动 2026-10-14 · 图例新增「浮窗条目可点击」提示的跳转箭头图标（对齐浮窗内 .go 金色） */
+.sr-map-gi-legend .go {
+  color: #e8c877;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}

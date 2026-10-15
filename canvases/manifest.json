@@ -1,0 +1,20 @@
+{
+  "generatedBy": "tools/export_canvases.py",
+  "canvases": [
+    {
+      "canvasId": "canvas_dd5058b5-252f-40ad-b868-d55f3724a0ed",
+      "title": "看板入门",
+      "purpose": "浏览实时信息看板，安装预设，创建并调整自己的看板。",
+      "widgetCount": 7,
+      "canvasJson": "看板入门/canvas.json"
+    },
+    {
+      "canvasId": "canvas_7c295802-8b38-427d-a369-2e4cf3811d14",
+      "title": "Hello World",
+      "purpose": "一块统一蓝黑白画风的 Hello Dashboard 教程。",
+      "widgetCount": 19,
+      "canvasJson": "Hello World/canvas.json"
+    }
+  ],
+  "unplacedWidgets": "_unplaced/widgets.json"
+}

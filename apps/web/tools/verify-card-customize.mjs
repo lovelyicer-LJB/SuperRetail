@@ -1,0 +1,24 @@
+import { chromium } from '@playwright/test';
+import assert from 'node:assert/strict';
+const browser=await chromium.launch({channel:'chrome',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+const page=await browser.newPage({viewport:{width:1440,height:1000}});
+const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!m.location().url.endsWith('/favicon.ico'))errors.push(m.text())});
+await page.goto('http://127.0.0.1:3000/workshop/nft-card-05');
+const canvas=page.locator('.card-model-canvas'); await page.locator('.card-model-canvas[data-ready=true]').waitFor();
+await page.getByRole('button',{name:'立体视角',exact:true}).click(); await page.waitForTimeout(350);
+const before=await canvas.screenshot();
+await page.locator('#foil-hue').fill('0.5'); await page.waitForTimeout(350);
+assert.notDeepEqual(before,await canvas.screenshot());
+await page.locator('summary').filter({hasText:'外边框'}).click();
+await page.locator('#outer-silverPeak').fill('6');
+let state=JSON.parse(await canvas.getAttribute('data-material-values'));assert.equal(state.outer.silverPeak,6);assert.equal(state.inner.silverPeak,1.8);
+await page.locator('input[aria-label="外边框 · 彩条与银白高光 银白峰值亮度 滑条"]').fill('3');
+assert.equal(await page.locator('#outer-silverPeak').inputValue(),'3');
+await page.getByRole('button',{name:'全部重置',exact:true}).click();assert.equal(await page.locator('#foil-hue').inputValue(),'0');assert.equal(await page.locator('#outer-silverPeak').inputValue(),'1.8');
+assert.equal(await canvas.getAttribute('data-view'),'perspective');assert.equal(await canvas.locator('canvas').count(),1);
+await page.screenshot({path:'../../output/nft-card-05/customize-desktop-v1.png'});
+await page.setViewportSize({width:390,height:844});await page.waitForTimeout(300);
+const panelBounds=await page.locator('.material-controls').boundingBox();assert.ok(panelBounds.x>=0 && panelBounds.x+panelBounds.width<=390);
+await page.screenshot({path:'../../output/nft-card-05/customize-mobile-v1.png'});
+assert.deepEqual(errors,[]);console.log('PASS: rendered change, independent frames, slider/number sync, reset, camera retained, mobile overflow, shader errors');await browser.close();
+

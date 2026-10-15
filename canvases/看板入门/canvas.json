@@ -1,0 +1,105 @@
+{
+  "canvasId": "canvas_dd5058b5-252f-40ad-b868-d55f3724a0ed",
+  "title": "看板入门",
+  "purpose": "浏览实时信息看板，安装预设，创建并调整自己的看板。",
+  "placements": [
+    {
+      "mountId": "mount_18b731c3-a6cf-4bf8-8aa9-70d3ce73962f",
+      "widgetId": "widget_2d70932b-eaba-4569-a0b2-648d8ec9e95c",
+      "title": "搭建你的第一个看板",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 3
+      },
+      "zOrder": 1,
+      "exported": true
+    },
+    {
+      "mountId": "mount_2f429acc-17de-4b67-aef1-9d36975e63a7",
+      "widgetId": "widget_e2cc80a7-f7a0-4078-9950-db6f1783f337",
+      "title": "让 Kimi 搭建你的专属看板",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "zOrder": 5,
+      "exported": true
+    },
+    {
+      "mountId": "mount_5129bbc0-6a63-4f38-bc3d-5f982d31df77",
+      "widgetId": "widget_d422423b-678b-450a-bed7-b441c5503cbe",
+      "title": "关心的事 实时呈现",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 12
+      },
+      "zOrder": 0,
+      "exported": true
+    },
+    {
+      "mountId": "mount_517255fc-c43c-4d38-8070-74f4009a9d85",
+      "widgetId": "widget_d1aa10b7-3071-42fb-b2cf-1c0b4008e855",
+      "title": "每日财经",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 15,
+        "w": 4,
+        "h": 7
+      },
+      "zOrder": 2,
+      "exported": true
+    },
+    {
+      "mountId": "mount_6b853308-18af-411b-aba3-7ece75f68240",
+      "widgetId": "widget_fef10036-e726-41f1-a5e9-579dabbe9d77",
+      "title": "来点酷的",
+      "layout": {
+        "mode": "grid",
+        "x": 8,
+        "y": 15,
+        "w": 4,
+        "h": 7
+      },
+      "zOrder": 4,
+      "exported": true
+    },
+    {
+      "mountId": "mount_7525ce3f-1e3e-45fd-b8c2-bdfc4f7613f9",
+      "widgetId": "widget_de516ce8-f974-44bd-8191-856efb8082e8",
+      "title": "个人效率",
+      "layout": {
+        "mode": "grid",
+        "x": 4,
+        "y": 15,
+        "w": 4,
+        "h": 7
+      },
+      "zOrder": 3,
+      "exported": true
+    },
+    {
+      "mountId": "mount_970807c1-02c3-4f7b-8cfe-ffadc21639a6",
+      "widgetId": "widget_9d68a869-1b15-4de1-8c62-34a7568a4842",
+      "title": "随心摆放 组合看板",
+      "layout": {
+        "mode": "grid",
+        "x": 0,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "zOrder": 6,
+      "exported": true
+    }
+  ]
+}

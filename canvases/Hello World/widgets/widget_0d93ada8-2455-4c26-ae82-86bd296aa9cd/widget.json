@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_0d93ada8-2455-4c26-ae82-86bd296aa9cd",
+    "title": "导览 · ② 本地数据，自己管",
+    "description": "待办、番茄钟与磁盘数据留在本机。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:section-local-data",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.057Z",
+    "updatedAt": "2026-09-08T14:49:56.057Z"
+  }
+}

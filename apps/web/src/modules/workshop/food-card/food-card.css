@@ -1,0 +1,125 @@
+/* 🔴 改动 2026-10-09 · 食品原材料数字卡片样式：全息边框 + 主视觉窗 + 底部信息条。 */
+/* 🔴 改动 2026-10-10 · 色值整体迁移到超零售品牌 token（--sr-*，见 src/design/tokens.css）；全息光谱改用品牌青紫系。 */
+.food-cards-showcase .nft-showcase-heading { position: relative; left: auto; top: auto; padding: 24px 24px 0; pointer-events: auto; }
+.food-cards-showcase .nft-eyebrow { margin-top: 22px; }
+.food-cards-showcase .nft-showcase-heading p span { display: inline; margin-left: 12px; }
+.food-cards-stage { position: relative; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: clamp(16px, 1.8vw, 28px); min-height: calc(100svh - 68px); padding: 34px 16px 60px; }
+.food-cards-stage::before { position: absolute; content: ''; inset: 40% -10% -25%; pointer-events: none; background: radial-gradient(ellipse at 50% 85%, color-mix(in srgb, var(--sr-accent-persian-blue) 42%, transparent) 0%, color-mix(in srgb, var(--sr-accent-persian-blue) 20%, transparent) 30%, transparent 64%); }
+.is-light .food-cards-stage::before { opacity: .45; }
+
+/* 🔴 改动 2026-10-10 · 平面卡支持点击翻转查看卡背，全息边框层不拦截点击。 */
+.food-card { position: relative; width: min(320px, 86vw); aspect-ratio: 650 / 950; border-radius: 22px; transition: transform .35s ease; transform-style: preserve-3d; cursor: pointer; }
+.food-card:hover { transform: translateY(-10px) rotateX(4deg) rotateY(-4deg); }
+.food-card:focus-visible { outline: 2px solid var(--sr-accent-frosty-skies); outline-offset: 4px; }
+
+/* 全息边框：品牌青紫光谱锥形渐变流动 */
+.food-card-holo { position: absolute; inset: 0; border-radius: 22px; padding: 2px; background: conic-gradient(from var(--holo-angle, 0deg), #0fedff, #8f5bff, var(--sr-accent-persian-blue), var(--sr-accent-frosty-skies), #0fedff); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: holo-spin 6s linear infinite; opacity: .9; pointer-events: none; }
+@property --holo-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes holo-spin { to { --holo-angle: 360deg; } }
+/* 🔴 改动 2026-10-10 · 稀有度边框配色随稀有等级信息一并移除，统一为默认全息渐变。 */
+
+.food-card-flip { position: absolute; inset: 2px; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.3, .7, .3, 1); }
+.food-card.is-flipped .food-card-flip { transform: rotateY(180deg); }
+
+.food-card-inner { position: absolute; inset: 0; display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; background: linear-gradient(168deg, var(--sr-d-gray-10) 0%, var(--sr-d-gray-11) 58%, var(--sr-d-gray-10) 100%); border: 1px solid color-mix(in srgb, var(--sr-d-gray-0) 8%, transparent); box-shadow: 0 30px 60px -22px color-mix(in srgb, var(--sr-d-gray-11) 82%, transparent); backface-visibility: hidden; }
+.food-card-back { transform: rotateY(180deg); background: linear-gradient(168deg, var(--sr-d-gray-10) 0%, var(--sr-d-gray-11) 58%, var(--sr-d-gray-10) 100%); }
+
+.food-card-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px 10px; }
+.food-card-edition { font-size: 10px; letter-spacing: .14em; padding: 4px 10px; border-radius: 999px; border: 1px solid; }
+.tone-gold { color: var(--sr-accent-frosty-skies); border-color: color-mix(in srgb, var(--sr-accent-frosty-skies) 34%, transparent); background: color-mix(in srgb, var(--sr-accent-frosty-skies) 8%, transparent); }
+.tone-silver { color: var(--sr-d-gray-2); border-color: color-mix(in srgb, var(--sr-d-gray-2) 34%, transparent); background: color-mix(in srgb, var(--sr-d-gray-2) 7%, transparent); }
+.tone-red { color: var(--sr-accent-alizarin-red); border-color: color-mix(in srgb, var(--sr-accent-alizarin-red) 34%, transparent); background: color-mix(in srgb, var(--sr-accent-alizarin-red) 7%, transparent); }
+.food-card-status { font-size: 9px; letter-spacing: .12em; color: var(--sr-accent-frosty-skies); opacity: .85; }
+.food-card-status::before { content: ''; display: inline-block; width: 5px; height: 5px; margin-right: 5px; border-radius: 50%; background: var(--sr-accent-frosty-skies); vertical-align: 1px; }
+
+.food-card-art { position: relative; margin: 0 14px; border-radius: 14px; overflow: hidden; aspect-ratio: 4 / 4.6; background: var(--sr-d-gray-11); }
+.food-card-art > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.food-card-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 62%, color-mix(in srgb, var(--sr-d-gray-11) 80%, transparent) 100%); pointer-events: none; }
+.food-card-badges { position: absolute; z-index: 2; top: 10px; right: 10px; display: flex; align-items: center; gap: 6px; }
+.food-card-badges img { width: 34px; height: 34px; object-fit: contain; border-radius: 50%; background: color-mix(in srgb, var(--sr-d-gray-0) 85%, transparent); padding: 2px; box-shadow: 0 2px 8px color-mix(in srgb, var(--sr-d-gray-11) 50%, transparent); }
+.food-card-badge-extra { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: color-mix(in srgb, var(--sr-cta) 85%, transparent); color: var(--sr-d-gray-0); font-size: 9px; letter-spacing: .05em; box-shadow: 0 2px 8px color-mix(in srgb, var(--sr-d-gray-11) 50%, transparent); border: 1px solid color-mix(in srgb, var(--sr-d-gray-0) 34%, transparent); }
+
+.food-card-info { flex: 1; display: flex; flex-direction: column; padding: 12px 16px 12px; }
+.food-card-vintage { font-size: 9px; letter-spacing: .22em; color: var(--sr-d-gray-2); }
+.food-card-name { margin: 3px 0 1px; font-size: 21px; font-weight: 600; letter-spacing: .02em; color: var(--sr-d-gray-1); }
+.food-card-origin { font-size: 10px; color: var(--sr-d-gray-5); }
+
+.food-card-qty { margin-top: 10px; }
+.food-card-qty-row { display: flex; align-items: baseline; gap: 6px; }
+.food-card-qty-row strong { font-size: 17px; font-weight: 650; color: var(--sr-d-gray-0); }
+.food-card-qty-row span { font-size: 10px; color: var(--sr-d-gray-5); }
+.food-card-qty-row em { margin-left: auto; font-size: 10px; font-style: normal; color: var(--sr-accent-frosty-skies); }
+.food-card-qty-bar { margin-top: 6px; height: 3px; border-radius: 3px; background: color-mix(in srgb, var(--sr-d-gray-0) 8%, transparent); overflow: hidden; }
+.food-card-qty-bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #0fedff, #8f5bff, var(--sr-accent-persian-blue)); }
+
+.food-card-price { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; padding-top: 9px; border-top: 1px solid color-mix(in srgb, var(--sr-d-gray-0) 7%, transparent); }
+.food-card-price span { font-size: 9px; color: var(--sr-d-gray-5); }
+.food-card-price strong { font-size: 16px; font-weight: 650; color: var(--sr-accent-frosty-skies); }
+.food-card-asset { margin-top: 7px; font-size: 8px; letter-spacing: .18em; color: var(--sr-d-gray-6); font-family: 'JetBrains Mono', Consolas, monospace; }
+
+/* 🔴 改动 2026-10-10 · 购买按钮：参照主流 NFT 市场（OpenSea 蓝）选用最接近的品牌 token --sr-accent-azure；平面版正面右下角绝对定位（不占文档流），三维版为右下角覆盖层（翻面时隐藏）。 */
+.food-card-buy { position: absolute; z-index: 3; right: 14px; bottom: 12px; border: none; border-radius: 999px; padding: 7px 20px; font-size: 11px; font-weight: 600; letter-spacing: .14em; color: var(--sr-d-gray-0); background: var(--sr-accent-azure); cursor: pointer; box-shadow: 0 4px 14px color-mix(in srgb, var(--sr-accent-azure) 32%, transparent); transition: transform .15s ease, box-shadow .15s ease, background .15s ease, opacity .3s ease; }
+.food-card-buy:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--sr-accent-azure) 88%, var(--sr-d-gray-11)); box-shadow: 0 6px 18px color-mix(in srgb, var(--sr-accent-azure) 48%, transparent); }
+.food-card-buy:active { transform: translateY(0); }
+.food-card-model .food-card-buy { right: 26px; bottom: 72px; }
+.food-card-model-canvas[data-flipped="true"] + .food-card-buy { opacity: 0; pointer-events: none; }
+
+.food-card-foot { display: flex; justify-content: space-between; padding: 10px 16px 12px; font-size: 8px; letter-spacing: .24em; color: var(--sr-d-gray-6); }
+
+.is-light .food-card-inner { background: linear-gradient(168deg, var(--sr-l-gray-0) 0%, var(--sr-l-gray-1) 60%, var(--sr-l-gray-1) 100%); border-color: color-mix(in srgb, var(--sr-l-gray-11) 8%, transparent); box-shadow: 0 30px 60px -26px color-mix(in srgb, var(--sr-l-gray-11) 10%, transparent); }
+.is-light .food-card-name { color: var(--sr-l-gray-11); }
+.is-light .food-card-vintage { color: var(--sr-l-gray-8); }
+.is-light .food-card-origin, .is-light .food-card-qty-row span, .is-light .food-card-price span { color: var(--sr-l-gray-4); }
+.is-light .food-card-qty-row strong { color: var(--sr-l-gray-11); }
+.is-light .food-card-qty-row em { color: var(--sr-cta); }
+.is-light .food-card-qty-bar { background: color-mix(in srgb, var(--sr-l-gray-11) 8%, transparent); }
+.is-light .food-card-price { border-top-color: color-mix(in srgb, var(--sr-l-gray-11) 7%, transparent); }
+.is-light .food-card-price strong { color: var(--sr-cta); }
+.is-light .food-card-asset { color: var(--sr-l-gray-4); }
+.is-light .food-card-art { background: var(--sr-d-gray-10); }
+.is-light .food-card-status { color: var(--sr-nav-active); }
+.is-light .food-card-status::before { background: var(--sr-nav-active); }
+.is-light .tone-silver { color: var(--sr-l-gray-8); border-color: color-mix(in srgb, var(--sr-l-gray-8) 34%, transparent); background: color-mix(in srgb, var(--sr-l-gray-8) 7%, transparent); }
+
+/* 🔴 改动 2026-10-10 · 卡背溯源档案：二维码 + 批次/证书/发行价 + 流转记录。 */
+.food-card-back-body { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 6px 18px 0; }
+.food-card-back-qr { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 4px; }
+.food-card-qr { display: block; width: 108px; height: 108px; border-radius: 10px; background: var(--sr-d-gray-0); padding: 6px; box-shadow: 0 6px 18px color-mix(in srgb, var(--sr-d-gray-11) 44%, transparent); }
+.food-card-qr.is-loading { display: block; }
+.food-card-back-qr p { font-size: 9px; letter-spacing: .18em; color: var(--sr-accent-frosty-skies); }
+.food-card-back .food-card-name { margin-top: 10px; font-size: 17px; }
+.food-card-back-rows { width: 100%; margin: 10px 0 0; }
+.food-card-back-rows > div { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 1px dashed color-mix(in srgb, var(--sr-d-gray-0) 8%, transparent); }
+.food-card-back-rows dt { font-size: 10px; color: var(--sr-d-gray-5); letter-spacing: .1em; }
+.food-card-back-rows dd { margin: 0; font-size: 11px; color: var(--sr-d-gray-1); font-family: 'JetBrains Mono', Consolas, monospace; letter-spacing: .04em; }
+.food-card-back-flow { width: 100%; margin: 12px 0 0; padding: 0; list-style: none; }
+.food-card-back-flow li { position: relative; display: flex; gap: 8px; align-items: baseline; padding: 5px 0 5px 14px; font-size: 9.5px; color: var(--sr-d-gray-2); }
+.food-card-back-flow li::before { content: ''; position: absolute; left: 2px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: linear-gradient(90deg, #0fedff, #8f5bff); }
+.food-card-back-flow time { flex: none; color: var(--sr-d-gray-6); font-family: 'JetBrains Mono', Consolas, monospace; font-size: 8.5px; }
+
+.is-light .food-card-back { background: linear-gradient(168deg, var(--sr-l-gray-0) 0%, var(--sr-l-gray-1) 60%, var(--sr-l-gray-1) 100%); }
+.is-light .food-card-back .food-card-name { color: var(--sr-l-gray-11); }
+.is-light .food-card-back-qr p { color: var(--sr-nav-active); }
+.is-light .food-card-back-rows > div { border-bottom-color: color-mix(in srgb, var(--sr-l-gray-11) 8%, transparent); }
+.is-light .food-card-back-rows dt { color: var(--sr-l-gray-4); }
+.is-light .food-card-back-rows dd { color: var(--sr-l-gray-11); }
+.is-light .food-card-back-flow li { color: var(--sr-l-gray-8); }
+.is-light .food-card-back-flow time { color: var(--sr-l-gray-4); }
+.is-light .food-card-qr { box-shadow: 0 6px 18px color-mix(in srgb, var(--sr-l-gray-11) 14%, transparent); }
+.is-light .food-card-foot { color: var(--sr-l-gray-4); }
+
+@media (max-width: 900px) { .food-cards-stage { padding-top: 26px; } }
+
+/* 🔴 改动 2026-10-09 · 三维镭射卡片容器与切换标签。 */
+.food-cards-tabs { position: relative; z-index: 2; display: flex; justify-content: center; gap: 10px; padding: 14px 24px 0; }
+.food-cards-tabs button { border: 1px solid color-mix(in srgb, var(--sr-d-gray-0) 13%, transparent); background: color-mix(in srgb, var(--sr-d-gray-0) 3%, transparent); border-radius: 30px; padding: 7px 15px; color: inherit; font-size: 11px; transition: background .15s; }
+.food-cards-tabs button:hover { background: color-mix(in srgb, var(--sr-d-gray-0) 9%, transparent); }
+.food-cards-tabs button[aria-pressed="true"] { border-color: color-mix(in srgb, var(--sr-accent-frosty-skies) 54%, transparent); background: color-mix(in srgb, var(--sr-accent-frosty-skies) 13%, transparent); }
+.is-light .food-cards-tabs button { border-color: color-mix(in srgb, var(--sr-l-gray-11) 13%, transparent); background: color-mix(in srgb, var(--sr-l-gray-0) 40%, transparent); }
+.food-cards-stage.is-3d { padding-top: 8px; }
+.food-card-model { position: relative; width: min(340px, 86vw); aspect-ratio: 650 / 1010; margin: 0; }
+.food-card-model-canvas { position: absolute; inset: 0 0 34px; cursor: grab; touch-action: pan-y; }
+.food-card-model-canvas:active { cursor: grabbing; }
+.food-card-model-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
+.food-card-model figcaption { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 10px; letter-spacing: .12em; color: var(--sr-d-gray-6); }
+.is-light .food-card-model figcaption { color: var(--sr-l-gray-4); }

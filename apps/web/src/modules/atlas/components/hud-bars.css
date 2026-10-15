@@ -1,0 +1,339 @@
+/* 🔴 改动 2026-10-12 · 版图底部 HUD：道具栏（上）+ 技能栏（下，固定 12 槽）。
+   尺寸 Token 见 design/tokens.css「HUD Layout」段（--sr-hud-* / --sr-board-icon-size）；
+   框体视觉复用资产画板图标的符文木框语言（asset-runes.css 的 .asset-rune + RuneOrnament）。
+   布局：技能栏在下、道具栏在上，两栏同宽 1152px（96 × 12），min() 随视口等比缩放。 */
+
+.sr-hud {
+  position: absolute;
+  left: 50%;
+  bottom: var(--sr-hud-bottom);
+  transform: translateX(-50%);
+  z-index: 30; /* 画板 z-0 / 已放置组件 z-10 之上，图表浮窗 z-40 之下 */
+  display: flex;
+  flex-direction: column;
+  gap: var(--sr-hud-bar-gap);
+  /* 基准宽 1152px；视口不足时收窄，格位经 1fr 等分 + aspect-ratio 等比缩小 */
+  width: min(var(--sr-hud-bar-width), calc(100% - 2 * var(--sr-hud-side-margin)));
+  user-select: none;
+}
+
+.sr-hud-bar {
+  display: grid;
+  grid-template-columns: repeat(var(--sr-hud-slots), minmax(0, 1fr));
+  container-type: inline-size; /* 名条字号随栏宽缩放（cqi 单位） */
+}
+
+/* ---- 单槽：满格正方形（基准 96×96 = 资产画板图标尺寸） ------------------ */
+.sr-hud-slot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  /* 注意：不要在此声明 background —— .sr-hud-skill 的 .asset-rune 木纹背景会被覆盖；
+     按钮默认背景由 Tailwind preflight 重置为透明 */
+  font-family: var(--sr-font-ui);
+}
+
+/* 空槽：内收的凹槽插座（ recessed well，不算「框」，故内缩 7% 让位给槽间距感） */
+.sr-hud-slot.is-empty::before {
+  content: '';
+  position: absolute;
+  inset: 7%;
+  border-radius: 22%;
+  border: 1px dashed color-mix(in srgb, var(--sr-l-gray-9) 24%, transparent);
+  background: color-mix(in srgb, var(--sr-l-gray-9) 6%, transparent);
+  box-shadow: inset 0 2px 6px color-mix(in srgb, var(--sr-l-gray-11) 10%, transparent);
+  transition: border-color 0.18s, background 0.18s;
+}
+.sr-hud.is-dark .sr-hud-slot.is-empty::before {
+  border-color: color-mix(in srgb, var(--sr-d-gray-0) 16%, transparent);
+  background: color-mix(in srgb, var(--sr-d-gray-11) 45%, transparent);
+  box-shadow: inset 0 2px 8px #00000088;
+}
+.sr-hud-bar:hover .sr-hud-slot.is-empty::before {
+  border-color: color-mix(in srgb, var(--sr-d-gray-0) 26%, transparent);
+}
+
+/* ---- 技能框：符文木框 + 主题色铭文 + 顶部玻璃名条 + 中央 glyph ---------- */
+.sr-hud-skill {
+  --rune-ink: var(--skill-tone, #b67d4b); /* 符文描边/微光跟随技能主题色 */
+  border-radius: 24%;
+  cursor: pointer;
+  color: var(--skill-tone);
+  transition: transform 0.16s ease-out;
+}
+.sr-hud-skill:hover {
+  transform: translateY(-4%);
+  /* 复用 asset-rune 的充能微光，强度略收 */
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--skill-tone), transparent 55%),
+    0 0 18px color-mix(in srgb, var(--skill-tone), transparent 80%),
+    0 5px 12px #0006;
+}
+.sr-hud-skill:active { transform: translateY(0) scale(0.97); }
+.sr-hud-skill:focus-visible {
+  outline: 2px solid var(--skill-tone);
+  outline-offset: 3px;
+}
+
+.sr-hud-skill-glyph {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-top: 14%; /* 让开顶部名条 */
+  z-index: 1;
+}
+.sr-hud-skill-glyph svg {
+  width: 32%;
+  height: 32%;
+  filter: drop-shadow(0 2px 5px #00000088);
+}
+
+/* 顶部玻璃名条（对齐资产画板图标的名称玻璃子形态观感） */
+.sr-hud-skill-name {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 24%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #eee1c92e;
+  border-radius: 24% 24% 0 0;
+  background: linear-gradient(130deg, #ffffff22, transparent 42%, #c7dcf51f), #141a2070;
+  color: #fff5e5;
+  font-size: clamp(8px, 1.05cqi, 12px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-shadow: 0 1px 3px #0009;
+  z-index: 4;
+}
+
+/* 槽位序号：游戏快捷键位提示，低亮度不抢视觉 */
+.sr-hud-slot-index {
+  position: absolute;
+  right: 9%;
+  bottom: 7%;
+  font-size: clamp(7px, 0.75cqi, 9px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--sr-d-gray-0) 38%, transparent);
+  z-index: 4;
+  pointer-events: none;
+}
+.sr-hud-skill .sr-hud-slot-index { color: color-mix(in srgb, #fff5e5 45%, transparent); }
+
+/* 🔴 改动 2026-10-12 · 道具槽：实物面板资产拖入（自动吸附 + 只显示画板图标形态） ------ */
+
+/* 拖放接收罩：道具栏外扩 --sr-hud-snap-margin 的透明判定带；
+   平时 pointer-events:none 不挡画板，资产拖动期间（.is-active）才接管指针 */
+.sr-hud-itemdrop {
+  margin: calc(-1 * var(--sr-hud-snap-margin));
+  padding: var(--sr-hud-snap-margin);
+  pointer-events: none;
+}
+.sr-hud-itemdrop.is-active { pointer-events: auto; }
+.sr-hud-itemdrop > .sr-hud-bar { pointer-events: auto; /* 栏体自身常开（移除钮可点） */ }
+
+/* 🔴 改动 2026-10-12 · 栏拖动换位：barwrap 盒与栏盒一致（道具栏接收罩的负 margin 与 padding 相抵），
+   被拖栏关过渡实时跟随指针；落定（is-settling）与另一栏的换位预览滑动都走 transform 过渡 */
+.sr-hud-barwrap { position: relative; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.25, 1); }
+.sr-hud-barwrap.is-dragging { z-index: 6; transition: none; }
+.sr-hud-barwrap.is-dragging.is-settling { transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.25, 1); }
+.sr-hud-barwrap.is-dragging > .sr-hud-bar,
+.sr-hud-barwrap.is-dragging > .sr-hud-itemdrop > .sr-hud-bar { filter: drop-shadow(0 10px 18px #00000059); }
+
+/* 栏拖柄：栏左缘外侧（最窄留白 --sr-hud-side-margin 24px 内恰好放得下），悬停栏体/聚焦时浮现 */
+.sr-hud-grip {
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--sr-l-gray-9) 26%, transparent);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--sr-d-gray-8) 82%, transparent);
+  color: color-mix(in srgb, var(--sr-d-gray-0) 62%, transparent);
+  box-shadow: 0 2px 8px #0005;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  cursor: grab;
+  touch-action: none; /* 指针拖拽接管触控板的垂直滚动手势 */
+  z-index: 7;
+}
+.sr-hud-barwrap:hover .sr-hud-grip,
+.sr-hud-grip:focus-visible { opacity: 1; }
+.sr-hud-grip:hover { background: var(--sr-d-gray-8); color: var(--sr-d-gray-0); }
+.sr-hud-grip:focus-visible { outline: 2px solid var(--sr-brand-interact-blue); outline-offset: 2px; }
+.sr-hud-barwrap.is-dragging .sr-hud-grip { opacity: 1; cursor: grabbing; }
+/* 资产拖入判定带激活时接收罩接管指针，拖柄让位以免遮挡吸附投放 */
+.sr-hud-itemdrop.is-active ~ .sr-hud-grip { opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  .sr-hud-barwrap,
+  .sr-hud-barwrap.is-dragging.is-settling { transition: none; }
+}
+
+/* 吸附判定高亮：互动蓝磁吸环（空槽/已填槽通用），指针进入栏体外扩判定带即出现 */
+.sr-hud-slot.is-snap::after {
+  content: '';
+  position: absolute;
+  inset: 2%;
+  border-radius: 24%;
+  border: 1.5px solid var(--sr-brand-interact-blue);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--sr-brand-interact-blue) 22%, transparent),
+    0 0 18px color-mix(in srgb, var(--sr-brand-interact-blue) 40%, transparent);
+  pointer-events: none;
+  z-index: 5;
+  animation: srHudSnapIn 0.14s ease-out both;
+}
+/* 空槽吸附命中：凹槽由虚线转为实底待填态 */
+.sr-hud-slot.is-empty.is-snap::before {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--sr-brand-interact-blue) 65%, transparent);
+  background: color-mix(in srgb, var(--sr-brand-interact-blue) 12%, transparent);
+}
+@keyframes srHudSnapIn {
+  from { opacity: 0; transform: scale(1.06); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* 已填道具：画板图标充满槽位并随栏宽等比缩放（覆盖 AssetIcon 内联 96px 基准宽） */
+.sr-hud-item { display: block; }
+.sr-hud-item .asset-board-token { width: 100% !important; max-width: 100%; }
+
+/* 悬停已填道具显示移除钮（资产回到「实物」面板，不销毁） */
+.sr-hud-item-remove {
+  position: absolute;
+  top: -5%;
+  right: -5%;
+  width: clamp(14px, 1.8cqi, 20px);
+  height: clamp(14px, 1.8cqi, 20px);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sr-d-gray-8);
+  color: var(--sr-d-gray-2);
+  box-shadow: 0 2px 6px #0007;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  cursor: pointer;
+  z-index: 6;
+}
+.sr-hud-item-remove:hover { background: var(--sr-accent-strawberry-red); color: #fff; }
+.sr-hud-item:hover .sr-hud-item-remove,
+.sr-hud-item-remove:focus-visible { opacity: 1; }
+
+/* 🔴 改动 2026-10-12 · 技能选中态：金色自定义鼠标 + 技能图标中心 → 光标连线 ----------- */
+
+/* 选中期间全页隐藏系统鼠标（class 挂在 body 上） */
+.sr-skill-casting,
+.sr-skill-casting * { cursor: none !important; }
+
+/* 选中技能框：主题色充能环 + 名条提亮 */
+.sr-hud-skill.is-selected {
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--skill-tone), transparent 25%),
+    0 0 24px color-mix(in srgb, var(--skill-tone), transparent 60%),
+    0 6px 14px #0007;
+}
+.sr-hud-skill.is-selected .rune-corners { stroke: color-mix(in srgb, var(--skill-tone), #fff 25%); }
+
+/* 覆盖层：连线 + 自定义鼠标；pointer-events:none 不挡任何操作 */
+.sr-skill-cast-layer { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+.sr-skill-link-layer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+/* 连线：金色虚线向光标行进（marching ants），带微光 */
+.sr-skill-link-line {
+  stroke: var(--sr-hud-cursor-gold);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-dasharray: 9 7;
+  animation: srSkillLinkMarch 0.7s linear infinite;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--sr-hud-cursor-gold) 70%, transparent));
+}
+@keyframes srSkillLinkMarch { to { stroke-dashoffset: -16; } }
+
+/* 源头点：技能图标中心，呼吸脉冲 */
+.sr-skill-link-origin {
+  fill: var(--sr-hud-cursor-gold);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: srSkillOriginPulse 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--sr-hud-cursor-gold) 80%, transparent));
+}
+@keyframes srSkillOriginPulse {
+  0%, 100% { transform: scale(1); opacity: 0.95; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+}
+
+/* 自定义鼠标：跟随指针（translate 由 JS 直写），热点按图形尖端/中心对齐 */
+.sr-skill-cursor { position: fixed; left: 0; top: 0; z-index: 71; will-change: transform; }
+.sr-skill-cursor-hotspot { display: block; }
+.sr-skill-cursor-hotspot.is-up { transform: translate(-13px, -3px); }        /* ▲ 热点=上顶点 */
+.sr-skill-cursor-hotspot.is-right { transform: translate(-23px, -13px); }    /* ▶ 热点=右顶点 */
+.sr-skill-cursor-hotspot.is-hourglass { transform: translate(-13px, -13px); } /* 沙漏热点=中心 */
+.sr-skill-cursor-glyph {
+  display: block;
+  width: 26px;
+  height: 26px;
+  filter:
+    drop-shadow(0 0 5px color-mix(in srgb, var(--sr-hud-cursor-gold) 65%, transparent))
+    drop-shadow(0 2px 3px #00000088);
+}
+/* 沙漏动态旋转（作用于 svg 本体，与热点偏移分层互不覆盖） */
+.sr-skill-cursor-glyph.is-hourglass {
+  animation: srSkillSpin 2.2s linear infinite;
+  transform-origin: 50% 50%;
+}
+@keyframes srSkillSpin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sr-skill-link-line { animation: none; }
+  .sr-skill-link-origin { animation: none; }
+  .sr-skill-cursor-glyph.is-hourglass { animation-duration: 8s; }
+}
+
+/* 窄屏（栏宽触顶收缩后）凹槽与名条保持比例，无需额外断点——cqi/% 已覆盖 */
+@media (prefers-reduced-motion: reduce) {
+  .sr-hud-skill { transition: none; }
+}
+
+/* 🔴 改动 2026-10-13 · 技能释放反馈提示：浮于技能栏上方，命中/未命中/占位三种文案，2s 自动消失 */
+.sr-skill-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--sr-hud-bar-gap));
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--sr-hud-cursor-gold) 60%, transparent);
+  background: color-mix(in srgb, var(--sr-d-gray-11) 88%, transparent);
+  color: color-mix(in srgb, var(--sr-hud-cursor-gold) 82%, #fff);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  box-shadow:
+    0 6px 22px #0007,
+    0 0 14px color-mix(in srgb, var(--sr-hud-cursor-gold) 30%, transparent);
+  animation: srSkillHintIn 0.18s ease-out both;
+  z-index: 5;
+  pointer-events: none;
+}
+@keyframes srSkillHintIn {
+  from { opacity: 0; transform: translate(-50%, 6px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}

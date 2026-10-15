@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kimi Work 介绍</title>
+<style>
+  :root{
+    --k-white:#FFFFFF; --k-black:#000000;
+    --k-blue-200:#91D4FF; --k-blue-hi:#91D4FF; --k-blue-soft:#D9EDFF; --k-blue-deep:#91D4FF;
+    --k-sans:var(--kimi-font-sans,"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","MiSans","Microsoft YaHei",sans-serif);
+    --k-mono:var(--kimi-font-mono,"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace);
+    --k-r:12px;
+    --w-2:rgba(255,255,255,.62); --w-3:rgba(255,255,255,.45); --w-4:rgba(255,255,255,.28);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { padding: 0; background: transparent; color: var(--k-white); font: 13px var(--k-sans); }
+  .card {
+    --padx: clamp(16px,3vw,28px); --pady: clamp(16px,2.6vw,26px);
+    position: relative; height: 100vh; padding: var(--pady) var(--padx);
+    border-radius: var(--k-r); background: var(--k-black);
+    display: flex; flex-direction: column; gap: clamp(10px,1.6vh,16px); overflow: hidden;
+    accent-color: var(--k-blue-hi);
+  }
+  .card::before {
+    content: ""; position: absolute; inset: 0; z-index: 0; opacity: .18; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,.9) 1px, transparent 1.5px);
+    background-size: 13px 13px;
+    -webkit-mask: radial-gradient(circle at 96% 6%, #000 0 26%, transparent 52%);
+            mask: radial-gradient(circle at 96% 6%, #000 0 26%, transparent 52%);
+  }
+  .card > * { position: relative; z-index: 1; }
+
+
+  .head { flex: none; display: flex; flex-direction: column; gap: 8px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 8px; width: max-content;
+    font-family: var(--k-mono); font-size: clamp(10px,.95vw,12px); letter-spacing: .16em;
+    text-transform: uppercase; color: var(--w-3);
+  }
+  .tag::before { content:""; width:14px; height:8px; background: var(--k-blue-hi); border-radius:2px; }
+  h1 {
+    margin: 0; font-family: var(--k-sans); font-weight: 800;
+    font-size: clamp(22px,3.6vw,36px); line-height: 1.04; letter-spacing: -.02em; color: var(--k-white);
+  }
+
+  .player {
+    flex: 1; min-height: 0; overflow: hidden; border-radius: 10px; background: #000;
+    box-shadow: inset 0 0 0 1px rgba(145,212,255,.22), 0 18px 40px rgba(0,0,0,.5);
+    position: relative;
+  }
+  .player::before {
+    content: ""; position: absolute; inset: 0; z-index: 0; opacity: .2; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,.85) 1px, transparent 1.5px);
+    background-size: 12px 12px;
+    -webkit-mask: radial-gradient(circle at 50% 46%, #000 0 34%, transparent 62%);
+            mask: radial-gradient(circle at 50% 46%, #000 0 34%, transparent 62%);
+  }
+  video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; background: #000; z-index: 1; }
+  .state { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; font-family: var(--k-mono); letter-spacing: .04em; color: var(--w-3); text-align: center; z-index: 1; }
+
+
+  .corner { position: absolute; width: 16px; height: 16px; z-index: 3; pointer-events: none; opacity: .9; }
+  .c-tl { left: 10px; top: 10px; border-left: 2px solid var(--k-blue-hi); border-top: 2px solid var(--k-blue-hi); }
+  .c-tr { right: 10px; top: 10px; border-right: 2px solid var(--k-blue-hi); border-top: 2px solid var(--k-blue-hi); }
+  .c-bl { left: 10px; bottom: 10px; border-left: 2px solid var(--k-blue-hi); border-bottom: 2px solid var(--k-blue-hi); }
+  .c-br { right: 10px; bottom: 10px; border-right: 2px solid var(--k-blue-hi); border-bottom: 2px solid var(--k-blue-hi); }
+
+
+  .hud {
+    position: absolute; left: 16px; top: 14px; z-index: 3;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--k-mono); font-size: 10px; letter-spacing: .14em;
+    color: rgba(255,255,255,.78); text-shadow: 0 1px 4px rgba(0,0,0,.6);
+    pointer-events: none;
+  }
+  .hud i { width: 7px; height: 7px; border-radius: 999px; background: var(--k-blue-hi); }
+  .player.playing .hud i { background: #FF5257; animation: rec 1.4s ease-in-out infinite; }
+  @keyframes rec { 50% { opacity: .25; } }
+  .dur {
+    position: absolute; right: 16px; top: 13px; z-index: 3;
+    font-family: var(--k-mono); font-size: 10px; letter-spacing: .1em;
+    color: rgba(255,255,255,.6); text-shadow: 0 1px 4px rgba(0,0,0,.6);
+    font-variant-numeric: tabular-nums; pointer-events: none;
+  }
+
+
+  .bigplay {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    z-index: 4; width: 62px; height: 62px; border-radius: 999px; border: 0; cursor: pointer;
+    background: linear-gradient(172deg, #FFFFFF 0%, #EFF8FF 100%); color: #0066D6;
+    font-size: 20px; line-height: 1; display: grid; place-items: center; padding-left: 4px;
+    box-shadow: 0 14px 34px rgba(0,0,0,.5), 0 0 0 8px rgba(145,212,255,.16);
+    transition: transform .18s cubic-bezier(.3,1.5,.5,1), opacity .2s;
+  }
+  .bigplay:hover { transform: translate(-50%,-50%) scale(1.07); }
+  .player.playing .bigplay { opacity: 0; pointer-events: none; }
+
+
+  .bar {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 4;
+    display: flex; align-items: center; gap: 10px;
+    padding: 24px 14px 10px;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.74) 74%);
+    opacity: 0; transition: opacity .22s;
+  }
+  .player:hover .bar, .player:not(.playing) .bar { opacity: 1; }
+  .bar button {
+    flex: none; width: 30px; height: 30px; border-radius: 8px; border: 0; cursor: pointer;
+    background: rgba(255,255,255,.14); color: #fff; font-size: 12px;
+    display: grid; place-items: center; transition: background .15s;
+  }
+  .bar button:hover { background: rgba(255,255,255,.3); }
+  .seek { flex: 1; min-width: 0; height: 22px; display: flex; align-items: center; cursor: pointer; }
+  .track { position: relative; width: 100%; height: 4px; border-radius: 999px; background: rgba(255,255,255,.22); }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; background: linear-gradient(90deg, #91D4FF 0%, #007CFF 100%); width: 0; }
+  .knob { position: absolute; top: 50%; left: 0; width: 10px; height: 10px; border-radius: 999px; background: #fff; transform: translate(-50%,-50%); box-shadow: 0 0 0 4px rgba(145,212,255,.22); }
+  .tc { flex: none; font-family: var(--k-mono); font-size: 10.5px; color: rgba(255,255,255,.82); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+
+  .foot { flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .meta { min-width: 0; font-size: clamp(10.5px,1vw,12px); color: var(--w-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .signoff { flex: none; font-family: var(--k-mono); font-size: clamp(10px,.9vw,11px); letter-spacing: .14em; color: var(--w-3); white-space: nowrap; }
+  a { color: var(--k-blue-200); text-decoration: none; }
+  a:hover { color: var(--k-white); }
+
+  .bigplay {
+    color: #002E58;
+    box-shadow: 0 10px 24px rgba(0,0,0,.20), 0 0 0 6px rgba(145,212,255,.09);
+  }
+  .bigplay svg { width: 24px; height: 24px; transform: translateX(2px); }
+  .bigplay:hover { transform: translate(-50%,-50%) scale(1.07); }
+
+  h1 { font-size: 22px !important; font-weight: 800; line-height: 1.08; letter-spacing: 0; }
+  .tag, .hud, .dur, .tc, .meta, .signoff { font-size: 12px !important; line-height: 1.4; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="head">
+    <h1 id="title">Kimi Work 介绍</h1>
+  </div>
+  <section class="player" id="player"><span class="state">加载中…</span></section>
+  <div class="foot">
+    <div class="meta" id="meta"></div>
+    <span class="signoff"></span>
+  </div>
+</main>
+<script>
+"use strict";
+(function () {
+    "use strict";
+    var locale = "zh-CN";
+    var isZh = locale.slice(0, 2) === "zh";
+    var player = document.getElementById("player");
+    var meta = document.getElementById("meta");
+    var videoUrl = "https://kimi-file.moonshot.cn/prod-chat-kimi/kfs/4/1/2026-06-13/1d8mck3ff2ena626hn060?x-tos-process=image%2Fauto-orient%2C1%2Fstrip%2Fignore-error%2C1";
+    var posterUrl = "https://kimi-file.moonshot.cn/prod-chat-kimi/kfs/4/2/2026-06-03/1d8fvat9l51jas59jtke0?x-tos-process=image%2Fauto-orient%2C1%2Fstrip%2Fignore-error%2C1";
+    var pageUrl = "https://www.kimi.com/activities/kimi-work-promo";
+    var copy = isZh ? {
+        title: "Kimi Work 介绍",
+        label: "官方宣传视频 · 卡片内播放",
+        link: "Kimi Work 官方活动页 ↗",
+        hud: "PROMO REEL"
+    } : {
+        title: "Kimi Work 介绍",
+        label: "Official promo video · plays inside this card",
+        link: "Kimi Work official promo page ↗",
+        hud: "PROMO REEL"
+    };
+    document.getElementById("title").textContent = copy.title;
+    meta.innerHTML = copy.label + ' · <a href="' + pageUrl + '" target="_blank" rel="noopener">' + copy.link + '</a>';
+    player.innerHTML =
+        '<video playsinline preload="metadata" poster="' + posterUrl + '" aria-label="' + copy.title + '">' +
+            '<source src="' + videoUrl + '" type="video/mp4"></video>' +
+            '<span class="corner c-tl"></span><span class="corner c-tr"></span>' +
+            '<span class="corner c-bl"></span><span class="corner c-br"></span>' +
+            '<span class="hud"><i></i>' + copy.hud + '</span>' +
+            '<span class="dur" id="dur"></span>' +
+            '<button class="bigplay" id="bigplay" type="button" aria-label="播放"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5L18 12L8.5 18.5Z" fill="#002E58" stroke="#002E58" stroke-width="2.2" stroke-linejoin="round" /></svg></button>' +
+            '<div class="bar">' +
+            '<button id="pp" type="button" aria-label="播放/暂停">▶</button>' +
+            '<div class="seek" id="seek"><div class="track"><div class="fill" id="fill"></div><div class="knob" id="knob"></div></div></div>' +
+            '<span class="tc" id="tc">00:00 / 00:00</span>' +
+            '<button id="mute" type="button" aria-label="静音">♪</button>' +
+            '<button id="fs" type="button" aria-label="全屏">⛶</button>' +
+            '</div>';
+    var video = player.querySelector("video");
+    var bigplay = document.getElementById("bigplay");
+    var pp = document.getElementById("pp");
+    var seek = document.getElementById("seek");
+    var fill = document.getElementById("fill");
+    var knob = document.getElementById("knob");
+    var tc = document.getElementById("tc");
+    var dur = document.getElementById("dur");
+    var muteBtn = document.getElementById("mute");
+    var fsBtn = document.getElementById("fs");
+    function fmt(seconds) {
+        if (!isFinite(seconds))
+            return "00:00";
+        var m = Math.floor(seconds / 60), s = Math.floor(seconds % 60);
+        return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+    }
+    function toggle() {
+        if (video.paused) {
+            video.play();
+        }
+        else {
+            video.pause();
+        }
+    }
+    function paintTime() {
+        var d = video.duration || 0, t = video.currentTime || 0;
+        var pct = d ? Math.min(100, t / d * 100) : 0;
+        fill.style.width = pct + "%";
+        knob.style.left = pct + "%";
+        tc.textContent = fmt(t) + " / " + fmt(d);
+    }
+    video.addEventListener("loadedmetadata", function () {
+        dur.textContent = fmt(video.duration);
+        paintTime();
+    });
+    video.addEventListener("timeupdate", paintTime);
+    video.addEventListener("play", function () { player.classList.add("playing"); pp.textContent = "❚❚"; });
+    video.addEventListener("pause", function () { player.classList.remove("playing"); pp.textContent = "▶"; });
+    video.addEventListener("error", function () {
+        player.classList.remove("playing");
+        var state = document.createElement("span");
+        state.className = "state";
+        state.textContent = isZh ? "视频加载失败" : "Failed to load video";
+        player.appendChild(state);
+    });
+    bigplay.addEventListener("click", toggle);
+    pp.addEventListener("click", toggle);
+    video.addEventListener("click", toggle);
+    function seekTo(event) {
+        var rect = seek.getBoundingClientRect();
+        var ratio = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+        if (isFinite(video.duration))
+            video.currentTime = ratio * video.duration;
+        paintTime();
+    }
+    var scrubbing = false;
+    seek.addEventListener("pointerdown", function (event) {
+        scrubbing = true;
+        try {
+            seek.setPointerCapture(event.pointerId);
+        }
+        catch (err) { }
+        seekTo(event);
+    });
+    seek.addEventListener("pointermove", function (event) { if (scrubbing)
+        seekTo(event); });
+    seek.addEventListener("pointerup", function () { scrubbing = false; });
+    muteBtn.addEventListener("click", function () {
+        video.muted = !video.muted;
+        muteBtn.style.opacity = video.muted ? .45 : 1;
+    });
+    fsBtn.addEventListener("click", function () {
+        try {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            else if (player.requestFullscreen) {
+                player.requestFullscreen();
+            }
+            else if (video.webkitEnterFullscreen) {
+                video.webkitEnterFullscreen();
+            }
+        }
+        catch (err) { }
+    });
+})();
+</script>
+</body>
+</html>

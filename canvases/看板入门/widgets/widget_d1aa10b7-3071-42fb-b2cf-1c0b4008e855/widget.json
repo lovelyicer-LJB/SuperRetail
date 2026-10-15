@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_d1aa10b7-3071-42fb-b2cf-1c0b4008e855",
+    "title": "每日财经",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "dashboard-tutorial:zh-CN:widget:template-finance",
+      "sourceBundleId": "bundle_dashboard-tutorial-20"
+    },
+    "createdAt": "2026-10-13T02:47:05.251Z",
+    "updatedAt": "2026-10-13T02:47:05.251Z"
+  }
+}

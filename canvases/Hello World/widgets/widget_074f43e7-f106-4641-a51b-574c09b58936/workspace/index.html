@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BEETBOX · 十六拍频道台</title>
+<style>
+  :root{
+
+
+    --bg:#121212; --ink:#FFFFFF; --dim:#8E9390; --faint:#002E58; --faint2:#002E58;
+    --blue:#00A1FF; --blue-l:#91D4FF;
+    --mono:Menlo,"SF Mono","DejaVu Sans Mono",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{width:100%;height:100%;background:var(--bg)}
+  body{
+    font-family:var(--mono); color:var(--ink);
+    user-select:none; position:relative; overflow:hidden;
+  }
+  .stage{position:relative;width:100%;height:100%;min-height:300px;overflow:hidden;background:var(--bg)}
+  .el{position:absolute}
+  button{font-size:inherit;font-family:inherit}
+
+
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:1em;flex-wrap:wrap}
+  .logo-wrap{display:flex;align-items:flex-end;gap:0.9em}
+  #logo{image-rendering:pixelated;display:block}
+  #logo.beat{animation:beat .16s steps(2,end)}
+  @keyframes beat{0%{opacity:.3}100%{opacity:1}}
+  .sub{font-size:0.8em;letter-spacing:.22em;color:var(--dim);line-height:1.7;white-space:nowrap}
+  .sub b{color:var(--ink);font-weight:700;font-size:1.35em;letter-spacing:.04em}
+
+  .transport{
+    display:grid;align-items:stretch;gap:0.6em;
+    grid-template-columns:auto auto minmax(6em,1fr) minmax(6em,1fr) minmax(6em,1fr) auto;
+  }
+  .onair{align-self:center}
+  .tbtn{
+    background:var(--faint);border:none;color:var(--ink);
+    font-family:var(--mono);font-size:0.95em;letter-spacing:.18em;
+    padding:0 1.1em;height:3em;cursor:pointer;display:flex;align-items:center;gap:0.7em;
+  }
+  .tbtn:hover{background:var(--faint2)}
+  #play{min-width:6em;justify-content:center}
+  #play .ico{width:0;height:0;border-left:0.85em solid var(--ink);border-top:0.55em solid transparent;border-bottom:0.55em solid transparent}
+  #play.on{background:#FFFFFF;color:#121212}
+  #play.on .ico{border:none;width:0.8em;height:1em;background:#121212}
+  #dilla{min-width:7.4em;justify-content:center;padding:0 .8em;letter-spacing:.08em;color:var(--blue-l)}
+  #dilla[aria-pressed="true"]{background:#FFFFFF;color:#121212;box-shadow:inset 0 -3px 0 var(--blue)}
+  .knob{
+    background:var(--faint);padding:0.4em 0.8em 0.3em;height:3em;
+    display:flex;flex-direction:column;justify-content:center;min-width:0;
+  }
+  .knob label{font-size:0.72em;letter-spacing:.22em;color:var(--dim);display:flex;justify-content:space-between;white-space:nowrap}
+  .knob label output{color:var(--ink)}
+  input[type=range]{appearance:none;-webkit-appearance:none;width:100%;height:1.2em;background:transparent;cursor:ew-resize}
+  input[type=range]::-webkit-slider-runnable-track{height:2px;background:#8E9390}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:0.7em;height:1.1em;background:var(--ink);margin-top:-0.45em;border-radius:0;
+  }
+  .onair{
+    display:inline-flex;align-items:center;gap:0.5em;font-size:0.8em;letter-spacing:.2em;
+    color:var(--dim);padding:0.3em 0.2em;white-space:nowrap;
+  }
+  .onair .dot{width:0.55em;height:0.55em;background:#8E9390}
+  .onair.live{color:var(--blue)}
+  .onair.live .dot{background:var(--blue);animation:pulse 1s steps(2,end) infinite}
+  @keyframes pulse{50%{opacity:.15}}
+
+
+  .channels{display:flex;gap:0.55em;flex-wrap:wrap;align-content:flex-start;overflow:hidden}
+  .ch{
+    border:none;background:var(--faint);color:var(--dim);
+    font-family:var(--mono);font-size:0.85em;letter-spacing:.14em;cursor:pointer;
+    padding:0.55em 0.9em 0.45em;display:flex;align-items:center;gap:0.6em;white-space:nowrap;
+  }
+  .ch .num{color:var(--dim)}
+  .ch:hover{background:var(--faint2);color:var(--ink)}
+  .ch.on{background:#FFFFFF;color:#121212}
+  .ch.on .num{color:var(--dim)}
+  .ch.on::before{content:"";width:0.45em;height:0.45em;background:#007CFF;animation:pulse 1.2s steps(2,end) infinite}
+
+
+  .seq{overflow:hidden}
+  .row{display:grid;grid-template-columns:var(--labw,110px) 1fr;gap:0.7em;align-items:center;height:var(--rowh,16px)}
+  .row + .row,.row + #rows,#rows .row + .row{margin-top:0.3em}
+  #rows .row{height:var(--rowh,16px)}
+  .steps{display:grid;grid-template-columns:repeat(16,1fr);gap:0.25em;height:100%}
+  .steps .cell:nth-child(4n+1){margin-left:0.45em}
+  .steps .cell:first-child{margin-left:0}
+
+  .stephead{font-size:0.72em;color:var(--dim);text-align:center;letter-spacing:0}
+  .stephead.beat{color:var(--ink)}
+  .stephead.now{color:var(--blue)}
+
+  .label{
+    display:flex;align-items:center;gap:0.6em;cursor:pointer;padding:0 0.2em;
+    font-size:0.82em;letter-spacing:.12em;color:var(--ink);white-space:nowrap;overflow:hidden;height:100%;
+  }
+  .label .chip{width:0.7em;height:0.7em;background:var(--ink);flex:none}
+  .label .chno{color:var(--dim);font-size:0.9em}
+  .label .zh{color:var(--dim);font-size:0.9em;letter-spacing:.06em}
+  .row.muted .label{opacity:.32}
+  .row.muted .label::after{content:"MUTE";color:var(--dim);font-size:0.9em;margin-left:auto;letter-spacing:.1em}
+  .row.muted .cell{opacity:.25}
+
+  .cell{
+    background:var(--faint);cursor:pointer;position:relative;
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.72em;color:transparent;line-height:1;overflow:hidden;
+  }
+  .cell:hover{background:var(--faint2)}
+  .cell.on{background:#FFFFFF;color:#121212}
+  .cell.now{background:var(--blue-l);color:#121212}
+  .cell.on.now{background:var(--blue);color:#FFFFFF}
+  .cell.hit{animation:hit .18s steps(2,end)}
+  @keyframes hit{0%{filter:brightness(2.4)}100%{filter:none}}
+
+
+  .keys-panel{overflow:hidden}
+  .keys-head{display:flex;align-items:center;gap:0.7em;margin-bottom:0.7em;flex-wrap:wrap}
+  #rec{
+    background:var(--faint);border:none;color:var(--dim);
+    font-family:var(--mono);font-size:0.85em;letter-spacing:.16em;cursor:pointer;
+    padding:0.55em 1em 0.45em;display:flex;align-items:center;gap:0.6em;white-space:nowrap;
+  }
+  #rec .rdot{width:0.6em;height:0.6em;background:#8E9390}
+  #rec:hover{background:var(--faint2)}
+  #rec.on{background:#FFFFFF;color:#121212}
+  #rec.on .rdot{background:#121212;animation:pulse .5s steps(2,end) infinite}
+  .tgt{display:flex}
+  .tgt button{
+    background:var(--faint);border:none;color:var(--dim);font-family:var(--mono);
+    font-size:0.85em;letter-spacing:.14em;padding:0.55em 0.9em 0.45em;cursor:pointer;white-space:nowrap;
+  }
+  .tgt button:hover{background:var(--faint2)}
+  .tgt button.on{background:#FFFFFF;color:#121212}
+  .keys-hint{font-size:0.75em;letter-spacing:.1em;color:var(--dim);margin-left:auto}
+  .keys-hint .k{color:var(--ink)}
+  .pads{display:grid;grid-template-columns:repeat(7,1fr);gap:0.35em}
+  .pad{
+    height:var(--padh,2.6em);background:var(--faint);cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.2em;
+  }
+  .pad .nt{font-size:1.1em;color:var(--ink);letter-spacing:.08em}
+  .pad .kb{font-size:0.72em;color:var(--dim);letter-spacing:.2em}
+  .pad:hover{background:var(--faint2)}
+  .pad.press{background:#FFFFFF}
+  .pad.press .nt,.pad.press .kb{color:#121212}
+
+  footer{
+    font-size:0.78em;letter-spacing:.12em;color:var(--dim);line-height:1.9;
+    display:flex;justify-content:space-between;gap:1em;flex-wrap:wrap;overflow:hidden;
+  }
+  footer .k{color:var(--ink)}
+
+
+  .field{overflow:hidden;cursor:crosshair}
+  .field canvas{width:100%;height:100%;display:block}
+
+  @media (max-width:620px){
+    .transport{width:100%;grid-template-columns:auto auto minmax(6em,1fr)}
+    .transport .tbtn{padding-left:.7em;padding-right:.7em}
+  }
+  @media (prefers-reduced-motion: reduce){
+    #logo.beat,.cell.hit,.ch.on::before,.onair.live .dot,#rec.on .rdot{animation:none}
+  }
+
+  #logo { display: none; }
+  .logo-wrap::before { content: "BEETBOX"; font-family: var(--mono); font-size: 28px; font-weight: 800; line-height: 1.08; letter-spacing: 0; color: var(--ink); }
+  .sub, .sub b, .tbtn, .knob label, .onair, .ch, .stephead, .label, .label .chno, .label .zh, .row.muted .label::after, .cell, #rec, .tgt button, .keys-hint, .pad .nt, .pad .kb, footer { font-size: 12px !important; line-height: 1.4; }
+  .seq { overflow: auto; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+</head>
+<body>
+<main class="stage" aria-label="BEETBOX 十六拍频道台">
+  <header class="el" id="hd">
+    <div class="logo-wrap">
+      <canvas id="logo"></canvas>
+      <div class="sub"><b>节拍编排 · 频道台</b></div>
+    </div>
+    <div class="transport">
+      <button class="tbtn" id="play"><span class="ico"></span><span id="playtxt">播放</span></button>
+      <button class="tbtn" id="dilla" type="button" aria-pressed="false" title="开启确定性的推拉拍与力度起伏">DILLA TIME</button>
+      <div class="knob">
+        <label>速度 <output id="bpmv">120</output></label>
+        <input type="range" id="bpm" min="70" max="170" value="120" step="1">
+      </div>
+      <div class="knob">
+        <label>摇摆 <output id="swv">0%</output></label>
+        <input type="range" id="swing" min="0" max="60" value="0" step="1">
+      </div>
+      <div class="knob">
+        <label>音量 <output id="volv">90</output></label>
+        <input type="range" id="vol" min="0" max="100" value="90" step="1">
+      </div>
+      <div class="onair" id="onair"><span class="dot"></span>播出中</div>
+    </div>
+  </header>
+
+  <div class="el channels" id="channels"></div>
+
+  <div class="el field" id="field" aria-hidden="true"><canvas></canvas></div>
+
+  <div class="el seq" id="seq">
+    <div class="row">
+      <div class="label" style="cursor:default"><span class="chno">轨道</span><span class="zh">点名静音⇩</span></div>
+      <div class="steps" id="stephead"></div>
+    </div>
+    <div id="rows"></div>
+  </div>
+
+  <div class="el keys-panel" id="keysPanel">
+    <div class="keys-head">
+      <button id="rec"><span class="rdot"></span>循环录制</button>
+      <div class="tgt" id="tgt">
+        <button data-t="lead" class="on">主旋律</button>
+        <button data-t="bass">贝斯</button>
+      </div>
+      <span class="keys-hint"><span class="k">A S D F G H J</span> 或点按演奏 · 录制亮起时边放边录 · 自动量化循环叠录</span>
+    </div>
+    <div class="pads" id="pads"></div>
+  </div>
+
+  <footer class="el" id="ft">
+    <span><span class="k">点击格子</span> 写入节拍 · <span class="k">DILLA TIME</span> 固定推拉拍与轻微力度起伏 · <span class="k">点击轨道名</span> 静音</span>
+    <span><span class="k">空格</span> 播放/停止 · 摇摆控制律动强度</span>
+  </footer>
+</main>
+
+<script>
+"use strict";
+const SORTED = " -+/()*▲K#⬢";
+const FCELL = 12;
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function cellHash(a, b) {
+    let h = (Math.imul(a + 1, 374761393) + Math.imul(b + 1, 668265263)) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+const fState = { on: false, ctx: null, w: 0, h: 0, cols: 0, rows: 0, offX: 0, offY: 0 };
+const P = { x: -1e4, y: -1e4, t: -1e4 };
+let laneAct = new Array(16).fill(0);
+let curStep = -1, curStepT = -1e4;
+function setupField(w, h) {
+    const cv = document.querySelector(".field canvas");
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.max(1, Math.round(w * dpr));
+    cv.height = Math.max(1, Math.round(h * dpr));
+    const ctx = cv.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fState.ctx = ctx;
+    fState.w = w;
+    fState.h = h;
+    fState.cols = Math.ceil(w / FCELL);
+    fState.rows = Math.max(1, Math.floor(h / FCELL));
+    fState.offX = (w - fState.cols * FCELL) / 2;
+    fState.offY = (h - fState.rows * FCELL) / 2;
+    fState.on = true;
+}
+function drawField(t) {
+    if (!fState.on)
+        return;
+    const { ctx, w, h, cols, rows, offX, offY } = fState;
+    ctx.clearRect(0, 0, w, h);
+    const breathe = 0.85 + 0.25 * Math.sin(t * 0.18 + 1);
+    let rip = null;
+    const dt = t - P.t;
+    if (dt >= 0 && dt < 1.5) {
+        const sig = FCELL * 2.6;
+        rip = { amp: 0.55 * Math.exp(-dt * 2.0), phase: dt * 9, s2: 2 * sig * sig };
+    }
+    const bloom = curStep >= 0 ? 0.6 * Math.exp(-Math.max(0, t - curStepT) * 2.2) : 0;
+    const buckets = [[], []];
+    for (let r = 0; r < rows; r++) {
+        const y = offY + r * FCELL + FCELL / 2;
+        const v = rows > 1 ? r / (rows - 1) : 0.5;
+        for (let c = 0; c < cols; c++) {
+            const u = cols > 1 ? c / (cols - 1) : 0.5;
+            const lane = Math.min(15, Math.floor(u * 16));
+            const amp = (0.14 + 0.26 * (4 * v * (1 - v))) * breathe;
+            let d = 0.10 + laneAct[lane] * 0.80
+                + amp * (0.50 * Math.sin(c * 0.31 + r * 0.23 - t * 0.8)
+                    + 0.32 * Math.sin(c * 0.12 - r * 0.31 + t * 0.5 + 2.0)
+                    + 0.18 * Math.sin((c + r) * 0.19 - t * 1.2 + 4.2))
+                + (cellHash(c * 3 + 1, r * 7 + 3) - 0.5) * 0.09;
+            if (bloom > 0.001) {
+                let dd = Math.abs(lane - curStep);
+                dd = Math.min(dd, 16 - dd);
+                d += bloom * Math.exp(-dd * dd / 2.2) * (0.55 + 0.45 * Math.sin(v * 6.28 + t * 6));
+            }
+            const x = offX + c * FCELL + FCELL / 2;
+            if (rip) {
+                const dx = x - P.x, dy = y - P.y;
+                const q = (dx * dx + dy * dy) / rip.s2;
+                if (q < 9)
+                    d += rip.amp * Math.exp(-q) * Math.cos(rip.phase - Math.sqrt(q) * 3);
+            }
+            if (d <= 0.045)
+                continue;
+            const idx = Math.floor(Math.min(1, d) * (SORTED.length - 1));
+            if (idx <= 0)
+                continue;
+            buckets[cellHash(c, r) < 0.5 ? 0 : 1].push(x, y, SORTED[idx], idx <= 2 ? (cellHash(c * 7 + 5, r * 11 + 2) < 0.10 ? "#91D4FF" : "#002E58")
+                : idx <= 5 ? "#91D4FF" : idx <= 8 ? "#00A1FF" : "#FFFFFF");
+        }
+    }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const sizes = [Math.max(12, FCELL * 0.8), Math.max(12, FCELL * 0.62)];
+    for (let b = 0; b < 2; b++) {
+        ctx.font = sizes[b] + 'px Menlo, "SF Mono", "DejaVu Sans Mono", monospace';
+        const a = buckets[b];
+        for (let i = 0; i < a.length; i += 4) {
+            ctx.fillStyle = a[i + 3];
+            ctx.fillText(a[i + 2], a[i], a[i + 1] + sizes[b] * 0.03);
+        }
+    }
+}
+let raf = 0, lastF = 0;
+function loop(now) {
+    raf = requestAnimationFrame(loop);
+    if (now - lastF < 66)
+        return;
+    lastF = now;
+    drawField(now / 1000);
+}
+function startLoop() { if (!raf && !REDUCED && _tFix === null && !document.hidden)
+    raf = requestAnimationFrame(loop); }
+function stopLoop() { if (raf) {
+    cancelAnimationFrame(raf);
+    raf = 0;
+} }
+document.addEventListener("visibilitychange", () => { document.hidden ? stopLoop() : startLoop(); });
+const fieldEl = document.getElementById("field");
+fieldEl.addEventListener("pointermove", e => {
+    if (REDUCED)
+        return;
+    const rc = fieldEl.getBoundingClientRect();
+    P.x = e.clientX - rc.left;
+    P.y = e.clientY - rc.top;
+    P.t = performance.now() / 1000;
+}, { passive: true });
+(function () {
+    const F = { B: ["111", "101", "110", "101", "111"], E: ["111", "100", "110", "100", "111"],
+        T: ["111", "010", "010", "010", "010"], O: ["111", "101", "101", "101", "111"],
+        X: ["101", "101", "010", "101", "101"] };
+    const word = "BEETBOX", px = 4, gap = 1, sp = 2;
+    const cols = word.length * (3 + sp) - sp, c = document.getElementById('logo');
+    c.width = cols * (px + gap);
+    c.height = 5 * (px + gap);
+    const g = c.getContext('2d');
+    g.fillStyle = "#FFFFFF";
+    let x0 = 0;
+    [...word].forEach((ch) => {
+        F[ch].forEach((r, y) => [...r].forEach((b, x) => { if (b === "1")
+            g.fillRect((x0 + x) * (px + gap), y * (px + gap), px, px); }));
+        x0 += 3 + sp;
+    });
+})();
+const NOTE_LABEL = ["", "A", "C", "D", "E", "G", "A⁺", "C⁺"];
+const SEMI = [0, 3, 5, 7, 10, 12, 15];
+const TRACKS = [
+    { id: "lead", name: "LEAD", zh: "主旋律", type: "mel", root: 220 },
+    { id: "bass", name: "BASS", zh: "贝斯", type: "mel", root: 55 },
+    { id: "kick", name: "KICK", zh: "底鼓", type: "drum" },
+    { id: "snr", name: "SNARE", zh: "军鼓", type: "drum" },
+    { id: "clp", name: "CLAP", zh: "拍手", type: "drum" },
+    { id: "chh", name: "HAT", zh: "闭镲", type: "drum" },
+    { id: "ohh", name: "OPEN", zh: "开镲", type: "drum" },
+    { id: "rim", name: "RIM", zh: "边击", type: "drum" },
+    { id: "tom", name: "TOM", zh: "通鼓", type: "drum" },
+    { id: "cow", name: "BELL", zh: "牛铃", type: "drum" },
+    { id: "shk", name: "SHAKER", zh: "沙锤", type: "drum" },
+    { id: "crs", name: "CRASH", zh: "吊镲", type: "drum" },
+];
+const state = { steps: {}, muted: {}, bpm: 120, swing: 0, dilla: false };
+TRACKS.forEach(t => { state.steps[t.id] = new Array(16).fill(0); state.muted[t.id] = false; });
+const PRESETS = [
+    { name: "TECHNO", zh: "暗室", bpm: 132, swing: 0, p: {
+            kick: "X...X...X...X...", clp: "....X.......X...", snr: "................",
+            chh: "XX.XXX.XXX.XXX.X", ohh: "..X...X...X...X.", rim: ".......X.......X",
+            tom: "..............X.", cow: "................", shk: "X.X.X.X.X.X.X.X.",
+            crs: "X...............",
+            bass: "1..1..1.1..1..4.", lead: "..5...3.....7..6"
+        } },
+    { name: "FUNK", zh: "油渍", bpm: 104, swing: 22, p: {
+            kick: "X..X..X...X..X..", snr: "....X..X....X..X", clp: "................",
+            chh: "X.XX.XX.XX.XX.X.", ohh: "......X.......X.", rim: "..X.......X.....",
+            tom: "................", cow: ".X.....X.X......", shk: "..X...X...X...X.",
+            crs: "................",
+            bass: "1.1..3.1..4.3.1.", lead: "..3.5....7.5.3.."
+        } },
+    { name: "HIPHOP", zh: "回街", bpm: 90, swing: 34, p: {
+            kick: "X.....X..X..X...", snr: "................", clp: "....X.......X...",
+            chh: "X.X.X.X.X.X.X.XX", ohh: "..............X.", rim: "......X.........",
+            tom: "................", cow: "................", shk: "................",
+            crs: "................",
+            bass: "1.....1..3..1...", lead: "5...3...6..5...3"
+        } },
+    { name: "AFROBEAT", zh: "日光", bpm: 114, swing: 12, p: {
+            kick: "X..X....X..X....", snr: "....X..X.X..X...", clp: "................",
+            chh: "X.XX.XX.X.XX.XX.", ohh: "................", rim: "..X..X..X...X..X",
+            tom: ".....X.....X..X.", cow: "X..X..X.X..X..X.", shk: "X.X.X.X.X.X.X.X.",
+            crs: "................",
+            bass: "1..3..1..4..3.1.", lead: ".3.5.6.5..7.6.5."
+        } },
+    { name: "ACID", zh: "酸性", bpm: 140, swing: 8, p: {
+            kick: "X...X...X...X...", snr: "....X.......X...", clp: "............X...",
+            chh: ".X.X.X.X.X.X.X.X", ohh: "..X.......X.....", rim: "................",
+            tom: "..........X...X.", cow: "................", shk: "................",
+            crs: "........X.......",
+            bass: "1131113111311731", lead: "1.4.1.6.1.4.7.64"
+        } },
+    { name: "NEO SOUL", zh: "丝绒", bpm: 78, swing: 41, dilla: true, p: {
+            kick: "X....X..X..X....", snr: "....X.......X...", clp: "................",
+            chh: "X.XX.X..X.XX.X.X", ohh: ".......X.......X", rim: "..X......X....X.",
+            tom: "...........X....", cow: "................", shk: ".X.X.X.X.X.X.X.X",
+            crs: "X...............",
+            bass: "................", lead: "................"
+        } },
+];
+const rowsEl = document.getElementById('rows'), headEl = document.getElementById('stephead');
+const cellEls = {};
+for (let i = 0; i < 16; i++) {
+    const d = document.createElement('div');
+    d.className = "stephead" + (i % 4 === 0 ? " beat" : "");
+    d.textContent = (i + 1);
+    headEl.appendChild(d);
+    if (i % 4 === 0 && i > 0)
+        d.style.marginLeft = "0.45em";
+}
+TRACKS.forEach((t, ri) => {
+    const row = document.createElement('div');
+    row.className = "row";
+    const lab = document.createElement('div');
+    lab.className = "label";
+    lab.innerHTML = `<span class="chip"></span><span class="chno">CH·${String(ri + 1).padStart(2, "0")}</span><span>${t.zh}</span>`;
+    lab.onclick = () => { state.muted[t.id] = !state.muted[t.id]; row.classList.toggle('muted', state.muted[t.id]); recomputeLanes(); };
+    const steps = document.createElement('div');
+    steps.className = "steps";
+    cellEls[t.id] = [];
+    for (let i = 0; i < 16; i++) {
+        const c = document.createElement('div');
+        c.className = "cell";
+        const set = v => { state.steps[t.id][i] = v; paint(t, i); };
+        c.onclick = () => {
+            if (t.type === "drum")
+                set(state.steps[t.id][i] ? 0 : 1);
+            else
+                set((state.steps[t.id][i] + 1) % 8);
+            tryAudition(t, i);
+        };
+        c.oncontextmenu = e => {
+            e.preventDefault();
+            if (t.type === "drum")
+                set(0);
+            else
+                set((state.steps[t.id][i] + 7) % 8);
+        };
+        steps.appendChild(c);
+        cellEls[t.id].push(c);
+    }
+    row.appendChild(lab);
+    row.appendChild(steps);
+    rowsEl.appendChild(row);
+});
+function paint(t, i) {
+    const v = state.steps[t.id][i], c = cellEls[t.id][i];
+    c.classList.toggle('on', v > 0);
+    if (t.type === "mel") {
+        c.textContent = v > 0 ? NOTE_LABEL[v] : "";
+        c.style.filter = v > 0 ? `brightness(${0.62 + v * 0.09})` : "";
+    }
+    recomputeLanes();
+}
+function repaintAll() { TRACKS.forEach(t => { for (let i = 0; i < 16; i++)
+    paint(t, i); }); recomputeLanes(); }
+function recomputeLanes() {
+    for (let l = 0; l < 16; l++) {
+        let a = 0;
+        for (const t of TRACKS) {
+            if (state.steps[t.id][l] > 0 && !state.muted[t.id])
+                a++;
+        }
+        laneAct[l] = a / TRACKS.length;
+    }
+}
+const chWrap = document.getElementById('channels');
+let activePreset = -1;
+PRESETS.forEach((p, pi) => {
+    const b = document.createElement('button');
+    b.className = "ch";
+    b.innerHTML = `<span class="num">CH·${pi + 1}0</span> <span style="letter-spacing:.06em">${p.zh}</span>`;
+    b.onclick = () => loadPreset(pi);
+    chWrap.appendChild(b);
+});
+const utils = [["CLEAR", "清空", clearAll], ["RAND", "随机", randomize]];
+utils.forEach(([n, zh, fn]) => {
+    const b = document.createElement('button');
+    b.className = "ch";
+    b.innerHTML = `<span style="letter-spacing:.06em">${zh}</span>`;
+    b.onclick = fn;
+    chWrap.appendChild(b);
+});
+function markPreset(pi) {
+    activePreset = pi;
+    [...chWrap.children].forEach((el, i) => el.classList.toggle('on', i === pi));
+}
+function loadPreset(pi) {
+    const pr = PRESETS[pi];
+    TRACKS.forEach(t => {
+        const s = pr.p[t.id] || "................";
+        state.steps[t.id] = [...s].map(ch => ch === "X" ? 1 : (ch >= "1" && ch <= "7") ? +ch : 0);
+        state.muted[t.id] = false;
+    });
+    document.querySelectorAll('.row.muted').forEach(r => r.classList.remove('muted'));
+    setBpm(pr.bpm);
+    setSwing(pr.swing);
+    setDilla(!!pr.dilla);
+    repaintAll();
+    markPreset(pi);
+}
+function clearAll() { TRACKS.forEach(t => state.steps[t.id].fill(0)); repaintAll(); markPreset(-1); }
+function randomize() {
+    const den = { kick: .32, snr: .18, clp: .12, chh: .55, ohh: .12, rim: .15, tom: .12, cow: .14, shk: .4, crs: .05 };
+    TRACKS.forEach(t => {
+        for (let i = 0; i < 16; i++) {
+            if (t.type === "drum")
+                state.steps[t.id][i] = Math.random() < (den[t.id] || .2) ? 1 : 0;
+            else
+                state.steps[t.id][i] = Math.random() < (t.id === "bass" ? .45 : .3) ? 1 + Math.floor(Math.random() * 7) : 0;
+        }
+        if (t.id === "kick") {
+            state.steps.kick[0] = 1;
+        }
+    });
+    repaintAll();
+    markPreset(-1);
+}
+let AC = null, master, noiseBuf, delayNode, delayGain;
+function ensureAudio() {
+    if (AC)
+        return;
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    const comp = AC.createDynamicsCompressor();
+    comp.threshold.value = -14;
+    comp.ratio.value = 4;
+    master = AC.createGain();
+    master.gain.value = state.vol;
+    const shaper = AC.createWaveShaper();
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) {
+        const x = i / 128 - 1;
+        curve[i] = Math.tanh(1.6 * x);
+    }
+    shaper.curve = curve;
+    master.connect(shaper);
+    shaper.connect(comp);
+    comp.connect(AC.destination);
+    delayNode = AC.createDelay(1);
+    delayGain = AC.createGain();
+    delayGain.gain.value = .3;
+    delayNode.delayTime.value = Math.min(1, 60 / state.bpm * .75);
+    const fb = AC.createGain();
+    fb.gain.value = .34;
+    const dl = AC.createBiquadFilter();
+    dl.type = "highpass";
+    dl.frequency.value = 500;
+    delayNode.connect(dl);
+    dl.connect(fb);
+    fb.connect(delayNode);
+    dl.connect(master);
+    delayGain.connect(delayNode);
+    noiseBuf = AC.createBuffer(1, AC.sampleRate * 1.5, AC.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++)
+        d[i] = Math.random() * 2 - 1;
+}
+const noise = () => { const s = AC.createBufferSource(); s.buffer = noiseBuf; return s; };
+function env(g, t, peak, dur, velocity = 1) { g.gain.setValueAtTime(peak * velocity, t); g.gain.exponentialRampToValueAtTime(.0008, t + dur); }
+function freqOf(root, deg) { return root * Math.pow(2, SEMI[deg - 1] / 12); }
+const SYNTH = {
+    kick(t, velocity = 1) {
+        const o = AC.createOscillator(), g = AC.createGain();
+        o.frequency.setValueAtTime(160, t);
+        o.frequency.exponentialRampToValueAtTime(42, t + .12);
+        env(g, t, 1.05, .34, velocity);
+        o.connect(g);
+        g.connect(master);
+        o.start(t);
+        o.stop(t + .4);
+    },
+    snr(t, velocity = 1) {
+        const n = noise(), f = AC.createBiquadFilter(), g = AC.createGain();
+        f.type = "bandpass";
+        f.frequency.value = 1900;
+        f.Q.value = .9;
+        env(g, t, .55, .16, velocity);
+        n.connect(f);
+        f.connect(g);
+        g.connect(master);
+        n.start(t);
+        n.stop(t + .2);
+        const o = AC.createOscillator(), g2 = AC.createGain();
+        o.type = "triangle";
+        o.frequency.value = 196;
+        env(g2, t, .4, .09, velocity);
+        o.connect(g2);
+        g2.connect(master);
+        o.start(t);
+        o.stop(t + .12);
+    },
+    clp(t, velocity = 1) {
+        for (let k = 0; k < 3; k++) {
+            const n = noise(), f = AC.createBiquadFilter(), g = AC.createGain();
+            f.type = "bandpass";
+            f.frequency.value = 1200 + k * 180;
+            f.Q.value = 1.6;
+            const tt = t + k * .018;
+            env(g, tt, .4, k < 2 ? .03 : .22, velocity);
+            n.connect(f);
+            f.connect(g);
+            g.connect(master);
+            n.start(tt);
+            n.stop(tt + .26);
+        }
+    },
+    chh(t, velocity = 1) {
+        const n = noise(), f = AC.createBiquadFilter(), g = AC.createGain();
+        f.type = "highpass";
+        f.frequency.value = 8200;
+        env(g, t, .32, .05, velocity);
+        n.connect(f);
+        f.connect(g);
+        g.connect(master);
+        n.start(t);
+        n.stop(t + .08);
+    },
+    ohh(t, velocity = 1) {
+        const n = noise(), f = AC.createBiquadFilter(), g = AC.createGain();
+        f.type = "highpass";
+        f.frequency.value = 7400;
+        env(g, t, .3, .42, velocity);
+        n.connect(f);
+        f.connect(g);
+        g.connect(master);
+        n.start(t);
+        n.stop(t + .5);
+    },
+    rim(t, velocity = 1) {
+        const o = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain();
+        o.type = "square";
+        o.frequency.value = 1720;
+        f.type = "bandpass";
+        o.frequency.value = 1720;
+        f.Q.value = 7;
+        env(g, t, .5, .035, velocity);
+        o.connect(f);
+        f.connect(g);
+        g.connect(master);
+        o.start(t);
+        o.stop(t + .06);
+    },
+    tom(t, velocity = 1) {
+        const o = AC.createOscillator(), g = AC.createGain();
+        o.frequency.setValueAtTime(190, t);
+        o.frequency.exponentialRampToValueAtTime(88, t + .2);
+        env(g, t, .7, .26, velocity);
+        o.connect(g);
+        g.connect(master);
+        o.start(t);
+        o.stop(t + .3);
+    },
+    cow(t, velocity = 1) {
+        [545, 800].forEach(fr => {
+            const o = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain();
+            o.type = "square";
+            o.frequency.value = fr;
+            f.type = "bandpass";
+            o.frequency.value = 800;
+            f.Q.value = 3;
+            env(g, t, .28, .24, velocity);
+            o.connect(f);
+            f.connect(g);
+            g.connect(master);
+            o.start(t);
+            o.stop(t + .3);
+        });
+    },
+    shk(t, velocity = 1) {
+        const n = noise(), f = AC.createBiquadFilter(), g = AC.createGain();
+        f.type = "bandpass";
+        f.frequency.value = 6200;
+        f.Q.value = .7;
+        g.gain.setValueAtTime(.001, t);
+        g.gain.linearRampToValueAtTime(.26 * velocity, t + .02);
+        g.gain.exponentialRampToValueAtTime(.0008, t + .1);
+        n.connect(f);
+        f.connect(g);
+        g.connect(master);
+        n.start(t);
+        n.stop(t + .14);
+    },
+    crs(t, velocity = 1) {
+        const n = noise(), f = AC.createBiquadFilter(), g = AC.createGain();
+        f.type = "highpass";
+        f.frequency.value = 5200;
+        env(g, t, .3, 1.4, velocity);
+        n.connect(f);
+        f.connect(g);
+        g.connect(master);
+        n.start(t);
+        n.stop(t + 1.5);
+    },
+    bass(t, deg, velocity = 1) {
+        const fr = freqOf(55, deg);
+        const o = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain();
+        o.type = "sawtooth";
+        o.frequency.value = fr;
+        f.type = "lowpass";
+        f.frequency.setValueAtTime(680, t);
+        f.frequency.exponentialRampToValueAtTime(120, t + .22);
+        f.Q.value = 6;
+        env(g, t, .5, .3, velocity);
+        o.connect(f);
+        f.connect(g);
+        g.connect(master);
+        o.start(t);
+        o.stop(t + .34);
+    },
+    lead(t, deg, velocity = 1) {
+        const fr = freqOf(220, deg);
+        const g = AC.createGain(), f = AC.createBiquadFilter();
+        f.type = "lowpass";
+        f.frequency.setValueAtTime(2600, t);
+        f.frequency.exponentialRampToValueAtTime(560, t + .26);
+        f.Q.value = 4;
+        env(g, t, .24, .3, velocity);
+        [["sawtooth", 0], ["square", 6]].forEach(([w, det]) => {
+            const o = AC.createOscillator();
+            o.type = w;
+            o.frequency.value = fr;
+            o.detune.value = det;
+            o.connect(f);
+            o.start(t);
+            o.stop(t + .34);
+        });
+        f.connect(g);
+        g.connect(master);
+        g.connect(delayGain);
+    },
+};
+const DILLA_STEP = [-.006, .030, -.020, .054, -.014, .041, -.030, .068, -.018, .026, -.036, .058, -.010, .046, -.026, .072];
+const DILLA_TRACK = {
+    lead: [.010, -.012, .018, -.006], bass: [-.012, .016, -.004, .012], kick: [0, -.008, .012, -.004],
+    snr: [.044, .052, .040, .058], clp: [.058, .050, .064, .054],
+    chh: [-.012, -.034, -.006, -.026], ohh: [-.008, -.020, .004, -.016], shk: [.008, -.038, .014, -.030],
+    rim: [.010, .020, .006, .016], tom: [.014, -.006, .022, .002], cow: [-.004, .012, -.010, .018], crs: [0, .010, -.006, .014]
+};
+const DILLA_VELOCITY = [1.04, .92, .98, .90, 1.02, .94, .96, .88, 1.03, .91, 1, .89, 1.01, .93, .97, .90];
+function dillaTrackOffset(id, s) { const p = DILLA_TRACK[id]; return p ? p[s % p.length] : 0; }
+function dillaVelocity(id, s) {
+    if (!state.dilla)
+        return 1;
+    const ti = TRACKS.findIndex(t => t.id === id);
+    const detail = (((s * 5 + ti * 3) % 7) - 3) * .006;
+    const alternating = (id === "chh" || id === "shk") ? (s % 2 ? .02 : -.01) : 0;
+    return Math.max(.84, Math.min(1.08, DILLA_VELOCITY[s] + detail + alternating));
+}
+let playing = false, step = 0, nextT = 0, timer = null;
+const bpmEl = document.getElementById('bpm'), swEl = document.getElementById('swing'), volEl = document.getElementById('vol'), dillaBtn = document.getElementById('dilla');
+state.vol = .9;
+function setBpm(v) {
+    state.bpm = v;
+    bpmEl.value = v;
+    document.getElementById('bpmv').textContent = v;
+    if (AC)
+        delayNode.delayTime.setTargetAtTime(Math.min(1, 60 / v * .75), AC.currentTime, .08);
+}
+function setSwing(v) { state.swing = v; swEl.value = v; document.getElementById('swv').textContent = v + "%"; }
+function setVol(v) {
+    state.vol = v / 100;
+    volEl.value = v;
+    document.getElementById('volv').textContent = v;
+    if (AC)
+        master.gain.setTargetAtTime(state.vol, AC.currentTime, .04);
+}
+function setDilla(on) {
+    state.dilla = !!on;
+    dillaBtn.setAttribute('aria-pressed', String(state.dilla));
+    dillaBtn.title = state.dilla ? "关闭确定性的推拉拍与力度起伏" : "开启确定性的推拉拍与力度起伏";
+}
+bpmEl.oninput = e => setBpm(+e.target.value);
+swEl.oninput = e => setSwing(+e.target.value);
+volEl.oninput = e => setVol(+e.target.value);
+dillaBtn.onclick = () => setDilla(!state.dilla);
+function schedule() {
+    while (nextT < AC.currentTime + .12) {
+        const dur = 60 / state.bpm / 4, s = step;
+        const swingDelay = s % 2 === 1 ? dur * (state.swing / 100) * .9 : 0;
+        const feel = state.dilla ? .7 + (state.swing / 100) * .8 : 0;
+        const stepTime = Math.max(AC.currentTime + .004, nextT + swingDelay + dur * DILLA_STEP[s] * feel);
+        TRACKS.forEach(tr => {
+            const v = state.steps[tr.id][s];
+            if (v > 0 && !state.muted[tr.id]) {
+                const hitTime = Math.max(AC.currentTime + .004, stepTime + dur * dillaTrackOffset(tr.id, s) * feel);
+                const velocity = dillaVelocity(tr.id, s);
+                tr.type === "mel" ? SYNTH[tr.id](hitTime, v, velocity) : SYNTH[tr.id](hitTime, velocity);
+            }
+        });
+        const delay = Math.max(0, (stepTime - AC.currentTime) * 1000);
+        setTimeout(() => drawStep(s), delay);
+        step = (step + 1) % 16;
+        nextT += dur;
+    }
+}
+let lastDrawn = -1;
+function drawStep(s) {
+    if (!playing)
+        return;
+    if (lastDrawn >= 0) {
+        headEl.children[lastDrawn].classList.remove('now');
+        TRACKS.forEach(t => cellEls[t.id][lastDrawn].classList.remove('now', 'hit'));
+    }
+    headEl.children[s].classList.add('now');
+    if (s % 4 === 0) {
+        const lg = document.getElementById('logo');
+        lg.classList.remove('beat');
+        void lg.offsetWidth;
+        lg.classList.add('beat');
+    }
+    TRACKS.forEach(t => {
+        const c = cellEls[t.id][s];
+        c.classList.add('now');
+        if (state.steps[t.id][s] > 0 && !state.muted[t.id])
+            c.classList.add('hit');
+    });
+    lastDrawn = s;
+    curStep = s;
+    curStepT = performance.now() / 1000;
+}
+function clearPlayhead() {
+    if (lastDrawn >= 0) {
+        headEl.children[lastDrawn].classList.remove('now');
+        TRACKS.forEach(t => cellEls[t.id][lastDrawn].classList.remove('now', 'hit'));
+        lastDrawn = -1;
+    }
+    curStep = -1;
+}
+const playBtn = document.getElementById('play');
+function toggle() {
+    ensureAudio();
+    AC.resume();
+    playing = !playing;
+    playBtn.classList.toggle('on', playing);
+    document.getElementById('playtxt').textContent = playing ? "停止" : "播放";
+    document.getElementById('onair').classList.toggle('live', playing);
+    if (playing) {
+        step = 0;
+        nextT = AC.currentTime + .06;
+        delayNode.delayTime.value = Math.min(1, 60 / state.bpm * .75);
+        timer = setInterval(schedule, 25);
+    }
+    else {
+        clearInterval(timer);
+        clearPlayhead();
+    }
+    if (typeof syncRecGlow === "function")
+        syncRecGlow();
+}
+playBtn.onclick = toggle;
+document.addEventListener('keydown', e => { if (e.code === "Space") {
+    e.preventDefault();
+    toggle();
+} });
+function tryAudition(t, i) {
+    if (playing)
+        return;
+    ensureAudio();
+    AC.resume();
+    const v = state.steps[t.id][i];
+    if (v <= 0)
+        return;
+    const now = AC.currentTime + .02;
+    t.type === "mel" ? SYNTH[t.id](now, v) : SYNTH[t.id](now);
+}
+const KEYMAP = { KeyA: 1, KeyS: 2, KeyD: 3, KeyF: 4, KeyG: 5, KeyH: 6, KeyJ: 7,
+    Digit1: 1, Digit2: 2, Digit3: 3, Digit4: 4, Digit5: 5, Digit6: 6, Digit7: 7 };
+let recOn = false, liveTarget = "lead";
+const recBtn = document.getElementById('rec'), tgtEl = document.getElementById('tgt'), padsEl = document.getElementById('pads'), keysPanel = document.getElementById('keysPanel');
+const padEls = [];
+for (let d = 1; d <= 7; d++) {
+    const p = document.createElement('div');
+    p.className = "pad";
+    p.innerHTML = `<span class="nt">${NOTE_LABEL[d]}</span><span class="kb">${"ASDFGHJ"[d - 1]}</span>`;
+    p.onpointerdown = e => { e.preventDefault(); playLive(d); };
+    p.onpointerup = p.onpointerleave = p.onpointercancel = () => padUp(d);
+    padsEl.appendChild(p);
+    padEls.push(p);
+}
+function setTarget(t) {
+    liveTarget = t;
+    [...tgtEl.children].forEach(b => b.classList.toggle('on', b.dataset.t === t));
+}
+tgtEl.onclick = e => { const b = e.target.closest('button'); if (b)
+    setTarget(b.dataset.t); };
+recBtn.onclick = () => {
+    recOn = !recOn;
+    recBtn.classList.toggle('on', recOn);
+    syncRecGlow();
+    if (recOn && !playing)
+        toggle();
+};
+function syncRecGlow() { keysPanel.classList.toggle('rec', recOn && playing); }
+function nearestStep() {
+    const dur = 60 / state.bpm / 4;
+    const ahead = (nextT - AC.currentTime) / dur;
+    const cur = step - ahead;
+    return ((Math.round(cur)) % 16 + 16) % 16;
+}
+function padDown(d) {
+    const p = padEls[d - 1];
+    p.classList.add('press');
+}
+function padUp(d) { padEls[d - 1].classList.remove('press'); }
+function playLive(deg) {
+    ensureAudio();
+    AC.resume();
+    SYNTH[liveTarget](AC.currentTime + .02, deg);
+    padDown(deg);
+    if (recOn && playing) {
+        const s = nearestStep();
+        state.steps[liveTarget][s] = deg;
+        const tr = TRACKS.find(t => t.id === liveTarget);
+        paint(tr, s);
+        const c = cellEls[liveTarget][s];
+        c.classList.add('hit');
+        setTimeout(() => c.classList.remove('hit'), 200);
+        markPreset(-1);
+    }
+}
+document.addEventListener('keydown', e => {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey)
+        return;
+    const d = KEYMAP[e.code];
+    if (d) {
+        e.preventDefault();
+        playLive(d);
+    }
+});
+document.addEventListener('keyup', e => { const d = KEYMAP[e.code]; if (d)
+    padUp(d); });
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function pickCols(W, H) {
+    const a = W / H;
+    if (a >= 2.6)
+        return { n: 10 };
+    if (a >= 2.1)
+        return { n: 8 };
+    if (a >= 1.55)
+        return { n: 6 };
+    if (a >= 1.15)
+        return { n: 4 };
+    return { n: 5 };
+}
+function gridMetrics(W, H, n) {
+    const mx = 0.05 * W, my = 0.05 * H, g = 0.01 * W;
+    const iw = W - 2 * mx, ih = H - 2 * my;
+    const sCols = (iw - (n - 1) * g) / n;
+    const m = Math.max(1, Math.round((ih + g) / (sCols + g)));
+    const sRows = (ih - (m - 1) * g) / m;
+    const s = Math.min(sCols, sRows);
+    const ox = mx + (iw - n * s - (n - 1) * g) / 2;
+    const oy = my + (ih - m * s - (m - 1) * g) / 2;
+    return { n, m, s, g, ox, oy };
+}
+function layout() {
+    const stage = document.querySelector(".stage");
+    const W = stage.clientWidth, H = stage.clientHeight;
+    if (!W || !H)
+        return;
+    const { n } = pickCols(W, H);
+    const gm = gridMetrics(W, H, n);
+    const { s, g, ox, oy } = gm;
+    const iw = n * s + (n - 1) * g, ih = gm.m * s + (gm.m - 1) * g;
+    const u = 12;
+    stage.style.fontSize = u + "px";
+    const hd = document.getElementById("hd"), ch = document.getElementById("channels"), sq = document.getElementById("seq"), kp = document.getElementById("keysPanel"), ft = document.getElementById("ft"), fe = document.getElementById("field");
+    const logo = document.getElementById("logo");
+    const logoH = clamp(u * 2.4, 16, 26);
+    logo.style.height = logoH + "px";
+    logo.style.width = (logoH * 33 / 5) + "px";
+    const lw = iw;
+    [hd, ch, sq, kp, ft, fe].forEach(e => { e.style.left = ox + "px"; e.style.width = lw + "px"; });
+    const showFt = lw > 320;
+    ft.style.display = showFt ? "" : "none";
+    document.querySelector(".keys-hint").style.display = lw > 520 ? "" : "none";
+    const hdH = hd.offsetHeight, chH = ch.offsetHeight, kpH = kp.offsetHeight, ftH = showFt ? ft.offsetHeight : 0;
+    const gaps = (showFt ? 5 : 4) * g;
+    let fieldH = gm.m >= 6 ? 2 * s + g : s;
+    let seqH = ih - hdH - chH - fieldH - kpH - ftH - gaps;
+    let rowh = (seqH - 12 * 0.3 * u) / 13;
+    if (rowh < 14 && fieldH > s) {
+        fieldH = s;
+        seqH = ih - hdH - chH - fieldH - kpH - ftH - gaps;
+        rowh = (seqH - 12 * 0.3 * u) / 13;
+    }
+    rowh = Math.max(14, rowh);
+    seqH = Math.max(20, seqH);
+    sq.style.setProperty("--rowh", rowh + "px");
+    sq.style.setProperty("--labw", clamp(lw * 0.24, 58, 118) + "px");
+    sq.style.height = seqH + "px";
+    let y = oy;
+    hd.style.top = y + "px";
+    y += hdH + g;
+    ch.style.top = y + "px";
+    y += chH + g;
+    fe.style.top = y + "px";
+    fe.style.height = fieldH + "px";
+    y += fieldH + g;
+    sq.style.top = y + "px";
+    y += seqH + g;
+    kp.style.top = y + "px";
+    y += kpH + g;
+    if (showFt)
+        ft.style.top = y + "px";
+    setupField(lw, fieldH);
+    drawField(_tFix !== null ? _tFix : performance.now() / 1000);
+}
+const _q = new URLSearchParams(location.search);
+if (_q.has("w") && _q.has("h")) {
+    const st = document.querySelector(".stage");
+    st.style.width = _q.get("w") + "px";
+    st.style.height = _q.get("h") + "px";
+}
+const _tFix = _q.has("t") ? (parseFloat(_q.get("t")) || 0) : null;
+if (_tFix !== null)
+    window.__drawAt = () => drawField(_tFix);
+window.addEventListener("resize", layout);
+new ResizeObserver(layout).observe(document.querySelector(".stage"));
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => {
+    layout();
+    if (window.__drawAt)
+        window.__drawAt();
+});
+loadPreset(5);
+layout();
+if (_tFix !== null)
+    window.__drawAt();
+else if (REDUCED)
+    drawField(0.7);
+else
+    startLoop();
+</script>
+</body>
+</html>

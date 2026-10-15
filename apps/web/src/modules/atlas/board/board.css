@@ -1,0 +1,1916 @@
+/* 🔴 改动 2026-10-10 · 画板全套样式：点阵网格/卡片/添加菜单/连线/子画板，复刻 Evoloop 观感，明暗双主题。
+   作用域全部限定在 .sr-board 内，不污染全局；色板取自项目 tokens（--sr-l-* / --sr-d-*）。 */
+
+/* ---- 主题变量：浅色（默认，取自 --sr-l-* 色板，按任务约定不使用 gray-3/4；
+   中间档经 color-mix 由色板两端调和，强调色取自项目品牌/Accent tokens） ---- */
+.sr-board {
+  --bd-canvas: var(--sr-l-gray-1);
+  /* 🔴 改动 2026-10-10 · 点阵对比增强：34%→45%，浅色画布上肉眼可见（原值在截图/高分屏上几乎不可辨） */
+  --bd-dot: color-mix(in srgb, var(--sr-l-gray-5) 45%, var(--sr-l-gray-1));
+  --bd-surface: var(--sr-l-gray-0);
+  --bd-toolbar: var(--sr-l-gray-0);
+  --bd-border: var(--sr-l-gray-2);
+  --bd-text: var(--sr-l-gray-11);
+  --bd-muted: var(--sr-l-gray-5);
+  --bd-hover: color-mix(in srgb, var(--sr-l-gray-2) 70%, var(--sr-l-gray-0));
+  --bd-accent: var(--sr-accent-azure);
+  --bd-line: var(--sr-accent-amethyst);
+  /* 🔴 改动 2026-10-12 · 收益连线金色三档（同工坊 asset-runes.css 浅色值） */
+  --bd-gold-mid: #a77a28;
+  --bd-gold-light: #c69b48;
+  --bd-gold-deep: #90661f;
+  --bd-danger: var(--sr-accent-strawberry-red);
+  --bd-shadow: color-mix(in srgb, var(--sr-l-gray-11) 16%, transparent);
+  --bd-check: var(--sr-accent-azure);
+  /* 🔴 改动 2026-10-10 · 定位改为 absolute + inset 0 + z-index 0：版图页最底层
+     （自带层叠上下文，卡片/菜单等子层永远压在地球/卷轴/预览弹层之下）；子画板
+     覆盖层经 .sr-subboard-overlay 挂在 body 上（fixed z-70），不受此影响。 */
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  color: var(--bd-text);
+  font: 14px/1.5 system-ui, 'Segoe UI', sans-serif;
+  touch-action: none;
+  user-select: none;
+}
+
+/* ---- 主题变量：深色（观感 1:1 对齐 Evoloop --mn-* 深色画板；色值全部改用项目
+   sr-d-gray-0/1/2/5/6/10/11 色板，Evoloop 的中间灰阶经 color-mix 由 d-0/d-10 调和，
+   强调色 --sr-brand-interact-blue 与 Evoloop #0AB9E6 同值） ---- */
+.sr-board.sr-board-dark {
+  --bd-canvas: var(--sr-d-gray-10);
+  /* 🔴 改动 2026-10-10 · 点阵对比增强：52%→68%，深色画布上肉眼可见 */
+  --bd-dot: color-mix(in srgb, var(--sr-d-gray-6) 68%, var(--sr-d-gray-10));
+  --bd-surface: color-mix(in srgb, var(--sr-d-gray-0) 12%, var(--sr-d-gray-10));
+  --bd-toolbar: color-mix(in srgb, var(--sr-d-gray-0) 7%, var(--sr-d-gray-10));
+  --bd-border: color-mix(in srgb, var(--sr-d-gray-0) 21%, var(--sr-d-gray-10));
+  --bd-text: var(--sr-d-gray-1);
+  --bd-muted: var(--sr-d-gray-5);
+  --bd-hover: color-mix(in srgb, var(--sr-d-gray-0) 16%, var(--sr-d-gray-10));
+  --bd-accent: var(--sr-brand-interact-blue);
+  --bd-line: var(--sr-accent-amethyst);
+  /* 🔴 改动 2026-10-12 · 收益连线金色三档（同工坊 asset-runes.css 深色值） */
+  --bd-gold-mid: #d4ad57;
+  --bd-gold-light: #eed193;
+  --bd-gold-deep: #b88a3b;
+  --bd-danger: var(--sr-accent-alizarin-red);
+  --bd-shadow: color-mix(in srgb, var(--sr-d-gray-11) 45%, transparent);
+  --bd-check: var(--sr-brand-interact-blue);
+}
+
+/* 🔴 改动 2026-10-14 · 跨画板拖放：作为投放目标时画板根内圈高亮（提示松手移入） */
+.sr-board.sr-board-cross-target {
+  box-shadow: inset 0 0 0 2px var(--bd-accent);
+}
+/* 🔴 改动 2026-10-14 · 拖动期间全局 grabbing 光标：越过画板隔线/其他画板/壳层时指针样式不回退 */
+body.sr-board-grabbing,
+body.sr-board-grabbing * {
+  cursor: grabbing !important;
+}
+
+/* ---- 点阵网格背景（n8n 风格 16 单位网格，随视口联动，见 engine applyViewport） ---- */
+.sr-board-grid {
+  position: absolute;
+  inset: 0;
+  background-color: var(--bd-canvas);
+  background-image: radial-gradient(circle at center, var(--bd-dot) 0 var(--bd-dot-radius, 0.5px), transparent var(--bd-dot-edge, 0.65px));
+  background-size: 16px 16px;
+  background-position: -16px -8px;
+}
+
+/* ---- 世界层：所有卡片与连线都在其中，transform 由引擎直接写入 ---- */
+.sr-board-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* ---- 连线层（SVG 在世界内，随世界变换） ---- */
+.sr-board-lines {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+}
+.sr-board-line {
+  stroke: var(--bd-line);
+  stroke-width: 2;
+  stroke-linecap: round;
+  /* 🔴 改动 2026-10-12 · 连线改为贝塞尔 path：填充关闭；命中交给加宽的 sr-board-wire-hit 层 */
+  fill: none;
+  pointer-events: none;
+}
+.sr-board-wire:hover .sr-board-line {
+  stroke: var(--bd-accent);
+  stroke-width: 3;
+}
+/* 🔴 改动 2026-10-12 · 连线的加宽透明命中层（双击删除用；参照工坊 asset-wire-hit） */
+.sr-board-wire-hit {
+  stroke: transparent;
+  stroke-width: 14;
+  fill: none;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+/* 🔴 改动 2026-10-12 · 待定连线：拖拽中跟随光标的虚线（参照工坊 asset-pending-wire），不吃指针事件 */
+.sr-board-wire-pending {
+  stroke: var(--bd-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 6 5;
+  fill: none;
+  pointer-events: none;
+  animation: srBoardWireDash 0.6s linear infinite;
+}
+@keyframes srBoardWireDash {
+  to { stroke-dashoffset: -11; }
+}
+/* 🔴 改动 2026-10-12 · 端口可拖十字光标 + 悬停提亮（food 卡的 sr-food-port / 节点形态的 asset-port） */
+.sr-board-card [data-port-side] {
+  cursor: crosshair;
+  pointer-events: auto;
+}
+.sr-board-card [data-port-side="out"]:hover {
+  filter: brightness(1.3);
+}
+/* 🔴 改动 2026-10-13 · 收益连线金色材质（同工坊 asset-runes 配方）：
+   已形成收益（未激活）= 渐变描边 + 光晕；
+   激活为收益线程 = 叠加 UE5 执行流脉冲（粗圆头亮脉冲 + 柔光晕，按链路深度错峰） */
+.sr-board-wire-aura {
+  stroke: var(--bd-gold-mid);
+  stroke-width: 5;
+  fill: none;
+  stroke-linecap: round;
+  opacity: 0.08;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--bd-gold-mid) 50%, transparent));
+  pointer-events: none;
+}
+.sr-board.sr-board-dark .sr-board-wire-aura {
+  opacity: 0.11;
+}
+/* 收益线程执行流脉冲：光晕层 + 亮核层（dash 占比由引擎按实测长度写入，动画错峰延迟经 inline style） */
+.sr-board-thread-halo,
+.sr-board-thread-pulse {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  animation: srBoardThreadFlow 1.4s linear infinite;
+}
+.sr-board-thread-halo {
+  stroke: #ffd976;
+  stroke-width: 8;
+  opacity: 0.3;
+  filter: blur(1.5px);
+}
+.sr-board-thread-pulse {
+  stroke: #fff8dd;
+  stroke-width: 5;
+  opacity: 1;
+  filter: drop-shadow(0 0 5px rgba(255, 233, 168, 0.95)) drop-shadow(0 0 12px rgba(255, 217, 118, 0.55));
+}
+.sr-board.sr-board-light .sr-board-thread-pulse { stroke: #fff3cd; }
+.sr-board.sr-board-light .sr-board-thread-halo { stroke: #c58f2e; opacity: 0.26; }
+@keyframes srBoardThreadFlow {
+  to { stroke-dashoffset: -100; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sr-board-thread-halo, .sr-board-thread-pulse { animation: none; }
+  .sr-board-thread-halo { display: none; }
+}
+/* 金色连线悬停只加粗，保留渐变本色（普通线的变色悬停对它不适用） */
+.sr-board-wire:hover .sr-board-wire-gold {
+  stroke-width: 3;
+}
+/* 🔴 改动 2026-10-13 · 收益链路外框（自动生成，随节点拖动实时跟随，不吃指针事件）：
+   已形成收益（未循环、未激活）= 金色虚线框 = 系统提示「运行」技能可激活；
+   收益节点回流到链路内资产买入端口 = 形成循环 → 外框转金色实线框 = 「运转」技能可激活；
+   技能选中时对应类型外框 is-castable 高亮呼吸（可在框内释放）；
+   已激活 = 收益线程（流动虚线）/ 收益循环（流动实线）+ 徽标 */
+.sr-board-frame {
+  fill: color-mix(in srgb, var(--bd-gold-mid) 5%, transparent);
+  stroke: var(--bd-gold-mid);
+  stroke-width: 1.6;
+  pointer-events: none;
+}
+.sr-board-frame-gold {
+  stroke-dasharray: 9 7;
+}
+/* 已形成循环（未激活）：金色实线框 */
+.sr-board-frame-loop {
+  stroke: var(--bd-gold-mid);
+  stroke-width: 2;
+  fill: color-mix(in srgb, var(--bd-gold-mid) 8%, transparent);
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--bd-gold-mid) 35%, transparent));
+}
+.sr-board.sr-skill-armed .sr-board-frame.is-castable {
+  stroke: var(--bd-gold-light);
+  stroke-width: 2.4;
+  fill: color-mix(in srgb, var(--bd-gold-mid) 9%, transparent);
+  animation: srBoardFrameCastable 1.1s ease-in-out infinite;
+  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--bd-gold-light) 55%, transparent));
+}
+@keyframes srBoardFrameCastable {
+  50% { stroke-dashoffset: -8; opacity: 0.82; }
+}
+.sr-board-frame-thread {
+  stroke: var(--bd-gold-light);
+  stroke-width: 2;
+  stroke-dasharray: 12 9;
+  fill: color-mix(in srgb, var(--bd-gold-mid) 10%, transparent);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--bd-gold-light) 40%, transparent));
+  animation: srBoardFrameMarch 1.4s linear infinite;
+}
+@keyframes srBoardFrameMarch {
+  to { stroke-dashoffset: -42; }
+}
+/* 已激活的收益循环：金色实线框 + 呼吸微光 */
+.sr-board-frame-cycle {
+  stroke: var(--bd-gold-light);
+  stroke-width: 2.2;
+  fill: color-mix(in srgb, var(--bd-gold-mid) 11%, transparent);
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--bd-gold-light) 42%, transparent));
+  animation: srBoardFrameCycle 2.2s ease-in-out infinite;
+}
+@keyframes srBoardFrameCycle {
+  50% {
+    stroke-width: 2.8;
+    filter: drop-shadow(0 0 15px color-mix(in srgb, var(--bd-gold-light) 60%, transparent));
+  }
+}
+/* 收益线程 / 收益循环徽标（外框左上角） */
+.sr-board-frame-badge rect {
+  fill: color-mix(in srgb, var(--bd-gold-mid) 20%, var(--bd-canvas));
+  stroke: var(--bd-gold-light);
+  stroke-width: 1;
+}
+.sr-board-frame-badge text {
+  fill: var(--bd-gold-light);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  user-select: none;
+}
+.sr-board.sr-board-dark .sr-board-frame {
+  fill: color-mix(in srgb, var(--bd-gold-mid) 7%, transparent);
+}
+.sr-board.sr-board-dark .sr-board-frame-thread {
+  fill: color-mix(in srgb, var(--bd-gold-mid) 11%, transparent);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--bd-gold-light) 45%, transparent));
+}
+
+/* ---- 卡片通用（复刻 .mn-card） ---- */
+.sr-board-card {
+  position: absolute;
+  z-index: 2;
+  background: var(--bd-surface);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px var(--bd-shadow), 0 0 0 1px var(--bd-border);
+  color: var(--bd-text);
+  overflow: hidden;
+  cursor: default;
+  box-sizing: border-box;
+  user-select: none;
+}
+.sr-board-card:hover {
+  box-shadow: 0 2px 5px var(--bd-shadow), 0 0 0 1px var(--bd-muted);
+}
+.sr-board-card.sr-selected {
+  outline: 2px solid var(--bd-accent);
+  outline-offset: 2px;
+}
+.sr-board-card.sr-dragging {
+  cursor: grabbing;
+  box-shadow: 0 12px 28px var(--bd-shadow);
+  z-index: 50;
+}
+.sr-board-card.sr-dragging * {
+  cursor: grabbing !important;
+}
+.sr-board-card.sr-editing {
+  cursor: default;
+}
+
+/* 视图态（非编辑）下卡内控件惰性：点击/拖动都归卡片手势；编辑态恢复原生行为（复刻 Evoloop） */
+.sr-board-card:not(.sr-editing) input,
+.sr-board-card:not(.sr-editing) textarea,
+.sr-board-card:not(.sr-editing) button {
+  cursor: default;
+  user-select: none;
+}
+.sr-board-card.sr-editing textarea,
+.sr-board-card.sr-editing input {
+  cursor: text;
+  user-select: text;
+}
+.sr-board-card.sr-editing button {
+  cursor: pointer;
+}
+/* 视图态动作豁免：标记 sr-view-action 的控件（todo 复选框/删除按钮）非编辑态也可直接操作 */
+.sr-board-card:not(.sr-editing) .sr-view-action {
+  cursor: pointer;
+}
+
+/* 右下角缩放手柄（悬停/选中时显示，复刻 .mn-resize-handle） */
+.sr-board-card .sr-resize-handle {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 16px;
+  height: 16px;
+  cursor: se-resize;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  background: linear-gradient(135deg, transparent 50%, var(--bd-accent) 50%, var(--bd-accent) 60%, transparent 60%);
+}
+.sr-board-card:hover .sr-resize-handle,
+.sr-board-card.sr-selected .sr-resize-handle {
+  opacity: 0.9;
+}
+
+/* ---- Note 笔记卡（复刻 cards-basic.js 的 .mn-note） ---- */
+.sr-note {
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+.sr-note-ta {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 14px 16px;
+  background: transparent;
+  color: var(--bd-text);
+  font: 15px/1.6 system-ui, 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+.sr-board-card:not(.sr-editing) .sr-note-ta {
+  cursor: default;
+}
+.sr-board-card.sr-editing .sr-note-ta {
+  cursor: text;
+  user-select: text;
+}
+
+/* ---- To-do 待办卡（复刻 todo.js 的 Milanote 风格，精简掉进程条/URL 镜像/拖拽排序） ---- */
+/* 垂直节奏常量与 engine grow() 中的 chrome 高度保持同步：padding-top 6 + head margin-bottom 21 + padding-bottom 21 */
+.sr-todo {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  padding: 6px 0 21px;
+  box-sizing: border-box;
+}
+.sr-todo-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 14px 0;
+  margin-bottom: 21px;
+  flex: none;
+  min-height: 26px;
+}
+.sr-todo-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  color: var(--bd-text);
+  font: 700 18px/1.2 system-ui;
+  padding: 2px 0;
+  letter-spacing: 0.02em;
+  text-align: center;
+  resize: none;
+  overflow: hidden;
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.sr-todo-count {
+  flex: none;
+  font: 11px/1.6 system-ui;
+  color: var(--bd-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sr-todo-list {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sr-todo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 0 10px 0 6px;
+  min-height: 21px;
+  position: relative;
+  border-radius: 4px;
+}
+/* 勾选圆框：勾选后缩小为实心圆点（复刻 Evoloop 蓝点动效的静态终态） */
+.sr-todo-check {
+  width: 17px;
+  height: 17px;
+  min-width: 17px;
+  min-height: 17px;
+  max-width: 17px;
+  max-height: 17px;
+  aspect-ratio: 1/1;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  margin-top: 2px;
+  border: 1.5px solid var(--bd-muted);
+  border-radius: 50%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.25s ease, transform 0.12s ease;
+}
+.sr-todo-check:hover {
+  border-color: var(--bd-check);
+  transform: scale(1.12);
+}
+.sr-todo-check:active {
+  transform: scale(0.86);
+}
+.sr-todo-check[aria-checked='true'] {
+  background: var(--bd-check);
+  border-color: var(--bd-check);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--bd-check) 70%, transparent);
+  transform: scale(0.5);
+}
+.sr-todo-dot {
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #9fd8ff 0%, var(--bd-check) 60%);
+  transform: scale(0);
+  transition: transform 0.3s cubic-bezier(0.34, 1.9, 0.44, 1);
+  pointer-events: none;
+}
+.sr-todo-check[aria-checked='true'] .sr-todo-dot {
+  transform: scale(1);
+}
+.sr-todo-text {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: 14px/1.5 system-ui;
+  padding: 0 6px;
+  color: var(--bd-text);
+  resize: none;
+  overflow: hidden;
+  display: block;
+  word-break: break-word;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+.sr-todo-row.sr-done .sr-todo-text {
+  color: var(--bd-muted);
+  text-decoration: line-through;
+}
+.sr-todo-del {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin-top: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--bd-muted);
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  cursor: pointer;
+}
+.sr-todo-row:hover .sr-todo-del {
+  opacity: 1;
+}
+.sr-todo-del:hover {
+  background: var(--bd-hover);
+  color: var(--bd-danger);
+}
+
+/* ---- Board 嵌套子画板卡（复刻 .mn-card-board：透明底 + 徽章 + 标题 + 计数） ---- */
+.sr-card-board {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.sr-card-board:hover {
+  box-shadow: none;
+}
+.sr-card-board.sr-selected {
+  outline: none;
+}
+.sr-card-board .sr-resize-handle {
+  display: none;
+}
+.sr-boardcard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  height: 100%;
+  padding: 4px 6px;
+  box-sizing: border-box;
+}
+.sr-boardcard-badge {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #7cc8c0;
+  color: #174e60;
+  border-radius: 16px;
+  cursor: pointer;
+}
+.sr-boardcard-badge svg {
+  width: 34px;
+  height: 34px;
+  pointer-events: none;
+}
+.sr-boardcard-info {
+  min-width: 0;
+  width: 100%;
+  text-align: center;
+}
+.sr-boardcard-title {
+  min-width: 0;
+  color: var(--bd-text);
+  font: 600 15px/1.3 system-ui;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+}
+.sr-boardcard-rename {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  letter-spacing: inherit;
+  text-align: center;
+}
+.sr-boardcard-count {
+  font: 12px/1.4 system-ui;
+  color: var(--bd-muted);
+  margin-top: 1px;
+}
+/* 选中态：徽章描边 + 右上角圆点（复刻 Evoloop） */
+.sr-card-board.sr-selected .sr-boardcard-badge {
+  outline: 2px solid var(--bd-accent);
+  outline-offset: 1px;
+}
+.sr-card-board.sr-selected .sr-boardcard-badge::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  right: 0;
+  top: 0;
+  background: var(--bd-accent);
+}
+/* 🔴 改动 2026-10-14 · 卡片拖入画板卡：作为投放目标时高亮（徽章描边 + 外光晕 + 标题着色），提示松手移入 */
+.sr-card-board.sr-board-drop-target .sr-boardcard-badge {
+  outline: 2px solid var(--bd-accent);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--bd-accent) 18%, transparent),
+    0 0 16px color-mix(in srgb, var(--bd-accent) 55%, transparent);
+}
+.sr-card-board.sr-board-drop-target .sr-boardcard-title {
+  color: var(--bd-accent);
+}
+
+/* ---- 添加菜单（左侧常驻竖排工具栏，复刻 .mn-addmenu；点击中心创建，可拖放到落点创建；
+   全量 18 项内容类型超屏时菜单自身滚动，同 Evoloop top/bottom 夹持 + overflow-y:auto） ---- */
+.sr-addmenu {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  bottom: 16px;
+  z-index: 20;
+  width: 60px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bd-border) transparent;
+  background: var(--bd-toolbar);
+  border: 1px solid var(--bd-border);
+  border-radius: 12px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  box-shadow: 0 4px 18px var(--bd-shadow);
+}
+.sr-addmenu h4 {
+  margin: 2px 4px;
+  font: 600 10px/1 system-ui;
+  color: var(--bd-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sr-additem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 3px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  box-sizing: border-box;
+  min-width: 0;
+}
+.sr-additem:hover {
+  background: var(--bd-hover);
+}
+/* 未实现的内容类型（复刻 .mn-additem.mn-disabled：不可点不可拖，提示「即将支持」） */
+.sr-additem.sr-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.sr-additem.sr-disabled:hover {
+  background: transparent;
+}
+.sr-additem-ico {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1;
+  color: #fff;
+}
+.sr-additem-lbl {
+  font: 500 9px/1.2 system-ui;
+  color: var(--bd-text);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ---- 框选矩形（左键拖空白，复刻 .mn-marquee） ---- */
+.sr-board-marquee {
+  position: absolute;
+  z-index: 40;
+  border: 1px solid var(--bd-accent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--bd-accent) 10%, transparent);
+  pointer-events: none;
+  display: none;
+}
+
+/* ---- 🔴 改动 2026-10-13 · 吸附对齐辅助线（Figma 风格参考线）：
+   拖动卡片与其他卡片顶/底/左/右/水平中心/垂直中心对齐，或输出↔输入端口同高（可直线连线）
+   时出现；根层屏幕坐标（世界层之外），因此线宽不随缩放变化，永远清晰 1px。 ---- */
+.sr-snap-guides {
+  position: absolute;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  overflow: hidden;
+}
+.sr-snap-guide {
+  position: absolute;
+  background: var(--bd-accent);
+  opacity: 0.85;
+  pointer-events: none;
+  box-shadow: 0 0 4px color-mix(in srgb, var(--bd-accent) 65%, transparent);
+}
+.sr-snap-guide-h {
+  height: 1px;
+  left: 0;
+  right: 0;
+}
+.sr-snap-guide-v {
+  width: 1px;
+  top: 0;
+  bottom: 0;
+}
+/* 端口对齐：金色提示段连接两端口（暗示「可直线连线」），与收益金同族配色 */
+.sr-snap-guide-port {
+  height: 1px;
+  background: var(--bd-gold-light);
+  opacity: 0.95;
+  box-shadow: 0 0 5px color-mix(in srgb, var(--bd-gold-light) 70%, transparent);
+}
+
+/* 🔴 改动 2026-10-11 · 移除画板底部提示文字样式（.sr-board-hint）：用户要求画布保持干净 */
+
+/* ---- 平移中光标 ---- */
+.sr-board.sr-panning,
+.sr-board.sr-panning * {
+  cursor: grabbing !important;
+}
+
+/* ---- 连线模式 ---- */
+.sr-board.sr-connecting,
+.sr-board.sr-connecting .sr-board-card {
+  cursor: crosshair;
+}
+.sr-board-connect-hint {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: var(--bd-toolbar);
+  border: 1px solid var(--bd-border);
+  color: var(--bd-text);
+  font: 500 12px/1 system-ui;
+  box-shadow: 0 4px 18px var(--bd-shadow);
+  display: none;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.sr-board.sr-connecting .sr-board-connect-hint {
+  display: block;
+}
+
+/* ---- 嵌套子画板覆盖层（z-70：高于卷轴 z-40 与预览弹层 z-50） ---- */
+.sr-subboard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+}
+.sr-subboard-host {
+  position: absolute;
+  inset: 0;
+}
+.sr-board-back {
+  position: absolute;
+  top: 16px;
+  left: 92px;
+  z-index: 25;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--bd-border);
+  background: var(--bd-toolbar);
+  color: var(--bd-text);
+  font: 600 13px/1 system-ui;
+  cursor: pointer;
+  box-shadow: 0 4px 18px var(--bd-shadow);
+}
+.sr-board-back:hover {
+  background: var(--bd-hover);
+}
+
+/* ---- 输入细节（复刻 Evoloop：光标色/占位符/选区） ---- */
+.sr-board input,
+.sr-board textarea {
+  caret-color: var(--bd-text);
+}
+.sr-board input::placeholder,
+.sr-board textarea::placeholder {
+  color: var(--bd-muted);
+  opacity: 1;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.sr-board input::selection,
+.sr-board textarea::selection {
+  background: #45637d;
+  color: #fff;
+}
+
+/* 🔴 改动 2026-10-11 · 画布右键菜单（拆分画板 ▸ 垂直/水平拆分） */
+.sr-board-ctxmenu {
+  position: absolute;
+  z-index: 60;
+  min-width: 132px;
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  font: 13px/1.4 system-ui, "Segoe UI", sans-serif;
+  user-select: none;
+}
+.sr-board-dark .sr-board-ctxmenu {
+  background: #2a2a2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+.sr-board-ctxitem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  color: #1c1c1f;
+}
+.sr-board-dark .sr-board-ctxitem {
+  color: #e4e4e7;
+}
+.sr-board-ctxitem:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+.sr-board-dark .sr-board-ctxitem:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+/* 🔴 改动 2026-10-13 · 危险菜单项（删除画板）红色 */
+.sr-board-ctxitem.sr-board-ctxdanger {
+  color: #d94838;
+}
+.sr-board-dark .sr-board-ctxitem.sr-board-ctxdanger {
+  color: #ff6b5e;
+}
+/* 🔴 改动 2026-10-14 · 禁用菜单项（剪贴板为空时的「粘贴」）：灰显、不可点 */
+.sr-board-ctxitem.sr-board-ctxdisabled {
+  color: rgba(0, 0, 0, 0.32);
+  cursor: default;
+  pointer-events: auto;
+}
+.sr-board-ctxitem.sr-board-ctxdisabled:hover {
+  background: transparent;
+}
+.sr-board-dark .sr-board-ctxitem.sr-board-ctxdisabled {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ==========================================================================
+   🔴 改动 2026-10-13 · 悬浮子画板（画中画）选中态：四周高亮蓝色分隔线 + 四角手柄
+   （框选矩形重叠即选中；选中后才可左键拖动头部/分隔线，右键任意部位直接拖动）
+   ========================================================================== */
+.sr-pinned-board.is-selected {
+  outline: none;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sr-brand-interact-blue, #0ab9e6) 30%, transparent), 0 18px 48px rgba(0, 0, 0, 0.5);
+}
+.sr-pin-divider {
+  position: absolute;
+  background: var(--sr-brand-interact-blue, #0ab9e6);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--sr-brand-interact-blue, #0ab9e6) 65%, transparent);
+  z-index: 30;
+  pointer-events: auto;
+  cursor: grab;
+}
+.sr-pin-divider.is-top {
+  left: -7px;
+  right: -7px;
+  top: -7px;
+  height: 4px;
+  border-radius: 2px;
+}
+.sr-pin-divider.is-bottom {
+  left: -7px;
+  right: -7px;
+  bottom: -7px;
+  height: 4px;
+  border-radius: 2px;
+}
+.sr-pin-divider.is-left {
+  top: -7px;
+  bottom: -7px;
+  left: -7px;
+  width: 4px;
+  border-radius: 2px;
+}
+.sr-pin-divider.is-right {
+  top: -7px;
+  bottom: -7px;
+  right: -7px;
+  width: 4px;
+  border-radius: 2px;
+}
+.sr-pin-corner {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--sr-brand-interact-blue, #0ab9e6);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--sr-brand-interact-blue, #0ab9e6) 70%, transparent);
+  z-index: 31;
+  pointer-events: auto;
+  cursor: grab;
+}
+.sr-pin-corner.is-tl { top: -10px; left: -10px; }
+.sr-pin-corner.is-tr { top: -10px; right: -10px; }
+.sr-pin-corner.is-bl { bottom: -10px; left: -10px; }
+.sr-pin-corner.is-br { bottom: -10px; right: -10px; }
+.sr-pinned-board:active .sr-pin-divider,
+.sr-pinned-board:active .sr-pin-corner {
+  cursor: grabbing;
+}
+.sr-board-ctxarrow {
+  opacity: 0.5;
+  font-size: 11px;
+}
+.sr-board-ctxsubmenu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: -5px;
+  margin-left: 4px;
+}
+.sr-board-ctxsub:hover .sr-board-ctxsubmenu {
+  display: block;
+}
+/* 🔴 改动 2026-10-11 · 右边缘空间不足时主菜单收回画布内、子菜单向左展开（is-left 由 JS 判定） */
+.sr-board-ctxmenu.is-left .sr-board-ctxsubmenu {
+  left: auto;
+  right: 100%;
+  margin-left: 0;
+  margin-right: 4px;
+}
+
+/* ==========================================================================
+   🔴 改动 2026-10-11 · food 实物卡（食品原材料，200×280 固定比例）
+   设计：design/canvas-ingredient-card 评审稿 v0.1；色值全部来自 --sr-* token
+   （cards 为「产品实体」，深浅画板主题下均保持深色卡面，与 NFT 数字卡一致）
+   ========================================================================== */
+
+/* 引擎外壳：底版样式让给内层卡片（选中描边保留） */
+.sr-board-card.sr-card-food {
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+  border-radius: 0;
+}
+.sr-board-card.sr-card-food:hover {
+  box-shadow: none;
+}
+.sr-board-card.sr-card-food.sr-selected {
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+.sr-card-food-missing {
+  display: grid;
+  place-items: center;
+  font: 500 12px/1.6 "HarmonyOS Sans SC", "Noto Sans SC", sans-serif;
+  color: var(--sr-d-gray-4);
+  padding: 12px;
+  text-align: center;
+}
+
+/* 版本色（editionTone）：red 联名 / gold 限定 / silver 礼盒。
+   🔴 改动 2026-10-11 · 修饰类必须带 sr- 前缀：工坊 food-card.css 存在全局裸类 .tone-gold/.tone-silver/.tone-red
+   （edition 徽章用），画布卡根节点若直接挂 tone-* 会被其 color/background 覆盖（实测龙井卡名被染成 frosty-skies 青色） */
+.sr-food-card {
+  --tone-a: var(--sr-accent-red-orange);
+  --tone-b: var(--sr-accent-strawberry-red);
+  --tone-ink: color-mix(in srgb, var(--tone-b) 30%, #ffc9c6);
+}
+.sr-food-card.sr-tone-gold {
+  --tone-a: var(--sr-accent-dark-amber);
+  --tone-b: var(--sr-accent-shiny-orange);
+  --tone-ink: color-mix(in srgb, var(--tone-b) 35%, #fff3d6);
+}
+.sr-food-card.sr-tone-silver {
+  --tone-a: var(--sr-d-gray-5);
+  --tone-b: var(--sr-d-gray-3);
+  --tone-ink: var(--sr-d-gray-2);
+}
+
+.sr-food-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--sr-d-gray-9) 0%, color-mix(in srgb, var(--sr-d-gray-9) 62%, var(--sr-d-gray-11)) 100%);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .05), 0 0 0 1px var(--sr-d-gray-8);
+  color: var(--sr-d-gray-1);
+  font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  transition: box-shadow .18s ease;
+}
+.sr-food-card:hover {
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .6), 0 0 0 1px var(--sr-d-gray-7), 0 0 0 4px color-mix(in srgb, var(--tone-b) 14%, transparent);
+}
+/* 版本色带：顶部 3px 渐变，色彩即信息 */
+.sr-food-tone {
+  position: absolute;
+  top: 0; left: 14px; right: 14px;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(90deg, var(--tone-a), var(--tone-b) 60%, color-mix(in srgb, var(--tone-b) 72%, var(--sr-brand-black)));
+}
+/* 顶条：品类图腾 + 年份版本 + 状态灯 */
+.sr-food-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 11px 8px;
+}
+.sr-food-cat {
+  width: 16px; height: 16px;
+  border-radius: 5px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--tone-b) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone-b) 42%, transparent);
+}
+.sr-food-cat svg { width: 11px; height: 11px; }
+.sr-food-cat .p-pod { fill: var(--tone-a); }
+.sr-food-cat .p-stem { stroke: var(--sr-accent-verdepom); }
+.sr-food-vintage {
+  flex: 1;
+  font-size: 10px;
+  color: var(--sr-d-gray-4);
+  letter-spacing: .04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sr-food-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--sr-d-gray-3);
+  flex: none;
+}
+.sr-food-status i {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--sr-accent-verdepom);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--sr-accent-verdepom) 80%, transparent);
+}
+/* 主视觉方窗（沿用三维卡方窗决策） */
+.sr-food-art {
+  position: relative;
+  margin: 0 12px;
+  width: calc(100% - 24px);
+  aspect-ratio: 1;
+}
+.sr-food-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07);
+  background: color-mix(in srgb, var(--sr-d-gray-10) 80%, var(--sr-d-gray-11));
+  pointer-events: none;
+}
+.sr-food-edition {
+  position: absolute;
+  top: 7px; left: 7px;
+  font-size: 9px;
+  letter-spacing: .08em;
+  color: var(--tone-ink);
+  background: color-mix(in srgb, var(--tone-b) 28%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone-b) 50%, transparent);
+  border-radius: 999px;
+  padding: 2px 8px;
+  backdrop-filter: blur(6px);
+}
+/* 认证徽章：金色圆形简化章，压图窗右下角（MTG 系列符号位置逻辑） */
+.sr-food-seal {
+  position: absolute;
+  right: -6px; bottom: -6px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%,
+    color-mix(in srgb, var(--sr-accent-shiny-orange) 32%, #fff8) 0%,
+    color-mix(in srgb, var(--sr-accent-shiny-orange) 78%, #fff2) 34%,
+    var(--sr-accent-shiny-orange) 62%,
+    var(--sr-accent-dark-amber) 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .55),
+    inset 0 1px 2px rgba(255, 255, 255, .55),
+    0 0 0 1.5px color-mix(in srgb, var(--sr-accent-shiny-orange) 55%, #fff);
+  display: grid;
+  place-items: center;
+  cursor: help;
+  color: color-mix(in srgb, var(--sr-accent-dark-amber) 58%, var(--sr-brand-black));
+}
+.sr-food-seal svg { width: 14px; height: 14px; }
+/* 追加徽章（如「有机」）：青绿圆字标 */
+.sr-food-extra {
+  position: absolute;
+  right: 22px; bottom: -6px;
+  min-width: 24px; height: 24px;
+  border-radius: 999px;
+  box-sizing: border-box;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-style: normal;
+  color: #fff;
+  background: var(--sr-accent-verdepom);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .5), 0 0 0 1.5px rgba(255, 255, 255, .85);
+}
+/* 名称区 */
+.sr-food-name { padding: 9px 12px 0; }
+.sr-food-name h3 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  line-height: 1.25;
+  margin: 0;
+}
+.sr-food-name p {
+  font-size: 10px;
+  color: var(--sr-d-gray-4);
+  margin: 3px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.sr-food-name p svg { width: 9px; height: 9px; flex: none; }
+/* 库存区：工作流最关心的数量关系 */
+.sr-food-qty { padding: 7px 12px 0; }
+.sr-food-qty .row { display: flex; align-items: baseline; gap: 5px; }
+.sr-food-qty strong {
+  font-size: 13.5px;
+  font-weight: 650;
+  font-family: Consolas, "JetBrains Mono", monospace;
+  letter-spacing: -.01em;
+}
+.sr-food-qty .of {
+  font-size: 9.5px;
+  color: var(--sr-d-gray-5);
+  font-family: Consolas, "JetBrains Mono", monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sr-food-qty .price {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--sr-d-gray-3);
+  font-family: Consolas, "JetBrains Mono", monospace;
+  flex: none;
+}
+.sr-food-qty .bar {
+  margin-top: 6px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--sr-d-gray-8);
+  overflow: hidden;
+}
+.sr-food-qty .bar i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--tone-a), var(--tone-b));
+}
+/* 底行：资产编号弱显示（溯源主键，能选中复制即可） */
+.sr-food-asset {
+  padding: 7px 12px 10px;
+  font-family: Consolas, "JetBrains Mono", monospace;
+  font-size: 8.5px;
+  letter-spacing: .08em;
+  color: var(--sr-d-gray-6);
+}
+/* 连接端口：左入（预留·产地/供应商）右出（→ 配方卡）；引擎连线走中心到中心，此处为视觉锚点 */
+.sr-food-port {
+  position: absolute;
+  top: 50%;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+}
+.sr-food-port.in {
+  left: -7px;
+  background: var(--sr-d-gray-9);
+  border: 2px solid var(--sr-d-gray-6);
+}
+.sr-food-port.out {
+  right: -7px;
+  background: var(--tone-b);
+  border: 2px solid rgba(255, 255, 255, .85);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--tone-b) 55%, transparent);
+}
+.sr-board.sr-connecting .sr-food-port.out {
+  animation: srFoodPortPulse 1.1s ease-in-out infinite;
+}
+@keyframes srFoodPortPulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tone-b) 45%, transparent); }
+  50% { box-shadow: 0 0 0 6px transparent; }
+}
+
+/* ==========================================================================
+   🔴 改动 2026-10-12 · food 实物卡的四种形态（icon 图标 / node 节点 / info 组件 / card 卡片）
+   内容建造器在 foodCardContent.ts；视觉类名复用资产体系（asset-system.css / asset-runes.css），
+   其全局类依赖 .asset-lab 的 --al-* 变量，画板内由 .sr-food-form 桥接同一组深色色板
+   （实物各形态与数字卡同为「产品实体」，深浅画板主题下均保持深色）。
+   ========================================================================== */
+.sr-food-form {
+  --al-bg: #141416; --al-surface: #1c1c1f; --al-raised: #232326; --al-line: #343437;
+  --al-text: #efeeeb; --al-muted: #929195; --al-accent: #e07862; --al-accent-soft: #382822;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: var(--al-text);
+  font-family: Inter, "HarmonyOS Sans SC", "Noto Sans SC", sans-serif;
+}
+
+/* 图标形态（96×96）：符文图标居中，名称玻璃条与数量标签在图标内（asset-icon-board 同款） */
+.sr-food-form-icon { display: grid; place-items: center; }
+.sr-food-form-icon .asset-board-token { width: 96px; }
+
+/* ==========================================================================
+   🔴 改动 2026-10-12 · character 角色卡（杨峥 · 厨师）—— 卡片形态改版：
+   正面仅保留靠近卡片边缘的高亮镭射全息材质（柔光带 + 亮边线两层），卡面由人物照片铺满；
+   UI 信息改悬浮排版（眉行 / 姓名 / 头衔 / 玻璃数据条 / 资产编号）；
+   卡背设计不变（溯源档案：二维码 / 批次 / 证书 / 发行 / 流转记录），点击可翻面。
+   ========================================================================== */
+
+/* 引擎外壳：与 sr-card-food 同策略（底版让给内层卡片，选中描边保留） */
+/* 🔴 改动 2026-10-12 · market 市场卡并入同一外壳策略 */
+.sr-board-card.sr-card-character,
+.sr-board-card.sr-card-recipe,
+.sr-board-card.sr-card-dish,
+.sr-board-card.sr-card-market {
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+  border-radius: 0;
+}
+.sr-board-card.sr-card-character:hover,
+.sr-board-card.sr-card-recipe:hover,
+.sr-board-card.sr-card-dish:hover,
+.sr-board-card.sr-card-market:hover {
+  box-shadow: none;
+}
+.sr-board-card.sr-card-character.sr-selected {
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+.sr-board-card.sr-card-recipe.sr-selected {
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+.sr-board-card.sr-card-dish.sr-selected {
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+.sr-board-card.sr-card-market.sr-selected {
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+
+/* 版本色：复用 sr-food-card 的 tone 变量体系（gold 认证版 / red 签名版 / silver） */
+.sr-char-card {
+  --tone-a: var(--sr-accent-red-orange);
+  --tone-b: var(--sr-accent-strawberry-red);
+  --tone-ink: color-mix(in srgb, var(--tone-b) 30%, #ffc9c6);
+}
+.sr-char-card.sr-tone-gold {
+  --tone-a: var(--sr-accent-dark-amber);
+  --tone-b: var(--sr-accent-shiny-orange);
+  --tone-ink: color-mix(in srgb, var(--tone-b) 35%, #fff3d6);
+}
+.sr-char-card.sr-tone-silver {
+  --tone-a: var(--sr-d-gray-5);
+  --tone-b: var(--sr-d-gray-3);
+  --tone-ink: var(--sr-d-gray-2);
+}
+
+.sr-char-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  perspective: 1100px;
+  color: var(--sr-d-gray-1);
+  font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+.sr-char-flip {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform .6s cubic-bezier(.3, .7, .3, 1);
+}
+.sr-char-card.is-flipped .sr-char-flip { transform: rotateY(180deg); }
+.sr-char-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .5), 0 0 0 1px var(--sr-d-gray-8);
+}
+.sr-char-front { background: var(--sr-d-gray-10); }
+.sr-char-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(168deg, var(--sr-d-gray-10) 0%, var(--sr-d-gray-11) 58%, var(--sr-d-gray-10) 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 卡面照片：铺满整个正面（object-fit cover，人物构图焦点偏上） */
+.sr-char-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+  pointer-events: none;
+}
+
+/* 镭射全息材质 · 仅贴边：两层同源的锥形光谱，只渲染贴边环带（mask content-box 排除中央），
+   柔光带向内晕染 + 亮边线收边；随 --sr-holo-spin 缓慢流转。 */
+@property --sr-holo-spin { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+.sr-char-holo-band,
+.sr-char-holo-edge {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  pointer-events: none;
+  background: conic-gradient(from var(--sr-holo-spin, 0deg),
+    #0fedff, #8f5bff, #ff6ad5, #ffd76a, #53ffa9, #0fedff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: sr-char-holo-rotate 7s linear infinite;
+}
+.sr-char-holo-band {
+  padding: 15px;
+  opacity: .5;
+  mix-blend-mode: screen;
+  filter: blur(7px) saturate(1.25);
+}
+.sr-char-holo-edge {
+  padding: 2px;
+  opacity: .95;
+}
+@keyframes sr-char-holo-rotate { to { --sr-holo-spin: 360deg; } }
+
+/* 顶条：版本徽章 + 状态（悬浮在照片上） */
+.sr-char-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 10px 11px;
+  z-index: 2;
+}
+.sr-char-edition {
+  font-size: 9px;
+  letter-spacing: .1em;
+  color: var(--tone-ink);
+  background: color-mix(in srgb, var(--tone-b) 30%, rgba(10, 10, 14, .55));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone-b) 55%, transparent);
+  border-radius: 999px;
+  padding: 3px 9px;
+  backdrop-filter: blur(8px);
+}
+.sr-char-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9.5px;
+  color: var(--sr-d-gray-2);
+  background: rgba(10, 10, 14, .42);
+  border-radius: 999px;
+  padding: 3px 9px;
+  backdrop-filter: blur(8px);
+}
+.sr-char-status i {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--sr-accent-verdepom);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--sr-accent-verdepom) 80%, transparent);
+}
+
+/* 底部信息悬浮层：渐变暗罩保证可读，照片上半部分保持纯净 */
+.sr-char-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 2;
+  padding: 34px 12px 10px;
+  background: linear-gradient(180deg, transparent 0%, rgba(8, 8, 12, .38) 26%, rgba(8, 8, 12, .9) 68%, rgba(5, 5, 8, .96) 100%);
+}
+.sr-char-eyebrow {
+  margin: 0;
+  font-size: 8.5px;
+  letter-spacing: .22em;
+  color: var(--tone-ink);
+  text-transform: uppercase;
+}
+.sr-char-name {
+  margin: 2px 0 0;
+  font-size: 29px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  line-height: 1.15;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, .55);
+}
+.sr-char-desc {
+  margin: 3px 0 0;
+  font-size: 10px;
+  color: rgba(239, 238, 235, .82);
+}
+.sr-char-sign {
+  margin: 2px 0 0;
+  font-size: 10px;
+  color: var(--sr-d-gray-4);
+}
+/* 玻璃数据条：服务费 / 评分 / 席位 */
+.sr-char-stats {
+  margin-top: 9px;
+  display: flex;
+  align-items: stretch;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .09);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16), 0 4px 14px rgba(0, 0, 0, .3);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+.sr-char-stats > span {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 8px 7px;
+}
+.sr-char-stats > span + span { box-shadow: inset 1px 0 0 rgba(255, 255, 255, .12); }
+.sr-char-stats small {
+  font-size: 8px;
+  letter-spacing: .08em;
+  color: rgba(239, 238, 235, .62);
+}
+.sr-char-stats strong {
+  font-size: 11.5px;
+  font-weight: 650;
+  font-family: Consolas, "JetBrains Mono", monospace;
+  color: #fff;
+  white-space: nowrap;
+}
+.sr-char-stats strong em {
+  font-style: normal;
+  font-size: 8.5px;
+  color: rgba(239, 238, 235, .55);
+}
+/* 资产编号：底部锚点弱显示（溯源主键） */
+.sr-char-asset {
+  margin-top: 7px;
+  font-family: Consolas, "JetBrains Mono", monospace;
+  font-size: 7.5px;
+  letter-spacing: .08em;
+  color: rgba(239, 238, 235, .48);
+}
+
+/* ---- 卡背（设计不变：溯源档案同构，200×280 画布卡尺寸） ---- */
+.sr-char-back-no {
+  font-family: Consolas, "JetBrains Mono", monospace;
+  font-size: 8px;
+  letter-spacing: .04em;
+  color: var(--sr-d-gray-4);
+}
+.sr-char-back-body {
+  flex: 1;
+  min-height: 0;
+  padding: 4px 12px 0;
+  display: flex;
+  flex-direction: column;
+}
+.sr-char-back-qr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sr-char-qr-slot,
+.sr-char-qr-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: #fff;
+  padding: 3px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .4);
+}
+.sr-char-qr-slot { display: inline-block; }
+.sr-char-qr-slot.is-failed { background: var(--sr-d-gray-8); }
+.sr-char-back-qr p {
+  margin: 0;
+  font-size: 9.5px;
+  line-height: 1.5;
+  color: var(--sr-d-gray-4);
+}
+.sr-char-back-name {
+  margin: 9px 0 0;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: .02em;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.sr-char-back-name small {
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--sr-d-gray-4);
+}
+.sr-char-back-rows { margin: 8px 0 0; display: flex; flex-direction: column; gap: 4px; }
+.sr-char-back-rows div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 9.5px;
+}
+.sr-char-back-rows dt { color: var(--sr-d-gray-5); flex: none; }
+.sr-char-back-rows dd {
+  margin: 0;
+  color: var(--sr-d-gray-2);
+  font-family: Consolas, "JetBrains Mono", monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sr-char-back-flow {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.sr-char-back-flow li {
+  position: relative;
+  padding-left: 11px;
+  font-size: 9px;
+  line-height: 1.45;
+  color: var(--sr-d-gray-3);
+  display: flex;
+  gap: 6px;
+}
+.sr-char-back-flow li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 4px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--tone-a), var(--tone-b));
+}
+.sr-char-back-flow time {
+  flex: none;
+  font-family: Consolas, "JetBrains Mono", monospace;
+  font-size: 8px;
+  color: var(--sr-d-gray-5);
+}
+.sr-char-back-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px 9px;
+  font-size: 7.5px;
+  letter-spacing: .14em;
+  color: var(--sr-d-gray-5);
+  border-top: 1px solid color-mix(in srgb, var(--sr-d-gray-0) 7%, transparent);
+}
+
+/* ==========================================================================
+   🔴 改动 2026-10-12 · recipe 配方卡（辣龙腿）：沿用原材料卡版式，
+   图窗改 4:3 收高，新增原料清单芯片行；节点形态 238×232（3 原料 + 买入 = 4 行端口）。
+   ========================================================================== */
+.sr-recipe-card .sr-food-art { aspect-ratio: 4 / 3; }
+.sr-recipe-cat .p-pod { fill: none; stroke: var(--tone-a); stroke-width: 1.6; }
+.sr-recipe-cat .p-scroll { stroke: var(--tone-b); }
+.sr-recipe-cat .p-lines { stroke: var(--tone-ink); }
+.sr-recipe-ingredients {
+  display: flex;
+  gap: 4px;
+  padding: 7px 12px 0;
+  overflow: hidden;
+}
+.sr-recipe-chip {
+  flex: none;
+  max-width: 33%;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: 8.5px;
+  color: var(--sr-d-gray-2);
+  background: color-mix(in srgb, var(--tone-b) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone-b) 34%, transparent);
+  border-radius: 999px;
+  padding: 2.5px 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sr-recipe-chip small {
+  font-size: 7.5px;
+  color: var(--sr-d-gray-4);
+  font-family: Consolas, "JetBrains Mono", monospace;
+}
+/* 配方 / 角色 / 菜品 / 市场节点形态页脚（与 food 节点同款等宽对齐） */
+/* 🔴 改动 2026-10-12 · market 市场卡节点页脚并入同一组 */
+.sr-recipe-form .asset-node footer,
+.sr-char-form .asset-node footer,
+.sr-dish-form .asset-node footer,
+.sr-market-form .asset-node footer { white-space: nowrap; }
+.sr-recipe-form .asset-node footer > span:last-child,
+.sr-char-form .asset-node footer > span:last-child,
+.sr-dish-form .asset-node footer > span:last-child,
+.sr-market-form .asset-node footer > span:last-child {
+  font-family: Consolas, "JetBrains Mono", monospace;
+  font-size: 8px;
+  letter-spacing: .04em;
+  opacity: .75;
+}
+
+/* ==========================================================================
+   🔴 改动 2026-10-12 · dish 菜品卡（辣龙腿成品）：沿用原材料卡版式与配方卡的
+   4:3 图窗 + 芯片行（芯片内容为出品链路：配方「辣龙腿」 / 主厨「杨峥」）；
+   节点形态 238×202（配方服务 + 厨师 + 买入 = 3 行端口）。
+   ========================================================================== */
+.sr-dish-cat .p-dome { stroke: var(--tone-a); }
+.sr-dish-cat .p-base { stroke: var(--tone-b); }
+.sr-dish-cat .p-knob { fill: var(--tone-ink); }
+
+/* ==========================================================================
+   🔴 改动 2026-10-12 · market 市场卡（用户 / 采购方）：沿用原材料卡版式与配方卡的
+   4:3 图窗 + 芯片行（芯片内容为运营指标：月活 / 复购）；
+   节点形态 238×142（买入/资金 入 + 卖出 出 = 1 行端口，对齐资产体系采购方节点）。
+   ========================================================================== */
+.sr-market-cat .p-head { stroke: var(--tone-a); }
+.sr-market-cat .p-body { stroke: var(--tone-b); }
+.sr-market-cat .p-peer { stroke: var(--tone-ink); }
+
+
+/* 节点形态（238×172）：天赋节点底座；article 基础类 position:absolute，inline left/top/w/h 铺满外壳 */
+.sr-food-form-node .asset-node footer { white-space: nowrap; }
+.sr-food-form-node .asset-node footer > span:last-child {
+  font-family: Consolas, "JetBrains Mono", monospace;
+  font-size: 8px;
+  letter-spacing: .04em;
+  opacity: .75;
+}
+
+/* 组件形态（288×72）：AssetInfo 行同款，去掉列表页的下边框与上下留白，配节点同族深色底座 */
+.sr-food-form-info {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  box-sizing: border-box;
+  background: radial-gradient(ellipse at 80% 0%, #8cbbcc0b, transparent 60%), linear-gradient(150deg, #202b33, #131b23 60%, #17202a);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .4), inset 0 1px 0 #8aa4b418;
+}
+.sr-food-form-info .asset-info-row { padding: 0; border-bottom: 0; }
+.sr-food-form-info .asset-info-name strong { font-size: 13px; font-weight: 600; color: var(--al-text); letter-spacing: .01em; }
+.sr-food-form-info .asset-info-name small { font-size: 9px; color: var(--al-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sr-food-form-info .asset-info-value strong { font-size: 12px; font-weight: 600; color: var(--al-text); font-variant-numeric: tabular-nums; }
+.sr-food-form-info .asset-info-value small { font-size: 9px; color: var(--al-muted); white-space: nowrap; }
+
+/* ==========================================================================
+   🔴 改动 2026-10-11 · 拆分画板分隔线
+   8px 热区 + 常显 1px 分隔线，可拖拽推拉两窗格边界。
+   🔴 改动 2026-10-12 · 移除中间的拖动图标（圆徽章 + 双向箭头）；
+   光标改为 UE5 面板分隔条同款（Windows 标准 SIZEWE/SIZENS：ew-resize / ns-resize，
+   即无中杠的纯双向箭头，替代带竖杠的 col-resize/row-resize）。
+   ========================================================================== */
+.sr-split-divider {
+  position: relative;
+  flex: none;
+  z-index: 3; /* 压过两侧窗格（卡片 z-2） */
+  touch-action: none;
+  cursor: ew-resize;
+  /* 🔴 改动 2026-10-11 · 热区底色对齐画布色：透明会透出页面纯黑底，形成突兀的“黑槽” */
+  background: var(--sr-split-bg, var(--sr-l-gray-1));
+  user-select: none;
+}
+.sr-split-divider.is-horizontal {
+  cursor: ns-resize;
+}
+/* 拖拽中：整页统一光标，指针移出 8px 热区也不跳回箭头 */
+.sr-split-drag-ew,
+.sr-split-drag-ew * {
+  cursor: ew-resize !important;
+}
+.sr-split-drag-ns,
+.sr-split-drag-ns * {
+  cursor: ns-resize !important;
+}
+
+/* 常显分隔线（居中 1px，深色 rgba(255,255,255,.32) / 浅色 rgba(0,0,0,.26)，
+   对比度约为原 w-px 的 3 倍；悬停/拖拽时加亮并加粗到 2px） */
+.sr-split-divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: var(--sr-split-line, rgba(0, 0, 0, 0.26));
+  transition: background 0.15s ease, width 0.15s ease, height 0.15s ease;
+}
+.sr-split-divider.is-horizontal::before {
+  top: 50%;
+  bottom: auto;
+  left: 0;
+  right: 0;
+  width: auto;
+  height: 1px;
+  transform: translateY(-50%);
+}
+.sr-split-divider:hover::before,
+.sr-split-divider[data-dragging='true']::before {
+  background: var(--sr-split-line-active, rgba(0, 0, 0, 0.5));
+  width: 2px;
+}
+.sr-split-divider.is-horizontal:hover::before,
+.sr-split-divider.is-horizontal[data-dragging='true']::before {
+  width: auto;
+  height: 2px;
+}
+
+/* 🔴 改动 2026-10-12 · 已移除分隔线中间的拖动图标（原圆形徽章 + 双向箭头 .sr-split-arrows） */
+
+/* 深色主题变量（对齐项目 sr-d 色板） */
+.sr-split-divider.is-dark {
+  --sr-split-bg: var(--sr-d-gray-10);
+  --sr-split-line: rgba(255, 255, 255, 0.32);
+  --sr-split-line-active: rgba(255, 255, 255, 0.65);
+}
+
+/* ==========================================================================
+   🔴 改动 2026-10-12 · 收益节点与金色分支线（参考工坊资产节点 graph.ts / asset-runes.css：
+   卖出连线中点引出金色收益分支，落到收益节点顶边；金色变量同工坊 --revenue-gold-*）
+   ========================================================================== */
+.sr-board-revenue { pointer-events: none; }
+.sr-board-revenue-wire {
+  fill: none;
+  stroke: #d4ad57;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 2px rgba(223, 182, 93, 0.38));
+}
+.sr-board-revenue-aura {
+  fill: none;
+  stroke: #d4ad57;
+  stroke-width: 5;
+  opacity: 0.13;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sr-board-revenue-junction {
+  fill: #eed193;
+  stroke: #b88a3b;
+  stroke-width: 1;
+  filter: drop-shadow(0 0 2px rgba(223, 182, 93, 0.5));
+}
+.sr-board.sr-board-light .sr-board-revenue-wire { stroke: #a77a28; }
+.sr-board.sr-board-light .sr-board-revenue-aura { stroke: #a77a28; opacity: 0.1; }
+.sr-board.sr-board-light .sr-board-revenue-junction { fill: #c69b48; stroke: #90661f; }
+
+/* 收益节点卡：金色卡片（自动生成，固定尺寸，无缩放手柄） */
+.sr-board-card.sr-card-revenue {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.sr-card-revenue.sr-selected {
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+.sr-revenue-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 12px;
+  padding: 12px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #f4e4b8;
+  background: linear-gradient(180deg, rgba(212, 173, 87, 0.16) 0%, rgba(212, 173, 87, 0.05) 100%);
+  border: 1px solid rgba(212, 173, 87, 0.55);
+  box-shadow: 0 0 18px rgba(223, 182, 93, 0.14), inset 0 1px 0 rgba(255, 241, 197, 0.18);
+}
+.sr-revenue-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+.sr-revenue-coin {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b88a3b;
+  background: radial-gradient(circle at 35% 28%, #fff1c5 0%, #eed193 45%, #d4ad57 100%);
+  box-shadow: 0 0 10px rgba(223, 182, 93, 0.5);
+}
+.sr-revenue-coin svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+.sr-revenue-title {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sr-revenue-title small {
+  font: 500 10px/1.4 system-ui, "Segoe UI", sans-serif;
+  color: rgba(244, 228, 184, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sr-revenue-title strong {
+  font: 600 14px/1.3 system-ui, "Segoe UI", sans-serif;
+  color: #f6e9c2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sr-revenue-ports {
+  display: flex;
+  flex-direction: column;
+}
+.sr-revenue-port {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+  padding: 0 0 0 6px;
+  font: 500 12px/1.4 system-ui, "Segoe UI", sans-serif;
+  color: rgba(244, 228, 184, 0.9);
+  cursor: default;
+}
+.sr-revenue-port i {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #b88a3b;
+  border: 2px solid #eed193;
+  box-shadow: 0 0 6px rgba(223, 182, 93, 0.6);
+}
+.sr-revenue-port:hover i {
+  background: #eed193;
+  border-color: #fff1c5;
+}
+.sr-revenue-foot {
+  margin-top: auto;
+  font: 500 10px/1.4 system-ui, "Segoe UI", sans-serif;
+  color: rgba(244, 228, 184, 0.6);
+  text-align: center;
+}
+/* 🔴 改动 2026-10-13 · 收益线程（已激活）：边框提亮 + 呼吸光晕，标注激活运行中 */
+.sr-revenue-card.is-thread {
+  border-color: rgba(238, 209, 147, 0.85);
+  background: linear-gradient(180deg, rgba(212, 173, 87, 0.24) 0%, rgba(212, 173, 87, 0.08) 100%);
+  box-shadow: 0 0 22px rgba(223, 182, 93, 0.3), inset 0 1px 0 rgba(255, 241, 197, 0.3);
+  animation: srRevenueThreadBreath 2.2s ease-in-out infinite;
+}
+@keyframes srRevenueThreadBreath {
+  50% { box-shadow: 0 0 34px rgba(223, 182, 93, 0.45), inset 0 1px 0 rgba(255, 241, 197, 0.35); }
+}
+.sr-revenue-card.is-thread .sr-revenue-title small { color: #f6e9c2; }
+.sr-revenue-card.is-thread .sr-revenue-foot { color: rgba(246, 233, 194, 0.92); }

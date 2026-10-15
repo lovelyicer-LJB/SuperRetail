@@ -1,0 +1,9 @@
+const imgVector = "http://localhost:3845/assets/0951ca9ccd0517823654695ce9af996bfd1eb2b3.svg";
+
+export default function Vector() {
+  return (
+    <div className="relative size-full" data-node-id="48:2" data-name="Vector · 圆角修复前备份">
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgVector} />
+    </div>
+  );
+}

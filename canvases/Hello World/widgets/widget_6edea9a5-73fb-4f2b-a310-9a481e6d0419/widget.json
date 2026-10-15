@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_6edea9a5-73fb-4f2b-a310-9a481e6d0419",
+    "title": "演示 · 拉一拉",
+    "description": "调整卡片尺寸体验响应式布局。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:resize",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.044Z",
+    "updatedAt": "2026-09-08T14:49:56.044Z"
+  }
+}

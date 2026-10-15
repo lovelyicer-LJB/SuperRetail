@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_789339a0-a20d-456a-ae39-928719d8c14f",
+    "title": "导览 · 你好 Dashboard",
+    "description": "标题中的“活”使用 #1A88FF。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:intro",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.032Z",
+    "updatedAt": "2026-09-08T14:49:56.032Z"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_77e5a6e8-9e5b-4f86-a665-a26917b977cc",
+    "title": "待办 + 打卡",
+    "description": "本地待办与打卡工具。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:todo-habits",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.059Z",
+    "updatedAt": "2026-09-08T14:49:56.059Z"
+  }
+}

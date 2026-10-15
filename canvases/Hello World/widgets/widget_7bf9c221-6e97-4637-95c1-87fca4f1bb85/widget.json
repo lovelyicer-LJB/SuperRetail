@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_7bf9c221-6e97-4637-95c1-87fca4f1bb85",
+    "title": "便签 · 复刻咒语",
+    "description": "低饱和高明度随机蓝色卡片与白底复制反馈。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:clone-prompt",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.073Z",
+    "updatedAt": "2026-09-08T14:49:56.073Z"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_89663c89-b09f-4e69-bce3-da64af1946e7",
+    "title": "演示 · 点一下运行",
+    "description": "运行 managed Python 获取真实电脑状态。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "slots": {
+      "main": {
+        "kind": "json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "headline": {
+              "type": "string"
+            },
+            "metrics": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "pct": {
+                    "type": "number"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "label",
+                  "pct"
+                ],
+                "additionalProperties": true
+              }
+            },
+            "ranAt": {
+              "type": "string"
+            },
+            "runIndex": {
+              "type": "integer"
+            },
+            "tookMs": {
+              "type": "number"
+            },
+            "platform": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "ranAt",
+            "metrics"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    "events": {
+      "submit": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        }
+      }
+    },
+    "status": "idle",
+    "bindings": {
+      "main": "binding_e33aa94b-720f-4c80-b7e6-f7af26ebe194"
+    },
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:run-health",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.048Z",
+    "updatedAt": "2026-09-08T14:49:56.099Z"
+  }
+}

@@ -1,0 +1,3441 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>关心的事，实时呈现</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        font: 16px/1.45
+          var(
+            --kimi-font-sans,
+            "Inter",
+            -apple-system,
+            BlinkMacSystemFont,
+            "SF Pro Text",
+            "PingFang SC",
+            "Microsoft YaHei",
+            sans-serif
+          );
+        color: #121212;
+        background: transparent;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+      }
+      button:focus-visible,
+      [tabindex]:focus-visible {
+        outline: 2px solid #1684ed;
+        outline-offset: 4px;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .stage {
+        position: relative;
+        isolation: isolate;
+        display: grid;
+        grid-template-columns: minmax(260px, 0.8fr) minmax(0, 2fr);
+        gap: 32px;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        padding: 44px 44px 16px;
+        background: linear-gradient(135deg, #e1f5ff, #d1edfe 55%, #c9e8f8);
+        overflow: clip;
+      }
+
+      /* Decoration stays behind the native Widget content and never catches input. */
+      .atmosphere {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+      }
+      .intro {
+        align-self: center;
+        padding-bottom: 10px;
+        min-width: 0;
+      }
+      .intro h1 {
+        font-size: clamp(34px, 4vw, 44px);
+        font-weight: 750;
+        line-height: 1.18;
+        letter-spacing: -0.025em;
+        max-width: 350px;
+      }
+      .intro h1 span {
+        display: block;
+      }
+      .intro h1 .accent {
+        color: #1684ed;
+      }
+      .intro p {
+        font-size: 17px;
+        line-height: 1.55;
+        color: #667784;
+        margin-top: 17px;
+        max-width: 300px;
+      }
+      .showcase {
+        min-width: 0;
+        position: relative;
+        isolation: isolate;
+      }
+      .example-request {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        min-height: 78px;
+        margin-bottom: 10px;
+      }
+      .request-bubble {
+        max-width: 94%;
+        padding: 11px 18px;
+        border: 1px solid #bddff1;
+        border-radius: 18px 18px 4px 18px;
+        background: #fff;
+        color: #173c57;
+        font-size: 18px;
+        line-height: 26px;
+        font-weight: 500;
+        box-shadow: 0 5px 16px #2666900d;
+      }
+      .board {
+        height: 340px;
+        position: relative;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+      .board-footer {
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 6px;
+        color: #72818d;
+        font-size: 11px;
+      }
+      .refresh {
+        border: 0;
+        background: transparent;
+        color: #536f87;
+        padding: 2px 0;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+      .switcher {
+        margin-top: 29px;
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        max-width: 300px;
+      }
+      .tabs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+        flex: 1;
+      }
+      .tab {
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        background: #f5f8fb;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 8px 6px;
+        font-size: 14px;
+        line-height: 1.3;
+        color: #6e7e8b;
+        white-space: nowrap;
+        transition:
+          background 0.2s,
+          color 0.2s,
+          border-color 0.2s;
+      }
+      .tab[aria-selected="true"] {
+        color: #0868c9;
+        font-weight: 600;
+        background: #edf6ff;
+        border-color: #c8e2f9;
+      }
+      .tab:hover {
+        color: #1b6da9;
+        background: #edf4fa;
+      }
+      .tab:before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        width: 0;
+        background: #60b5ff;
+      }
+      .tab[aria-selected="true"]:before {
+        width: var(--progress, 0%);
+      }
+
+      /* A scaled teaching preview, not a nested native Canvas or a second layout owner.
+   Native Canvas uses 12 columns, 12px gaps, and 12px outer Widget corners. */
+      .mini-canvas {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-rows: repeat(14, minmax(0, 1fr));
+        gap: 8px;
+        height: 100%;
+        min-height: 0;
+        min-width: 0;
+      }
+      .mini-widget {
+        min-width: 0;
+        min-height: 0;
+        border: 1px solid #dce3e9;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .mk-shell {
+        color: #dce3e9;
+        font-family: var(--kimi-font-sans, sans-serif);
+        font-variant-numeric: tabular-nums;
+        --mk-up: var(--kimi-chart-2, #ef6574);
+        --mk-down: var(--kimi-chart-1, #67b8fe);
+      }
+      .mk-shell,
+      .mk-shell * {
+        box-sizing: border-box;
+      }
+      .mk-shell > .mini-widget {
+        background: #1d2127;
+        border-color: #25313b;
+      }
+      .mk-shell button {
+        font: inherit;
+        cursor: pointer;
+      }
+      .mk-shell button:focus-visible,
+      .mk-chart:focus-visible {
+        outline: 2px solid #f3f7fb;
+        outline-offset: 2px;
+      }
+      .mk-main {
+        grid-column: 1 / 9;
+        grid-row: 1 / 15;
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 14px;
+      }
+      .mk-heading {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .mk-name {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        min-width: 0;
+      }
+      .mk-name h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .mk-name > span {
+        font-size: 11px;
+        color: #8495a7;
+      }
+      .mk-ranges {
+        display: flex;
+        gap: 1px;
+        flex: none;
+        padding: 2px;
+        background: #ffffff09;
+        border-radius: 6px;
+      }
+      .mk-ranges button {
+        min-width: 29px;
+        padding: 3px 4px;
+        border: 0;
+        background: transparent;
+        color: #91a2b6;
+        border-radius: 4px;
+        font-size: 12px;
+        line-height: 16px;
+      }
+      .mk-ranges button[aria-pressed="true"] {
+        background: #fff;
+        color: #172331;
+      }
+      .mk-ranges button:hover {
+        color: #fff;
+        background: #ffffff25;
+      }
+      .mk-ranges button[aria-pressed="true"]:hover {
+        color: #172331;
+        background: #e9f2fb;
+      }
+      .mk-quote {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        margin-top: 11px;
+        line-height: 1.2;
+        white-space: nowrap;
+      }
+      .mk-quote > strong {
+        font-size: 24px;
+        font-weight: 400;
+      }
+      .mk-quote > strong small {
+        font-size: 12px;
+        font-weight: 400;
+        color: #8495a7;
+        margin-left: 6px;
+      }
+      .mk-quote > span {
+        font-size: 12px;
+      }
+      .mk-quote .mk-quote-label {
+        font-size: 11px;
+        color: #8190a1;
+        margin-left: auto;
+      }
+      .mk-legend {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        color: #a1b0bf;
+        font-size: 11px;
+        line-height: 20px;
+        margin-top: 3px;
+      }
+      .mk-legend > span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .mk-legend i {
+        display: inline-block;
+        width: 12px;
+        height: 0;
+        border-top: 1.5px solid #f0cd83;
+      }
+      .mk-legend .mk-ma20-key {
+        border-color: #a49cdb;
+        border-top-style: dashed;
+      }
+      .mk-legend .mk-adjustment {
+        margin-left: auto;
+        color: #7c8c9d;
+      }
+      .mk-chart {
+        min-height: 0;
+        flex: 1;
+        position: relative;
+        cursor: crosshair;
+        touch-action: pan-y;
+      }
+      .mk-chart svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+      .mk-chart svg text {
+        font-family: var(--kimi-font-sans, sans-serif);
+      }
+      .mk-up {
+        color: var(--mk-up);
+      }
+      .mk-down {
+        color: var(--mk-down);
+      }
+      .mk-grid {
+        stroke: #70889d26;
+        stroke-width: 0.7;
+        stroke-dasharray: 2 4;
+      }
+      .mk-axis-text {
+        font-size: 11px;
+        fill: #8c9baa;
+      }
+      .mk-wick {
+        stroke: currentColor;
+        stroke-width: 1;
+      }
+      .mk-candle {
+        fill: currentColor;
+      }
+      .mk-volume {
+        fill: currentColor;
+        opacity: 0.5;
+      }
+      .mk-ma5,
+      .mk-ma20 {
+        fill: none;
+        stroke: #f0cd83;
+        stroke-width: 1.25;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .mk-ma20 {
+        stroke: #a49cdb;
+        stroke-dasharray: 3 2;
+      }
+      .mk-cross {
+        pointer-events: none;
+      }
+      .mk-cross line {
+        stroke: #cadce7;
+        stroke-width: 1;
+        stroke-dasharray: 3 3;
+        opacity: 0.65;
+      }
+      .mk-cross circle {
+        fill: #10151c;
+        stroke: #ecf7ff;
+        stroke-width: 1.5;
+      }
+      .mk-tooltip {
+        position: absolute;
+        top: 3px;
+        right: 45px;
+        z-index: 2;
+        width: 250px;
+        max-width: calc(100% - 12px);
+        border: 1px solid #486074;
+        border-radius: 7px;
+        padding: 8px 9px;
+        background: #182431f5;
+        box-shadow: 0 3px 10px #0005;
+        color: #f1f5fa;
+        pointer-events: none;
+      }
+      .mk-tooltip[hidden] {
+        display: none;
+      }
+      .mk-tooltip.mk-tip-left {
+        left: 3px;
+        right: auto;
+      }
+      .mk-tip-date {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+        font-size: 11px;
+        line-height: 1.5;
+        color: #99acbf;
+      }
+      .mk-tip-date strong {
+        color: #eef5fb;
+        font-weight: 500;
+        font-size: 12px;
+      }
+      .mk-tip-values {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px 12px;
+        margin-top: 4px;
+        font-size: 12px;
+        line-height: 1.3;
+      }
+      .mk-tip-values > span {
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+      }
+      .mk-tip-values i {
+        font-style: normal;
+        color: #9aabbc;
+      }
+      .mk-watch {
+        grid-column: 9 / 13;
+        grid-row: 1 / 10;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+        gap: 3px;
+      }
+      .mk-watch-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex: none;
+        font-size: 12px;
+        line-height: 17px;
+        color: #98a9ba;
+        padding-bottom: 5px;
+      }
+      .mk-watch-title > span {
+        color: #64778b;
+        font-size: 11px;
+      }
+      .mk-index {
+        flex: none;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        min-width: 0;
+        padding: 5px 6px;
+        border: 1px solid #ffffff12;
+        border-radius: 5px;
+        background: transparent;
+        color: #b1c5d9;
+        text-align: left;
+        font-size: 12px;
+        line-height: 16px;
+      }
+      .mk-index > span {
+        color: #829ab0;
+        font-size: 11px;
+      }
+      .mk-index > strong {
+        min-width: 0;
+        font-size: 12px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .mk-index[aria-pressed="true"] {
+        background: #99ccff17;
+        border-color: #8cc8ff35;
+        color: #c9e6ff;
+      }
+      .mk-watch-row {
+        flex: 1;
+        min-height: 0;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        text-align: left;
+        color: #e5edf6;
+        background: transparent;
+        padding: 4px 6px;
+        margin: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .mk-watch-row:hover {
+        background: #ffffff0a;
+      }
+      .mk-watch-row[aria-pressed="true"] {
+        border-color: #ffffff16;
+        background: #ffffff09;
+      }
+      .mk-watch-identity {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        width: 100%;
+      }
+      .mk-watch-name {
+        display: block;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .mk-watch-code {
+        display: block;
+        flex: none;
+        margin-left: auto;
+        color: #8495a7;
+        font-size: 11px;
+        line-height: 1;
+      }
+      .mk-watch-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 6px;
+        margin-top: 5px;
+        width: 100%;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+      .mk-watch-price > span {
+        font-size: 11px;
+      }
+      .mk-watch-empty {
+        margin: auto;
+        color: #8299ad;
+        font-size: 13px;
+      }
+      .mk-details {
+        grid-column: 9 / 13;
+        grid-row: 10 / 15;
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .mk-details-title {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        color: #98a9ba;
+        font-size: 12px;
+        line-height: 14px;
+      }
+      .mk-details-title > span {
+        color: #657b91;
+        font-size: 10px;
+      }
+      .mk-details dl {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px 12px;
+        margin: 0;
+      }
+      .mk-details dl > div {
+        min-width: 0;
+      }
+      .mk-details dt {
+        color: #7f93a6;
+        font-size: 11px;
+        line-height: 1.2;
+        white-space: nowrap;
+      }
+      .mk-details dd {
+        color: #e7f0f8;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.2;
+        margin: 2px 0 0;
+        white-space: nowrap;
+      }
+      .mk-empty {
+        grid-column: 1 / -1;
+        grid-row: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 26px;
+        gap: 10px;
+      }
+      .mk-empty strong {
+        font-size: 17px;
+        font-weight: 500;
+      }
+      .mk-empty span {
+        color: #8fabc0;
+        font-size: 16px;
+      }
+      .mk-nochart {
+        display: grid;
+        place-items: center;
+        flex: 1;
+        color: #8299ad;
+        font-size: 16px;
+      }
+      .mk-noquote {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        justify-content: center;
+        gap: 12px;
+        padding: 12px;
+      }
+      .mk-noquote > strong {
+        font-size: 20px;
+        font-weight: 500;
+      }
+      .mk-noquote > span {
+        max-width: 260px;
+        color: #8299ad;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      /* Keep dark controls legible against the host's light default button hover. */
+      .stage .board .mk-shell button:hover:not(:disabled) {
+        background: #ffffff12;
+        color: #fff;
+      }
+      .stage .board .mk-shell .mk-ranges button[aria-pressed="true"]:hover {
+        background: #e9f2fb;
+        color: #172331;
+      }
+
+      .bi-scene {
+        color: rgba(0, 0, 0, 0.78);
+      }
+      .bi-summary {
+        grid-column: 1/-1;
+        grid-row: 1 / span 5;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .bi-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 23px;
+        font-size: 13px;
+      }
+      .bi-header > strong {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .bi-header > span {
+        margin-left: auto;
+        color: #8190a0;
+        font-size: 12px;
+      }
+      .bi-period {
+        display: flex;
+        background: #eef4fa;
+        border-radius: 6px;
+        padding: 2px;
+      }
+      .bi-period button {
+        border: 0;
+        background: none;
+        font-size: 13px;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .bi-period button[aria-pressed="true"] {
+        background: white;
+        color: #087bec;
+        box-shadow: 0 1px 3px #193a511a;
+      }
+      .bi-kpis {
+        display: grid;
+        grid-template-columns: 1.35fr 0.8fr 0.9fr 0.9fr;
+        gap: 14px;
+      }
+      .bi-kpis > div {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .bi-kpis span {
+        font-size: 13px;
+        color: #6f8192;
+      }
+      .bi-kpis strong {
+        font-size: 20px;
+        letter-spacing: -0.025em;
+        line-height: 1.2;
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+      }
+      .bi-kpis small {
+        font-size: 12px;
+        color: #708698;
+        white-space: nowrap;
+      }
+      .bi-kpis > div:first-child small {
+        color: #1a9188;
+      }
+      .bi-main {
+        display: contents;
+      }
+      .bi-main header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        font-weight: 500;
+        min-height: 20px;
+        gap: 8px;
+      }
+      .bi-main header button {
+        background: none;
+        border: 0;
+        font-size: 12px;
+        color: #3f85b7;
+        padding: 0 2px;
+        white-space: nowrap;
+      }
+      .bi-trend {
+        grid-column: 1 / span 8;
+        grid-row: 6 / span 9;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .bi-channels {
+        grid-column: 9 / span 4;
+        grid-row: 6 / span 9;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        background: #f0f7fe;
+        border-color: #d7e7f4;
+      }
+      .bi-chart {
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+        overflow: visible;
+      }
+      .bi-chart text {
+        font-size: 12px;
+        fill: #72879a;
+      }
+      .bi-point circle,
+      .bi-point text {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .bi-point:hover circle,
+      .bi-point:hover text,
+      .bi-point:focus circle,
+      .bi-point:focus text {
+        opacity: 1;
+      }
+      .bi-channel {
+        display: block;
+        width: 100%;
+        border: 0;
+        background: none;
+        text-align: left;
+        padding: 12px 0 3px;
+        color: #52697b;
+      }
+      .bi-channel > span {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        line-height: 1.25;
+      }
+      .bi-channel b {
+        font-weight: 500;
+      }
+      .bi-channel i {
+        display: block;
+        height: 6px;
+        margin-top: 6px;
+        background: #dfebf7;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .bi-channel em {
+        display: block;
+        height: 100%;
+        border-radius: 2px;
+      }
+      .bi-channel[aria-pressed="true"] {
+        color: #087bec;
+      }
+      .bi-channel[aria-pressed="true"] span {
+        font-weight: 500;
+      }
+      .bi-insight {
+        font-size: 11px;
+        line-height: 1.45;
+        color: #53728c;
+        flex-shrink: 0;
+        margin-top: auto;
+        padding-top: 10px;
+      }
+      .bi-insight > span {
+        color: #1986ed;
+        margin-right: 6px;
+      }
+      .bi-detail {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        scrollbar-width: thin;
+      }
+      .bi-detail table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .bi-detail th {
+        position: sticky;
+        top: 0;
+        background: #f7fafc;
+        font-weight: 500;
+        color: #7c8e9f;
+      }
+      .bi-detail td,
+      .bi-detail th {
+        padding: 5px 6px;
+        border-bottom: 1px solid #f0f4f8;
+      }
+      .bi-detail td:first-child,
+      .bi-detail th:first-child {
+        text-align: left;
+      }
+      @media (max-width: 850px) {
+        .bi-summary,
+        .bi-trend,
+        .bi-channels {
+          padding: 11px;
+        }
+        .bi-kpis {
+          gap: 8px;
+        }
+        .bi-kpis strong {
+          font-size: 20px;
+          font-weight: 500;
+        }
+        .bi-header > span {
+          display: none;
+        }
+        .bi-kpis small {
+          font-size: 10px;
+        }
+        .bi-insight {
+          font-size: 10px;
+        }
+        .bi-main header {
+          font-size: 12px;
+          font-weight: 500;
+        }
+      }
+
+      .project-scene {
+        /* Local values map to Kimi labels, fills, separator, and the brand chart palette. */
+        --pm-ink: rgba(0, 0, 0, 0.78);
+        --pm-muted: rgba(0, 0, 0, 0.6);
+        --pm-quiet: rgba(0, 0, 0, 0.45);
+        --pm-fill: rgba(0, 0, 0, 0.03);
+        --pm-selected: rgba(0, 0, 0, 0.05);
+        --pm-line: rgba(0, 0, 0, 0.13);
+        --pm-blue: #357af6;
+        --pm-blue-light: #ebf2fe;
+        --pm-blue-track: #c2d7fc;
+        --pm-blue-ink: #0f2d55;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        font-family: var(--kimi-font-sans, sans-serif);
+        color: var(--pm-ink);
+      }
+      .project-scene .pm-main,
+      .project-scene .pm-summary,
+      .project-scene .pm-milestone {
+        padding: 16px;
+      }
+      .project-scene .pm-main {
+        grid-column: 1 / span 8;
+        grid-row: 1 / -1;
+        display: flex;
+        flex-direction: column;
+      }
+      .project-scene .pm-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .project-scene .pm-title {
+        min-width: 0;
+        margin: 0;
+        font-size: 16px;
+        line-height: 24px;
+        font-weight: 500;
+      }
+      .project-scene .pm-health {
+        flex: none;
+        font-size: 12px;
+        line-height: 20px;
+        color: var(--pm-muted);
+      }
+      .project-scene .pm-at-risk::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        margin-right: 6px;
+        border-radius: 50%;
+        background: #ff9500;
+        vertical-align: 1px;
+      }
+      .project-scene .pm-tabs {
+        display: flex;
+        flex: none;
+        gap: 4px;
+        padding: 4px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        background: var(--pm-fill);
+      }
+      .project-scene .pm-tab {
+        flex: 1;
+        min-width: 0;
+        padding: 4px;
+        border: 0;
+        border-radius: 4px;
+        background: transparent;
+        color: var(--pm-muted);
+        font: inherit;
+        font-size: 14px;
+        line-height: 20px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition:
+          background 0.2s ease,
+          color 0.2s ease;
+      }
+      .project-scene .pm-tab span {
+        margin-left: 6px;
+        color: var(--pm-quiet);
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+      .project-scene .pm-tab[aria-selected="true"] {
+        color: var(--pm-ink);
+        background: #fff;
+        font-weight: 500;
+      }
+      .project-scene .pm-task-list {
+        min-height: 0;
+        overflow: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+      }
+      .project-scene .pm-task-row {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--pm-fill);
+      }
+      .project-scene .pm-task-row:last-child {
+        border-bottom: 0;
+      }
+      .project-scene .pm-task {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr) auto;
+        align-items: start;
+        gap: 12px;
+        width: 100%;
+        padding: 4px 0;
+        border: 0;
+        border-radius: 4px;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        font: inherit;
+        font-size: 14px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+      .project-scene .pm-check {
+        display: grid;
+        place-content: center;
+        width: 20px;
+        height: 20px;
+        border: 1.8px solid rgba(0, 0, 0, 0.25);
+        border-radius: 50%;
+        font-weight: 600;
+        color: #fff;
+        font-size: 12px;
+        line-height: 1;
+      }
+      .project-scene .pm-task-copy {
+        min-width: 0;
+      }
+      .project-scene .pm-task-name {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 400;
+      }
+      .project-scene .pm-task-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 4px;
+        color: var(--pm-quiet);
+        font-size: 12px;
+        line-height: 16px;
+      }
+      .project-scene .pm-due {
+        font-variant-numeric: tabular-nums;
+      }
+      .project-scene .pm-is-done .pm-check {
+        border-color: var(--pm-ink);
+        background: var(--pm-ink);
+      }
+      .project-scene .pm-is-done .pm-task-name {
+        color: var(--pm-quiet);
+        text-decoration: line-through;
+      }
+      .project-scene .pm-is-late {
+        color: var(--pm-muted);
+      }
+      .project-scene .pm-status {
+        padding: 0 4px;
+        color: var(--pm-quiet);
+        font-size: 12px;
+        line-height: 20px;
+        white-space: nowrap;
+      }
+      .project-scene .pm-status-active {
+        color: var(--pm-ink);
+      }
+      .project-scene .pm-status-blocked {
+        color: var(--pm-ink);
+        background: var(--pm-selected);
+        border-radius: 4px;
+      }
+      .project-scene .pm-task-note {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0 0 32px;
+        color: var(--pm-muted);
+        font-size: 12px;
+        line-height: 20px;
+      }
+      .project-scene .pm-task-note > span {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .project-scene .pm-resolve {
+        flex: none;
+        padding: 2px 8px;
+        border: 0;
+        border-radius: 4px;
+        background: var(--pm-selected);
+        color: var(--pm-ink);
+        font: inherit;
+        font-size: 12px;
+        line-height: 20px;
+        cursor: pointer;
+      }
+      .project-scene .pm-summary {
+        grid-column: 9 / span 4;
+        grid-row: 1 / span 7;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: var(--pm-blue-light);
+        color: var(--pm-blue-ink);
+      }
+      .project-scene .pm-label {
+        margin: 0;
+        color: inherit;
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 500;
+      }
+      .project-scene .pm-overview {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .project-scene .pm-percentage {
+        font-size: 28px;
+        line-height: 36px;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+      }
+      .project-scene .pm-percentage > span {
+        margin-left: 2px;
+        font-size: 16px;
+        font-weight: 400;
+      }
+      .project-scene .pm-total {
+        color: var(--pm-muted);
+        font-size: 14px;
+        line-height: 20px;
+      }
+      .project-scene .pm-progress {
+        height: 6px;
+        border-radius: 4px;
+        overflow: hidden;
+        background: var(--pm-blue-track);
+      }
+      .project-scene .pm-progress > span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--pm-blue);
+        transform-origin: left;
+        transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+      .project-scene .pm-schedule {
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--pm-muted);
+      }
+      .project-scene .pm-milestone {
+        grid-column: 9 / span 4;
+        grid-row: 8 / -1;
+      }
+      .project-scene .pm-timeline {
+        display: flex;
+        flex-direction: column;
+        margin-top: 12px;
+      }
+      .project-scene .pm-milestone-item {
+        position: relative;
+        display: grid;
+        grid-template-columns: 16px minmax(0, 1fr);
+        align-items: start;
+        gap: 8px;
+        padding: 0 0 4px;
+        border: 0;
+        background: transparent;
+        color: var(--pm-quiet);
+        text-align: left;
+        font: inherit;
+        font-size: 14px;
+        line-height: 20px;
+        cursor: pointer;
+      }
+      .project-scene .pm-milestone-item:last-child {
+        padding-bottom: 0;
+      }
+      .project-scene .pm-milestone-item:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        left: 7px;
+        top: 18px;
+        bottom: 2px;
+        width: 1px;
+        background: var(--pm-line);
+      }
+      .project-scene .pm-milestone-copy {
+        min-width: 0;
+      }
+      .project-scene .pm-milestone-copy > span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .project-scene .pm-milestone-copy time {
+        display: block;
+        margin-top: 2px;
+        color: var(--pm-quiet);
+        font-size: 12px;
+        line-height: 16px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 400;
+      }
+      .project-scene .pm-milestone-dot {
+        display: grid;
+        place-items: center;
+        width: 16px;
+        height: 16px;
+        border: 1px solid var(--pm-line);
+        border-radius: 50%;
+        font-size: 10px;
+      }
+      .project-scene .pm-milestone-item.is-complete .pm-milestone-dot {
+        background: var(--pm-ink);
+        border-color: var(--pm-ink);
+        color: #fff;
+      }
+      .project-scene .pm-milestone-item.is-current {
+        color: var(--pm-ink);
+        font-weight: 500;
+      }
+      .project-scene .pm-milestone-item.is-current .pm-milestone-dot {
+        border: 4px solid var(--pm-ink);
+      }
+      .project-scene button:hover {
+        background-color: var(--pm-fill);
+      }
+      .project-scene .pm-tab[aria-selected="true"]:hover {
+        background-color: #fff;
+      }
+      .project-scene button:active {
+        background-color: var(--pm-selected);
+      }
+      .project-scene button:focus-visible {
+        outline: 2px solid var(--pm-ink);
+        outline-offset: 2px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .project-scene .pm-progress > span {
+          transition: none;
+        }
+      }
+
+      /* Kimi web UI: labels.primary/secondary, fills.f1/f2, background.groundPc.
+   Keep the native Canvas preview's existing eight-pixel gap and outer radius. */
+      .nw-scene {
+        container-type: inline-size;
+        --nw-text: rgba(0, 0, 0, 0.78);
+        --nw-secondary: rgba(0, 0, 0, 0.6);
+        --nw-muted: rgba(0, 0, 0, 0.45);
+        --nw-fill: rgba(0, 0, 0, 0.03);
+        --nw-hover: rgba(0, 0, 0, 0.05);
+        --nw-line: rgba(0, 0, 0, 0.08);
+        color: var(--nw-text);
+      }
+      .nw-news,
+      .nw-mail,
+      .nw-projects {
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+      }
+      .nw-news {
+        grid-column: 1 / span 8;
+        grid-row: 1 / span 14;
+      }
+      .nw-mail {
+        grid-column: 9 / span 4;
+        grid-row: 1 / span 7;
+        background: #f9fbfc;
+      }
+      .nw-projects {
+        grid-column: 9 / span 4;
+        grid-row: 8 / span 7;
+      }
+      .nw-widget-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+        min-height: 24px;
+        flex-shrink: 0;
+      }
+      .nw-widget-heading strong {
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 24px;
+        white-space: nowrap;
+      }
+      .nw-widget-heading > span {
+        font-size: 12px;
+        line-height: 18px;
+        color: var(--nw-secondary);
+      }
+      .nw-filters {
+        display: flex;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .nw-filters button {
+        padding: 4px 8px;
+        border: 0;
+        border-radius: 8px;
+        background: none;
+        color: var(--nw-secondary);
+        font-size: 14px;
+        line-height: 20px;
+        white-space: nowrap;
+      }
+      .nw-filters button[aria-pressed="true"] {
+        background: var(--nw-hover);
+        color: var(--nw-text);
+      }
+      .nw-list {
+        min-height: 0;
+        overflow: auto;
+        scrollbar-width: thin;
+        flex: 1;
+      }
+      .nw-day > h4 {
+        font-size: 12px;
+        line-height: 18px;
+        font-weight: 400;
+        color: var(--nw-secondary);
+        margin: 12px 0 4px;
+      }
+      .nw-day:first-child > h4 {
+        margin-top: 0;
+      }
+      .nw-item {
+        display: flex;
+        gap: 8px;
+        border-bottom: 1px solid var(--nw-line);
+        padding: 12px 0;
+      }
+      .nw-item:last-child {
+        border-bottom: 0;
+      }
+      .nw-item.nw-lead {
+        padding-top: 4px;
+        padding-bottom: 16px;
+      }
+      .nw-story {
+        min-width: 0;
+        flex: 1;
+        text-align: left;
+        background: none;
+        border: 0;
+        padding: 0;
+        color: var(--nw-text);
+      }
+      .nw-item h3 {
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 400;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .nw-lead h3 {
+        font-size: 16px;
+        line-height: 30px;
+        font-weight: 500;
+      }
+      .nw-lead p {
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 400;
+        color: var(--nw-secondary);
+        margin: 8px 0 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .nw-read h3 {
+        color: var(--nw-secondary);
+      }
+      .nw-save {
+        border: 0;
+        border-radius: 4px;
+        background: none;
+        font-size: 20px;
+        line-height: 24px;
+        color: var(--nw-muted);
+        width: 24px;
+        height: 28px;
+        padding: 0;
+        align-self: flex-start;
+        flex-shrink: 0;
+      }
+      .nw-save[aria-pressed="true"] {
+        color: var(--nw-text);
+      }
+      .nw-sample {
+        border-radius: 4px;
+        background: var(--nw-hover);
+        padding: 0 4px;
+      }
+      .nw-mail-counts {
+        display: flex;
+        gap: 12px;
+        margin: 0 0 4px;
+        font-size: 12px;
+        line-height: 18px;
+        color: var(--nw-secondary);
+        flex-shrink: 0;
+      }
+      .nw-mail-counts b {
+        font-weight: 500;
+        color: var(--nw-text);
+        font-variant-numeric: tabular-nums;
+      }
+      .nw-mail-list {
+        min-height: 0;
+        flex: 1;
+        overflow: auto;
+        scrollbar-width: thin;
+      }
+      .nw-mail-item {
+        position: relative;
+        display: block;
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid var(--nw-line);
+        border-radius: 0;
+        background: none;
+        text-align: left;
+        color: var(--nw-text);
+        padding: 4px 0 4px 12px;
+      }
+      .nw-mail-item:last-child {
+        border-bottom: 0;
+      }
+      .nw-mail-item.is-unread:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 11px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--nw-text);
+      }
+      .nw-mail-from {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        line-height: 18px;
+        color: var(--nw-secondary);
+      }
+      .nw-mail-from strong {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 500;
+      }
+      .nw-mail-from time {
+        margin-left: auto;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+        color: var(--nw-muted);
+      }
+      .nw-mail-subject {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 14px;
+        line-height: 20px;
+        margin-top: 4px;
+      }
+      .nw-mail-item.is-read .nw-mail-subject {
+        color: var(--nw-secondary);
+      }
+      .nw-urgent {
+        font-size: 12px;
+        line-height: 18px;
+        color: #ff3849;
+        flex-shrink: 0;
+      }
+      .nw-repos {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        flex: 1;
+        overflow: auto;
+        scrollbar-width: thin;
+      }
+      .nw-repo {
+        padding: 8px 0;
+        text-align: left;
+        border: 0;
+        border-bottom: 1px solid var(--nw-line);
+        background: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        color: var(--nw-text);
+        min-width: 0;
+        flex: 1;
+        flex-shrink: 0;
+      }
+      .nw-repo:first-child {
+        padding-top: 0;
+      }
+      .nw-repo:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .nw-repo p {
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 400;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        overflow-wrap: anywhere;
+      }
+      .nw-repo-meta {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        line-height: 18px;
+        color: var(--nw-secondary);
+        gap: 4px;
+        min-width: 0;
+        margin-top: auto;
+      }
+      .nw-repo-meta strong {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 400;
+        margin-right: auto;
+      }
+      .nw-repo-meta > span {
+        flex-shrink: 0;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+      .nw-detail,
+      .nw-mail-detail {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        overflow: auto;
+        scrollbar-width: thin;
+      }
+      .nw-back {
+        border: 0;
+        border-radius: 4px;
+        padding: 0;
+        background: none;
+        text-align: left;
+        font-size: 12px;
+        line-height: 18px;
+        color: var(--nw-secondary);
+        align-self: flex-start;
+        flex-shrink: 0;
+      }
+      .nw-detail h3 {
+        font-size: 16px;
+        line-height: 30px;
+        font-weight: 500;
+        margin: 0;
+        flex-shrink: 0;
+      }
+      .nw-meta {
+        font-size: 12px;
+        line-height: 18px;
+        color: var(--nw-secondary);
+      }
+      .nw-detail p,
+      .nw-mail-detail p {
+        font-size: 14px;
+        line-height: 20px;
+        color: var(--nw-secondary);
+        margin: 0;
+        flex-shrink: 0;
+      }
+      .nw-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: auto;
+        padding: 8px 0 0;
+        flex-shrink: 0;
+      }
+      .nw-actions button,
+      .nw-mail-read {
+        font-size: 12px;
+        line-height: 18px;
+        border: 0;
+        border-radius: 8px;
+        padding: 4px 8px;
+        background: var(--nw-hover);
+        color: var(--nw-text);
+      }
+      .nw-actions button:first-child {
+        background: var(--nw-text);
+        color: #fff;
+      }
+      .nw-mail-detail {
+        gap: 4px;
+        overflow: hidden;
+      }
+      .nw-mail-detail h3 {
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 500;
+        margin: 0;
+        flex-shrink: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .nw-mail-detail .nw-mail-from {
+        flex-shrink: 0;
+      }
+      .nw-mail-detail p {
+        min-height: 0;
+        flex: 1;
+        overflow: auto;
+        scrollbar-width: thin;
+      }
+      .nw-mail-read {
+        align-self: flex-start;
+        margin-top: 0;
+        flex-shrink: 0;
+      }
+      .nw-mail-read:disabled {
+        color: var(--nw-muted);
+        background: none;
+        padding-left: 0;
+        cursor: default;
+      }
+      .nw-empty {
+        display: grid;
+        place-content: center;
+        color: var(--nw-secondary);
+        font-size: 14px;
+        line-height: 20px;
+        flex: 1;
+        min-height: 80px;
+        text-align: center;
+        padding: 8px;
+      }
+      .stage .board .nw-scene button {
+        min-block-size: 0;
+        overflow-wrap: normal;
+        transition:
+          background-color 160ms ease,
+          color 160ms ease;
+      }
+      .stage .board .nw-story:hover:not(:disabled),
+      .stage .board .nw-repo:hover:not(:disabled) {
+        background: transparent;
+      }
+      .nw-repo:hover p,
+      .nw-story:hover h3 {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .stage .board .nw-filters button:hover:not(:disabled),
+      .stage .board .nw-mail-item:hover:not(:disabled),
+      .stage .board .nw-save:hover:not(:disabled),
+      .stage .board .nw-mail-read:hover:not(:disabled) {
+        background: var(--nw-hover);
+        color: var(--nw-text);
+      }
+      .stage .board .nw-scene button:focus-visible {
+        outline: 2px solid var(--nw-text);
+        outline-offset: -2px;
+      }
+      @container (max-width:520px) {
+        .nw-widget-heading {
+          align-items: flex-start;
+          flex-wrap: wrap;
+        }
+        .nw-news .nw-widget-heading {
+          gap: 4px;
+        }
+        .nw-filters button {
+          padding-left: 4px;
+          padding-right: 4px;
+        }
+      }
+
+      .board {
+        overflow: hidden;
+      }
+      .board button {
+        min-block-size: 0;
+        overflow-wrap: normal;
+      }
+      .pm-due {
+        white-space: nowrap;
+      }
+      .board-footer #source-note {
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .board-footer {
+        font-size: 10px;
+      }
+      .switcher {
+        max-width: 300px;
+      }
+      .example-response.changing {
+        pointer-events: none;
+        animation: board-reply 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both;
+      }
+      .example-request.changing .request-bubble {
+        animation: request-enter 0.32s ease both;
+      }
+      @keyframes request-enter {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes board-reply {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+          clip-path: inset(0 0 100% 0 round 10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+          clip-path: inset(0 round 10px);
+        }
+      }
+      @media (min-width: 851px) {
+        .stage[data-tutorial-locale="en-US"] .intro h1 {
+          font-size: 36px;
+        }
+      }
+      @media (max-width: 850px) {
+        .stage {
+          grid-template-columns: minmax(185px, 0.85fr) minmax(0, 1.8fr);
+          padding: 44px 28px 16px;
+          gap: 23px;
+        }
+        .intro h1 {
+          font-size: 33px;
+        }
+        .intro p {
+          font-size: 16px;
+        }
+        .tab {
+          font-size: 12px;
+        }
+        .board-footer {
+          font-size: 9px;
+        }
+      }
+      @media (max-width: 660px) {
+        .stage {
+          display: block;
+          overflow: auto;
+          padding: 55px 24px 24px;
+        }
+        .intro {
+          padding-bottom: 26px;
+        }
+        .intro h1 {
+          font-size: 32px;
+          max-width: none;
+        }
+        .intro h1 span {
+          display: inline;
+        }
+        .intro h1 span + span {
+          margin-left: 8px;
+        }
+        .intro p {
+          margin-top: 10px;
+          max-width: none;
+        }
+        .showcase {
+          width: 100%;
+        }
+        .switcher {
+          margin-top: 18px;
+          max-width: none;
+        }
+        .tabs {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        .board {
+          height: 340px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *:before,
+        *:after {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage" data-tutorial-locale="zh-CN">
+      <canvas class="atmosphere" aria-hidden="true"></canvas>
+      <header class="intro">
+        <h1><span>关心的事 </span><span class="accent">实时呈现</span></h1>
+        <p>行情 项目 资讯 一眼看清</p>
+
+        <div class="switcher">
+          <div class="tabs" role="tablist" aria-label="看板示例">
+            <button
+              class="tab"
+              type="button"
+              id="case-0"
+              role="tab"
+              aria-controls="board"
+              aria-selected="true"
+              tabindex="0"
+            >
+              A 股盯盘</button
+            ><button
+              class="tab"
+              type="button"
+              id="case-1"
+              role="tab"
+              aria-controls="board"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              业务数据分析</button
+            ><button
+              class="tab"
+              type="button"
+              id="case-2"
+              role="tab"
+              aria-controls="board"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              项目管理</button
+            ><button
+              class="tab"
+              type="button"
+              id="case-3"
+              role="tab"
+              aria-controls="board"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              每日简报
+            </button>
+          </div>
+        </div>
+      </header>
+      <section class="showcase" aria-label="看板示例">
+        <div class="example-request">
+          <p class="request-bubble" id="example-prompt"></p>
+        </div>
+        <div class="example-response">
+          <div
+            class="board"
+            id="board"
+            tabindex="-1"
+            role="tabpanel"
+            aria-labelledby="case-0"
+          ></div>
+        </div>
+      </section>
+    </main>
+    <script>
+      (() => {
+        "use strict";
+        const SAMPLE_DATA = {"fetchedAt":"2026-09-23T10:35:20.343705+00:00","stocks":{"status":"ready","source":"Tencent","locale":"zh-CN","fetchedAt":"2026-09-23T10:35:20.343705+00:00","items":[{"symbol":"000001","code":"sh000001","name":"上证指数","nameEn":"Shanghai Composite","exchange":"SSE","instrumentType":"index","market":"CN","currency":"POINTS","priceUnit":"points","timeZone":"Asia/Shanghai","source":"Tencent","sourceUrl":"https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh000001,day,,,90,qfq","adjustment":"unadjusted","asOf":"2026-09-23T16:14:01+08:00","fetchedAt":"2026-09-23T10:35:20.343705+00:00","stale":false,"quoteDelay":"not-guaranteed","pollIntervalSeconds":3600,"maxQuoteAgeSeconds":604800,"currentQuote":{"price":3936.52,"previousClose":3952.13,"change":-15.61,"changePercent":-0.395,"open":3951.37,"high":3951.52,"low":3934.46,"volume":466913933,"volumeUnit":"source-units","asOf":"2026-09-23T16:14:01+08:00","ageSeconds":8479},"candlesAsOf":"2026-09-23","volumeUnit":"source-units","candles":[{"date":"2026-08-13","open":3957.16,"close":3926.96,"high":3968.48,"low":3924.64,"volume":572793677},{"date":"2026-08-14","open":3930.02,"close":3927.18,"high":3932.64,"low":3903.7,"volume":499525613},{"date":"2026-08-17","open":3930.1,"close":3982.65,"high":3983.51,"low":3924.47,"volume":489834027},{"date":"2026-08-18","open":3979.49,"close":3990.3,"high":3994.18,"low":3955.6,"volume":511234287},{"date":"2026-08-19","open":3952.12,"close":3894.42,"high":3961.14,"low":3879.58,"volume":572191213},{"date":"2026-08-20","open":3907.21,"close":3903.72,"high":3925.06,"low":3888.1,"volume":506633954},{"date":"2026-08-21","open":3891.18,"close":3905.2,"high":3912.13,"low":3883.79,"volume":446895868},{"date":"2026-08-24","open":3902.7,"close":3882.01,"high":3910.24,"low":3855.35,"volume":486931412},{"date":"2026-08-25","open":3863.37,"close":3889.44,"high":3896.21,"low":3850.86,"volume":464117264},{"date":"2026-08-26","open":3881.74,"close":3912.52,"high":3926.44,"low":3881.74,"volume":489553021},{"date":"2026-08-27","open":3911.89,"close":3956.57,"high":3958.03,"low":3909.31,"volume":516777549},{"date":"2026-08-28","open":3950.24,"close":3952.18,"high":3970.31,"low":3947.8,"volume":510581645},{"date":"2026-08-31","open":3926.53,"close":3986.3,"high":3986.3,"low":3926.5,"volume":576656606},{"date":"2026-09-01","open":3979.88,"close":3979.89,"high":3995.18,"low":3976.47,"volume":573538949},{"date":"2026-09-02","open":3963.07,"close":3941.39,"high":3965.81,"low":3932.25,"volume":516472775},{"date":"2026-09-03","open":3952.79,"close":3942.09,"high":3968.11,"low":3930.45,"volume":496990189},{"date":"2026-09-04","open":3955.55,"close":3930.12,"high":3980.2,"low":3915.22,"volume":537286161},{"date":"2026-09-07","open":3942.51,"close":3932.7,"high":3948.42,"low":3916.49,"volume":477375261},{"date":"2026-09-08","open":3935.55,"close":3940.55,"high":3951.32,"low":3925.72,"volume":529992688},{"date":"2026-09-09","open":3943.92,"close":3951.51,"high":3958.12,"low":3933.47,"volume":517504311},{"date":"2026-09-10","open":3939.09,"close":3934.4,"high":3949.25,"low":3927.35,"volume":484675114},{"date":"2026-09-11","open":3910.92,"close":3888.11,"high":3912.32,"low":3852.03,"volume":579123145},{"date":"2026-09-14","open":3867.02,"close":3885.33,"high":3895.51,"low":3867.02,"volume":458888916},{"date":"2026-09-15","open":3879.73,"close":3864.28,"high":3891.62,"low":3858.15,"volume":440907766},{"date":"2026-09-16","open":3861.75,"close":3891.6,"high":3894.66,"low":3842.72,"volume":459125108},{"date":"2026-09-17","open":3877,"close":3875.6,"high":3898.84,"low":3866.89,"volume":452886464},{"date":"2026-09-18","open":3891.96,"close":3911.87,"high":3919.67,"low":3888.5,"volume":485712507},{"date":"2026-09-21","open":3920.27,"close":3949.91,"high":3950.94,"low":3918.13,"volume":502354877},{"date":"2026-09-22","open":3963.81,"close":3952.13,"high":3967.68,"low":3945.42,"volume":506148369},{"date":"2026-09-23","open":3951.37,"close":3936.52,"high":3951.52,"low":3934.46,"volume":466913933}]},{"symbol":"600519","code":"sh600519","name":"贵州茅台","nameEn":"Kweichow Moutai","exchange":"SSE","instrumentType":"stock","market":"CN","currency":"CNY","priceUnit":"currency","timeZone":"Asia/Shanghai","source":"Tencent","sourceUrl":"https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh600519,day,,,90,qfq","adjustment":"qfq","asOf":"2026-09-23T16:14:50+08:00","fetchedAt":"2026-09-23T10:35:20.343705+00:00","stale":false,"quoteDelay":"not-guaranteed","pollIntervalSeconds":3600,"maxQuoteAgeSeconds":604800,"currentQuote":{"price":1251.24,"previousClose":1253.8,"change":-2.56,"changePercent":-0.2042,"open":1255.03,"high":1271.5,"low":1250.89,"volume":3098100,"volumeUnit":"shares","asOf":"2026-09-23T16:14:50+08:00","ageSeconds":8430},"candlesAsOf":"2026-09-23","volumeUnit":"shares","candles":[{"date":"2026-08-13","open":1338,"close":1355.29,"high":1359.6,"low":1337,"volume":3235300},{"date":"2026-08-14","open":1355,"close":1341.99,"high":1359,"low":1338.14,"volume":2985300},{"date":"2026-08-17","open":1295,"close":1293.09,"high":1301,"low":1280.34,"volume":7843000},{"date":"2026-08-18","open":1291,"close":1297.99,"high":1302.9,"low":1285.17,"volume":3872300},{"date":"2026-08-19","open":1300,"close":1307.88,"high":1308.88,"low":1290.5,"volume":3754800},{"date":"2026-08-20","open":1299.8,"close":1291.5,"high":1306.88,"low":1291,"volume":2533200},{"date":"2026-08-21","open":1291.5,"close":1272.83,"high":1291.5,"low":1272.01,"volume":3347200},{"date":"2026-08-24","open":1271.01,"close":1304.66,"high":1313.8,"low":1270.33,"volume":4844000},{"date":"2026-08-25","open":1311.89,"close":1304,"high":1317,"low":1301.11,"volume":2111100},{"date":"2026-08-26","open":1300,"close":1302.8,"high":1314.45,"low":1295,"volume":2173100},{"date":"2026-08-27","open":1304,"close":1292.3,"high":1305,"low":1288,"volume":2476700},{"date":"2026-08-28","open":1289,"close":1297.4,"high":1297.89,"low":1288,"volume":1612600},{"date":"2026-08-31","open":1297.99,"close":1299.52,"high":1305,"low":1286,"volume":2324800},{"date":"2026-09-01","open":1295,"close":1299.56,"high":1307.99,"low":1286.1,"volume":3266400},{"date":"2026-09-02","open":1302.8,"close":1297.5,"high":1303,"low":1291.2,"volume":2030800},{"date":"2026-09-03","open":1297.5,"close":1298.88,"high":1305,"low":1293.02,"volume":1774800},{"date":"2026-09-04","open":1295.88,"close":1330,"high":1338.86,"low":1295.6,"volume":4541600},{"date":"2026-09-07","open":1324,"close":1316.01,"high":1333.6,"low":1312.66,"volume":2525000},{"date":"2026-09-08","open":1318,"close":1309.3,"high":1323,"low":1309.05,"volume":1753400},{"date":"2026-09-09","open":1305.01,"close":1290.88,"high":1309.3,"low":1286.68,"volume":3222600},{"date":"2026-09-10","open":1291,"close":1285.13,"high":1294.99,"low":1282,"volume":1890000},{"date":"2026-09-11","open":1285.15,"close":1275.16,"high":1286.15,"low":1263.01,"volume":3480100},{"date":"2026-09-14","open":1277.27,"close":1277.96,"high":1285.53,"low":1270.36,"volume":1657100},{"date":"2026-09-15","open":1281,"close":1272.75,"high":1284.5,"low":1271.28,"volume":1376200},{"date":"2026-09-16","open":1273.93,"close":1258,"high":1274.98,"low":1254.1,"volume":2623500},{"date":"2026-09-17","open":1257.98,"close":1266.98,"high":1267.6,"low":1254,"volume":1755400},{"date":"2026-09-18","open":1262.99,"close":1257.12,"high":1265.88,"low":1256.1,"volume":2489100},{"date":"2026-09-21","open":1259,"close":1252.57,"high":1259.95,"low":1250.8,"volume":2501700},{"date":"2026-09-22","open":1252.15,"close":1253.8,"high":1265.88,"low":1248.1,"volume":2457300},{"date":"2026-09-23","open":1255.03,"close":1251.24,"high":1271.5,"low":1250.89,"volume":3098100}]},{"symbol":"300750","code":"sz300750","name":"宁德时代","nameEn":"CATL","exchange":"SZSE","instrumentType":"stock","market":"CN","currency":"CNY","priceUnit":"currency","timeZone":"Asia/Shanghai","source":"Tencent","sourceUrl":"https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sz300750,day,,,90,qfq","adjustment":"qfq","asOf":"2026-09-23T16:14:15+08:00","fetchedAt":"2026-09-23T10:35:20.343705+00:00","stale":false,"quoteDelay":"not-guaranteed","pollIntervalSeconds":3600,"maxQuoteAgeSeconds":604800,"currentQuote":{"price":301,"previousClose":304.63,"change":-3.63,"changePercent":-1.1916,"open":304.5,"high":305.76,"low":299.1,"volume":24744100,"volumeUnit":"shares","asOf":"2026-09-23T16:14:15+08:00","ageSeconds":8465},"candlesAsOf":"2026-09-23","volumeUnit":"shares","candles":[{"date":"2026-08-13","open":393.04,"close":396.3,"high":399.39,"low":391.04,"volume":24429300},{"date":"2026-08-14","open":395,"close":393.93,"high":400.99,"low":393.68,"volume":15930200},{"date":"2026-08-17","open":393.93,"close":399.98,"high":400.5,"low":390.5,"volume":20399800},{"date":"2026-08-18","open":399,"close":396.26,"high":400.75,"low":394.5,"volume":16933200},{"date":"2026-08-19","open":394,"close":389,"high":396.99,"low":388.33,"volume":21157200},{"date":"2026-08-20","open":391.51,"close":385,"high":392.09,"low":384,"volume":17909600},{"date":"2026-08-21","open":386,"close":391.15,"high":397.83,"low":383.05,"volume":20449600},{"date":"2026-08-24","open":391.15,"close":387.89,"high":394.4,"low":386.68,"volume":13973000},{"date":"2026-08-25","open":391,"close":376.73,"high":391.15,"low":376.06,"volume":26064600},{"date":"2026-08-26","open":379.9,"close":379,"high":385.5,"low":373.71,"volume":20716200},{"date":"2026-08-27","open":376.5,"close":373,"high":378.66,"low":370.05,"volume":23373800},{"date":"2026-08-28","open":368,"close":368.5,"high":371.25,"low":364.13,"volume":26377000},{"date":"2026-08-31","open":366.6,"close":363.55,"high":367.33,"low":357.3,"volume":26242400},{"date":"2026-09-01","open":362.49,"close":358.1,"high":363.56,"low":358.03,"volume":19808700},{"date":"2026-09-02","open":355.98,"close":348.29,"high":356.5,"low":347.55,"volume":27806700},{"date":"2026-09-03","open":349.99,"close":349.5,"high":354.8,"low":348.1,"volume":26286400},{"date":"2026-09-04","open":351.4,"close":351,"high":354.66,"low":349.56,"volume":22738100},{"date":"2026-09-07","open":351.05,"close":348.2,"high":351.8,"low":345.5,"volume":24678800},{"date":"2026-09-08","open":345.67,"close":335.49,"high":346.6,"low":326,"volume":51955100},{"date":"2026-09-09","open":332.48,"close":336.84,"high":337.66,"low":327.1,"volume":39024000},{"date":"2026-09-10","open":335.9,"close":338.06,"high":340.8,"low":330.5,"volume":29118400},{"date":"2026-09-11","open":333.06,"close":330.51,"high":335.66,"low":328.3,"volume":27660000},{"date":"2026-09-14","open":334.51,"close":337.11,"high":341.81,"low":334,"volume":26184900},{"date":"2026-09-15","open":335,"close":316.36,"high":335.73,"low":316,"volume":48048300},{"date":"2026-09-16","open":313.01,"close":305.48,"high":315,"low":299,"volume":78716300},{"date":"2026-09-17","open":306,"close":304.3,"high":308.66,"low":302.7,"volume":34489600},{"date":"2026-09-18","open":309.77,"close":301.95,"high":310,"low":300.27,"volume":38071300},{"date":"2026-09-21","open":303.04,"close":297.1,"high":303.6,"low":295.5,"volume":49488300},{"date":"2026-09-22","open":298,"close":304.63,"high":308.69,"low":297.74,"volume":47381100},{"date":"2026-09-23","open":304.5,"close":301,"high":305.76,"low":299.1,"volume":24744100}]},{"symbol":"002594","code":"sz002594","name":"比亚迪","nameEn":"BYD","exchange":"SZSE","instrumentType":"stock","market":"CN","currency":"CNY","priceUnit":"currency","timeZone":"Asia/Shanghai","source":"Tencent","sourceUrl":"https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sz002594,day,,,90,qfq","adjustment":"qfq","asOf":"2026-09-23T16:14:36+08:00","fetchedAt":"2026-09-23T10:35:20.343705+00:00","stale":false,"quoteDelay":"not-guaranteed","pollIntervalSeconds":3600,"maxQuoteAgeSeconds":604800,"currentQuote":{"price":85.85,"previousClose":86.58,"change":-0.73,"changePercent":-0.8432,"open":86,"high":86.55,"low":85.66,"volume":17315500,"volumeUnit":"shares","asOf":"2026-09-23T16:14:36+08:00","ageSeconds":8444},"candlesAsOf":"2026-09-23","volumeUnit":"shares","candles":[{"date":"2026-08-13","open":90.37,"close":89.71,"high":90.7,"low":89.7,"volume":22665400},{"date":"2026-08-14","open":89.3,"close":88.9,"high":89.68,"low":88.69,"volume":20585600},{"date":"2026-08-17","open":88.9,"close":89.88,"high":90.44,"low":88.61,"volume":24625500},{"date":"2026-08-18","open":89.88,"close":89.53,"high":90.38,"low":89.23,"volume":20636900},{"date":"2026-08-19","open":89.53,"close":88.66,"high":89.53,"low":88.44,"volume":21960600},{"date":"2026-08-20","open":89.05,"close":90.48,"high":91,"low":88.89,"volume":35807400},{"date":"2026-08-21","open":90.35,"close":90.47,"high":91.08,"low":89.72,"volume":17886200},{"date":"2026-08-24","open":90.01,"close":90.66,"high":91.49,"low":89.4,"volume":27364700},{"date":"2026-08-25","open":90.49,"close":91.36,"high":91.5,"low":89.91,"volume":27450200},{"date":"2026-08-26","open":91.2,"close":92.09,"high":93.23,"low":91.06,"volume":28282300},{"date":"2026-08-27","open":91.7,"close":91.49,"high":92.18,"low":91.17,"volume":17701400},{"date":"2026-08-28","open":91.38,"close":92.32,"high":92.48,"low":90.9,"volume":25031800},{"date":"2026-08-31","open":91.56,"close":88.2,"high":92.54,"low":88.1,"volume":64040000},{"date":"2026-09-01","open":88.4,"close":88.71,"high":89.86,"low":88.25,"volume":28858900},{"date":"2026-09-02","open":88.48,"close":86.8,"high":89,"low":86.6,"volume":34680000},{"date":"2026-09-03","open":86.96,"close":87.31,"high":87.86,"low":86.96,"volume":20373400},{"date":"2026-09-04","open":87.38,"close":87.4,"high":88.55,"low":87.26,"volume":20343100},{"date":"2026-09-07","open":86.89,"close":86.51,"high":87.34,"low":86.2,"volume":21926500},{"date":"2026-09-08","open":86.39,"close":86.57,"high":86.7,"low":85.43,"volume":19726700},{"date":"2026-09-09","open":86.57,"close":85.88,"high":86.58,"low":85.5,"volume":18185800},{"date":"2026-09-10","open":85.11,"close":83.52,"high":85.19,"low":83.48,"volume":33073200},{"date":"2026-09-11","open":83.17,"close":84,"high":84.48,"low":82.66,"volume":27293500},{"date":"2026-09-14","open":84.01,"close":85.43,"high":85.95,"low":83.75,"volume":28959900},{"date":"2026-09-15","open":85.75,"close":84.3,"high":85.99,"low":84.2,"volume":19356200},{"date":"2026-09-16","open":84.11,"close":83.96,"high":84.55,"low":83.45,"volume":17642300},{"date":"2026-09-17","open":83.8,"close":84.97,"high":85.56,"low":83.11,"volume":26147900},{"date":"2026-09-18","open":84,"close":84.3,"high":84.67,"low":83.27,"volume":29992500},{"date":"2026-09-21","open":84.27,"close":85.22,"high":85.29,"low":84.11,"volume":24832200},{"date":"2026-09-22","open":85.59,"close":86.58,"high":87.2,"low":85.46,"volume":33684700},{"date":"2026-09-23","open":86,"close":85.85,"high":86.55,"low":85.66,"volume":17315500}]}],"unavailableSymbols":[]},"news":{"status":"ready","source":"AI 观察","locale":"zh-CN","fetchedAt":"2026-09-23T10:35:20.343705+00:00","items":[{"id":"ai-agent","title":"AI Agent 加速落地办公场景，从对话走向执行任务","url":"https://example.com/ai-agent","publishedAt":"2026-09-23T09:00:00+00:00","source":"AI 观察","summary":"行业综述：AI Agent 正从简单问答进化为能拆解任务、调用工具、持续执行的智能体，办公自动化成为最先规模落地的方向之一。"},{"id":"ai-multimodal","title":"多模态大模型成为主流，图文音视频统一理解","url":"https://example.com/ai-multimodal","publishedAt":"2026-09-23T08:30:00+00:00","source":"AI 观察","summary":"行业综述：新一代模型普遍具备图像、音频、视频的统一理解能力，多模态交互正在重塑搜索、办公与创作工具的形态。"},{"id":"ai-opensource","title":"开源模型生态持续繁荣，中小模型能力快速逼近旗舰","url":"https://example.com/ai-opensource","publishedAt":"2026-09-23T08:00:00+00:00","source":"AI 观察","summary":"行业综述：开源社区推出的一系列中小尺寸模型在多项任务上逼近旗舰水平，为私有化部署和垂直场景微调提供了丰富选择。"},{"id":"ai-cost","title":"推理成本快速下降，AI 应用进入普惠阶段","url":"https://example.com/ai-cost","publishedAt":"2026-09-23T07:30:00+00:00","source":"AI 观察","summary":"行业综述：随着量化、蒸馏与推理引擎优化，单位 token 成本一年内大幅下降，更多中小企业得以把大模型能力投入生产。"},{"id":"ai-longcontext","title":"长上下文技术持续突破，百万字级文档处理走向实用","url":"https://example.com/ai-longcontext","publishedAt":"2026-09-23T07:00:00+00:00","source":"AI 观察","summary":"行业综述：上下文窗口从几十万字迈向百万字级，长文档总结、代码库级理解与跨会话记忆成为竞争新高地。"},{"id":"ai-coding","title":"AI 编程助手普及，软件开发流程被重新定义","url":"https://example.com/ai-coding","publishedAt":"2026-09-23T06:30:00+00:00","source":"AI 观察","summary":"行业综述：从补全到 Agent 式开发，AI 编程助手正在覆盖需求、编码、测试到部署的全流程，开发者角色向架构与审阅转移。"}],"unavailableSources":[]},"repositories":{"status":"ready","source":"GitHub","fetchedAt":"2026-09-23T10:35:20.343705+00:00","items":[{"id":"agent-flow","name":"agentflow/agent-flow","description":"面向生产环境的 AI Agent 编排框架，支持任务分解、工具调用、多 Agent 协作与可视化追踪。","url":"https://example.com/agent-flow","language":"Python","stars":8600,"updatedAt":"2026-09-23T09:00:00+00:00","createdAt":"2026-07-16T06:28:46+00:00"},{"id":"prompt-ops","name":"promptops/prompt-ops","description":"Prompt 全生命周期管理工具，支持版本管理、A/B 评测与回归测试，让提示词迭代有迹可循。","url":"https://example.com/prompt-ops","language":"TypeScript","stars":6200,"updatedAt":"2026-09-23T08:00:00+00:00","createdAt":"2026-07-20T06:28:46+00:00"},{"id":"llm-router","name":"llmroute/llm-router","description":"多模型智能路由与降级网关，按成本、延迟与质量自动选择模型，内置缓存与限流。","url":"https://example.com/llm-router","language":"Go","stars":5100,"updatedAt":"2026-09-23T07:00:00+00:00","createdAt":"2026-08-01T06:28:46+00:00"},{"id":"vector-lab","name":"vectorlab/vector-lab","description":"向量检索与 RAG 工具箱，支持混合检索、重排序与知识库增量更新，快速搭建问答系统。","url":"https://example.com/vector-lab","language":"Python","stars":4400,"updatedAt":"2026-09-23T06:00:00+00:00","createdAt":"2026-08-10T06:28:46+00:00"},{"id":"eval-kit","name":"evalkit/eval-kit","description":"大模型评测框架，覆盖推理、代码、多模态与 Agent 场景，支持自定义数据集与报告导出。","url":"https://example.com/eval-kit","language":"Python","stars":3800,"updatedAt":"2026-09-23T05:00:00+00:00","createdAt":"2026-08-20T06:28:46+00:00"},{"id":"tiny-llm","name":"tinyllm/tiny-llm","description":"端侧小模型推理引擎，支持手机与桌面端本地运行量化模型，保护隐私同时降低调用成本。","url":"https://example.com/tiny-llm","language":"Rust","stars":2900,"updatedAt":"2026-09-23T04:00:00+00:00","createdAt":"2026-08-28T06:28:46+00:00"}]}};
+        const stage = document.querySelector(".stage");
+        // The native Binding smoke host has no visual DOM or optional runtime APIs.
+        if (!stage) return;
+        // Presets keep their selected language when the host injects its own UI locale.
+        const en = stage.dataset.tutorialLocale === "en-US",
+          t = (zh, english) => (en ? english : zh);
+        const host = window.DaimonWidget,
+          canvas = window.DaimonCanvas;
+        const board = document.getElementById("board"),
+          note = document.getElementById("source-note") || { textContent: "" };
+        const tabs = [...document.querySelectorAll(".tab")],
+          reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const examplePrompt = document.getElementById("example-prompt"),
+          exampleRequest = document.querySelector(".example-request"),
+          exampleResponse = document.querySelector(".example-response"),
+          examplePrompts = [
+            t(
+              "帮我盯住 A 股大盘和自选股，每小时更新行情",
+              "Track the S&P 500 and my watchlist. Update hourly.",
+            ),
+            t(
+              "把店铺的收入、订单和渠道表现做成一张看板",
+              "Show my store’s revenue, orders and sales by channel.",
+            ),
+            t(
+              "跟踪官网上线进度，列出待办、风险和里程碑",
+              "Track our website launch, tasks, risks and milestones.",
+            ),
+            t(
+              "把每日资讯、开源项目和邮件放在一起",
+              "Bring my news, open-source picks and email together.",
+            ),
+          ];
+        for (const element of [exampleRequest, exampleResponse]) {
+          element.addEventListener("animationend", (event) => {
+            if (
+              event.animationName === "request-enter" ||
+              event.animationName === "board-reply"
+            )
+              element.classList.remove("changing");
+          });
+          // Keyboard users can enter the example without waiting for the reveal.
+          element.addEventListener("focusin", () => {
+            element.classList.remove("changing");
+          });
+        }
+        const esc = (value) =>
+          String(value ?? "").replace(
+            /[&<>"']/g,
+            (c) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[c],
+          );
+        let payload = SAMPLE_DATA,
+          active = 0,
+          scenes = [],
+          elapsed = 0,
+          last = 0,
+          frame = 0,
+          visible = true,
+          keyboardFocus = false,
+          pointerMode = false,
+          destroyed = false,
+          requestPending = false,
+          pendingTimer = 0;
+        let state = { version: 1 },
+          canSave = true,
+          storageError = "",
+          writeQueue = Promise.resolve();
+        const files = host?.files,
+          off = [];
+        const atmosphere = stage.querySelector(".atmosphere"),
+          atmosphereContext = atmosphere?.getContext?.("2d");
+        let atmosphereWidth = 0,
+          atmosphereHeight = 0,
+          atmosphereTime = 0,
+          atmospherePaintedAt = -Infinity,
+          introBounds;
+        const atmosphereChars = " -+/()*▲K#";
+        function paintAtmosphere() {
+          if (!atmosphereContext || !atmosphereWidth || !atmosphereHeight)
+            return;
+          const ctx = atmosphereContext,
+            width = atmosphereWidth,
+            height = atmosphereHeight,
+            seconds = atmosphereTime / 1000,
+            // Keep the chosen ice blue; breathe only within a narrow blue range.
+            blue = 0.45 + 0.065 * Math.sin((seconds * Math.PI * 2) / 16),
+            gradient = ctx.createLinearGradient(0, 0, width, height);
+          for (const [stop, rgb] of [
+            [0, [188, 232, 255]],
+            [0.55, [153, 216, 252]],
+            [1, [136, 204, 239]],
+          ]) {
+            gradient.addColorStop(
+              stop,
+              "rgb(" +
+                rgb
+                  .map((value) => Math.round(255 + (value - 255) * blue))
+                  .join(",") +
+                ")",
+            );
+          }
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, width, height);
+          ctx.font = '14px "SF Mono", Menlo, monospace';
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          const time = seconds * 0.7,
+            cell = 18;
+          for (let row = 0; row * cell < height; row++) {
+            for (let column = 0; column * cell < width; column++) {
+              const x = column * cell + cell / 2,
+                y = row * cell + cell / 2,
+                u = x / width,
+                v = y / height,
+                lobe = Math.exp(
+                  -(
+                    (u - 0.75 - Math.sin(time * 0.22) * 0.07) ** 2 * 7 +
+                    (v - 0.55) ** 2 * 3
+                  ),
+                ),
+                wave =
+                  0.46 +
+                  0.25 * Math.sin(u * 14 - v * 7 + time * 0.38) +
+                  0.18 * Math.cos(v * 11 + u * 8 - time * 0.2),
+                power = lobe * wave;
+              if (power < 0.17) continue;
+              const character =
+                atmosphereChars[
+                  Math.floor(
+                    Math.min(0.999, power * 1.4) * (atmosphereChars.length - 1),
+                  )
+                ];
+              if (character === " ") continue;
+              // Reserve quiet space around the title, subtitle and case controls.
+              const dx = Math.max(
+                  introBounds.left - 16 - x,
+                  0,
+                  x - introBounds.right - 12,
+                ),
+                dy = Math.max(
+                  introBounds.top - 12 - y,
+                  0,
+                  y - introBounds.bottom - 12,
+                ),
+                distance = Math.min(1, Math.hypot(dx, dy) / 70),
+                keep = 0.08 + 0.92 * distance * distance * (3 - 2 * distance);
+              ctx.globalAlpha = (0.12 + 0.56 * power) * 0.7 * keep;
+              ctx.fillStyle =
+                (column * 7 + row * 13) % 17 === 0 ? "#fff" : "#174b6d";
+              ctx.fillText(character, x + Math.sin(time * 0.25 + v * 4) * 2, y);
+            }
+          }
+          ctx.globalAlpha = 1;
+        }
+        function resizeAtmosphere() {
+          if (!atmosphereContext) return;
+          const rect = stage.getBoundingClientRect(),
+            intro = stage.querySelector(".intro").getBoundingClientRect(),
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+          atmosphereWidth = rect.width;
+          atmosphereHeight = rect.height;
+          atmosphere.width = Math.round(rect.width * dpr);
+          atmosphere.height = Math.round(rect.height * dpr);
+          atmosphereContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+          introBounds = {
+            left: intro.left - rect.left,
+            right: intro.right - rect.left,
+            top: intro.top - rect.top,
+            bottom: intro.bottom - rect.top,
+          };
+          paintAtmosphere();
+        }
+        let atmosphereObserver;
+        if (atmosphereContext) {
+          resizeAtmosphere();
+          if (typeof ResizeObserver === "function") {
+            atmosphereObserver = new ResizeObserver(resizeAtmosphere);
+            atmosphereObserver.observe(stage);
+            atmosphereObserver.observe(stage.querySelector(".intro"));
+          } else {
+            window.addEventListener("resize", resizeAtmosphere);
+          }
+        }
+        function openUrl(value) {
+          try {
+            const url = new URL(value);
+            if (
+              !["https:", "http:"].includes(url.protocol) ||
+              url.username ||
+              url.password
+            )
+              return;
+            if (typeof canvas?.openLink === "function")
+              canvas.openLink(url.href);
+            else window.open(url.href, "_blank", "noopener,noreferrer");
+          } catch {}
+        }
+        async function loadState() {
+          if (typeof files?.readText !== "function") return;
+          try {
+            const text = await files.readText(
+              "workspace/tutorial-preferences.json",
+            );
+            if (text.length > 100000) throw Error("invalid_state");
+            const value = JSON.parse(text);
+            if (
+              !value ||
+              typeof value !== "object" ||
+              Array.isArray(value) ||
+              value.version !== 1
+            )
+              throw Error("invalid_state");
+            state = {
+              version: 1,
+              ...(value.project && typeof value.project === "object"
+                ? { project: value.project }
+                : {}),
+              ...(value.news && typeof value.news === "object"
+                ? { news: value.news }
+                : {}),
+            };
+            // Workspace paths use Core's not_found; managed resources use file_not_found.
+          } catch (error) {
+            if (!["file_not_found", "not_found"].includes(error?.code)) {
+              canSave = false;
+              storageError = t(
+                "暂时无法读取已保存的更改",
+                "Saved changes could not be loaded",
+              );
+            }
+          }
+        }
+        function saveState(key, value) {
+          if (!["project", "news"].includes(key)) return;
+          state[key] = value;
+          if (!canSave || typeof files?.writeText !== "function") {
+            storageError = t(
+              "此处的更改暂未保存",
+              "Changes are not saved here",
+            );
+            renderNote();
+            return;
+          }
+          const contents = JSON.stringify(state);
+          writeQueue = writeQueue
+            .catch(() => {})
+            .then(() =>
+              files.writeText("workspace/tutorial-preferences.json", contents),
+            )
+            .then(
+              () => {
+                storageError = "";
+                if (!destroyed) renderNote();
+              },
+              () => {
+                storageError = t(
+                  "更改未保存，请稍后重试",
+                  "Changes could not be saved",
+                );
+                if (!destroyed) renderNote();
+              },
+            );
+        }
+        function render() {
+          if (destroyed || !scenes.length) return;
+          const focused = board.contains(document.activeElement)
+            ? document.activeElement
+            : null;
+          const attributes = focused
+            ? [...focused.attributes]
+                .filter((a) => a.name.startsWith("data-"))
+                .map((a) => [a.name, a.value])
+            : [];
+          board.innerHTML = scenes[active].render();
+          examplePrompt.textContent = examplePrompts[active];
+          if (focused && keyboardFocus) {
+            const match = [...board.querySelectorAll("button,[tabindex]")].find(
+              (el) =>
+                attributes.length &&
+                attributes.every(([k, v]) => el.getAttribute(k) === v),
+            );
+            (match || board.querySelector("button") || board).focus({
+              preventScroll: true,
+            });
+          }
+          renderNote();
+        }
+        function renderNote() {
+          if (destroyed) return;
+          const running = requestPending || host?.status === "running";
+          const failed = ["error", "cancelled", "needs_input"].includes(
+            host?.status,
+          );
+          if (storageError && (active === 2 || active === 3)) {
+            note.textContent = storageError;
+            return;
+          }
+          if (active === 1) {
+            note.textContent = t("示例项目", "Sample project");
+            return;
+          }
+          if (active === 2) {
+            note.textContent = t("示例项目", "Sample project");
+            return;
+          }
+          const unavailable =
+            active === 0
+              ? payload?.stocks?.status === "error" ||
+                !!payload?.stocks?.unavailableSymbols?.length
+              : payload?.news?.status === "error" ||
+                payload?.repositories?.status === "error" ||
+                !!payload?.news?.unavailableSources?.length;
+          note.textContent =
+            failed || unavailable
+              ? t("部分数据暂不可用", "Some data is unavailable")
+              : t("每小时更新", "Updated hourly");
+        }
+        function select(index, automatic = false) {
+          const moveFocus = automatic && board.contains(document.activeElement);
+          scenes[active]?.leave?.();
+          active = index;
+          elapsed = 0;
+          last = 0;
+          tabs.forEach((tab, i) => {
+            tab.setAttribute("aria-selected", String(i === index));
+            tab.tabIndex = i === index ? 0 : -1;
+            tab.style.setProperty("--progress", "0%");
+          });
+          board.setAttribute("aria-labelledby", "case-" + index);
+          render();
+          if (!reduce.matches) {
+            for (const element of [exampleRequest, exampleResponse]) {
+              element.classList.remove("changing");
+              if (
+                element === exampleResponse &&
+                element.contains(document.activeElement)
+              )
+                continue;
+              // Restart only on a scene change, not on updates inside the demo.
+              void element.offsetWidth;
+              element.classList.add("changing");
+            }
+          }
+          if (moveFocus) board.focus({ preventScroll: true });
+        }
+        function canAnimate() {
+          return !destroyed && !reduce.matches && !document.hidden && visible;
+        }
+        function tick(now) {
+          frame = 0;
+          if (!canAnimate()) return;
+          const delta = last ? Math.min(now - last, 100) : 0;
+          elapsed += delta;
+          atmosphereTime += delta;
+          last = now;
+          // Reuse the carousel clock and visibility lifecycle; decoration needs only 15 fps.
+          if (now - atmospherePaintedAt >= 1000 / 15) {
+            paintAtmosphere();
+            atmospherePaintedAt = now;
+          }
+          tabs[active].style.setProperty(
+            "--progress",
+            Math.min(100, elapsed / 90) + "%",
+          );
+          if (elapsed >= 9000) select((active + 1) % 4, true);
+          frame = requestAnimationFrame(tick);
+        }
+        function motion() {
+          if (reduce.matches) {
+            exampleRequest.classList.remove("changing");
+            exampleResponse.classList.remove("changing");
+          }
+          stage.classList.toggle(
+            "motion",
+            !reduce.matches && !document.hidden && visible,
+          );
+          if (canAnimate()) {
+            if (!frame) {
+              last = 0;
+              frame = requestAnimationFrame(tick);
+            }
+          } else {
+            cancelAnimationFrame(frame);
+            frame = 0;
+            last = 0;
+          }
+        }
+        // Factory functions live in this document; no external scripts or network calls in the iframe.
+        function createMarketScene(api) {
+          const { en, esc } = api;
+          const market = en ? "US" : "CN";
+          let symbol = null,
+            range = 30,
+            chartNode = null,
+            rows = [],
+            geometry = null,
+            inspected = -1,
+            chartVolumeUnit = "";
+          const fmt = (n) =>
+            Number.isFinite(n)
+              ? n.toLocaleString(en ? "en-US" : "zh-CN", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+              : "—";
+          const finite = (n) => typeof n === "number" && Number.isFinite(n);
+          const positive = (n) => finite(n) && n > 0;
+          const signed = (n) =>
+            finite(n) ? `${n > 0 ? "+" : ""}${n.toFixed(2)}%` : "—";
+          const tone = (n) => (n > 0 ? "mk-up" : n < 0 ? "mk-down" : "");
+          const name = (item) =>
+            (en ? item.nameEn || item.name : item.name) || item.symbol;
+          const validCandle = (r) =>
+            r &&
+            /^\d{4}-\d{2}-\d{2}$/.test(r.date) &&
+            [r.open, r.high, r.low, r.close].every(positive) &&
+            r.high >= Math.max(r.open, r.close) &&
+            r.low <= Math.min(r.open, r.close) &&
+            finite(r.volume) &&
+            r.volume >= 0;
+          const allItems = () => {
+            const items = api.getData()?.stocks?.items;
+            return Array.isArray(items)
+              ? items.filter(
+                  (r) =>
+                    r &&
+                    r.market === market &&
+                    ["index", "stock"].includes(r.instrumentType) &&
+                    typeof r.symbol === "string" &&
+                    positive(r.currentQuote?.price) &&
+                    Array.isArray(r.candles),
+                )
+              : [];
+          };
+          const selectedItem = (items) =>
+            symbol === null
+              ? items.find((item) => item.instrumentType === "index") || null
+              : items.find((item) => item.symbol === symbol) || null;
+          const priceUnit = (item) =>
+            item?.instrumentType === "index"
+              ? en
+                ? "pts"
+                : "点"
+              : item?.currency === "USD"
+                ? "USD"
+                : item?.currency === "CNY"
+                  ? "CNY"
+                  : "";
+          const currencySign = (item) =>
+            item?.instrumentType === "index"
+              ? ""
+              : item?.currency === "USD"
+                ? "$"
+                : item?.currency === "CNY"
+                  ? "¥"
+                  : "";
+          const volumeUnit = (item) =>
+            item.volumeUnit === "shares"
+              ? en
+                ? "shares"
+                : "股"
+              : item.volumeUnit === "source-units"
+                ? en
+                  ? "source units"
+                  : "源单位"
+                : "";
+          const volume = (v) =>
+            en ? `${(v / 1e6).toFixed(2)}M` : `${(v / 1e4).toFixed(1)}万`;
+          const shortDate = (d) => d.slice(5).replace("-", "/");
+          function means(candles, count) {
+            let sum = 0;
+            return candles.map((row, i) => {
+              sum += row.close;
+              if (i >= count) sum -= candles[i - count].close;
+              return i >= count - 1 ? sum / count : null;
+            });
+          }
+          function graph(item) {
+            chartVolumeUnit = volumeUnit(item);
+            const history = item.candles
+              .filter(validCandle)
+              .slice()
+              .sort((a, b) => a.date.localeCompare(b.date));
+            const from = Math.max(0, history.length - range);
+            rows = history.slice(from);
+            if (rows.length < 2) {
+              geometry = null;
+              return `<div class="mk-nochart">${en ? "Price history is unavailable" : "暂无可用日线"}</div>`;
+            }
+            const ma5 = means(history, 5).slice(from),
+              ma20 = means(history, 20).slice(from);
+            const limits = rows
+              .flatMap((r) => [r.high, r.low])
+              .concat(ma5.filter(finite), ma20.filter(finite));
+            let low = Math.min(...limits),
+              high = Math.max(...limits);
+            const padding = Math.max((high - low) * 0.12, high * 0.002);
+            low -= padding;
+            high += padding;
+            const width = 420,
+              start = 7,
+              end = 372,
+              plotTop = 10,
+              plotBottom = 112,
+              volumeTop = 128,
+              volumeBottom = 164;
+            const step = (end - start) / rows.length;
+            const x = (i) => start + (i + 0.5) * step;
+            const y = (n) =>
+              plotBottom - ((n - low) / (high - low)) * (plotBottom - plotTop);
+            const maxVolume = Math.max(1, ...rows.map((r) => r.volume));
+            const bodyWidth = Math.max(2, Math.min(12, step * 0.63));
+            geometry = { width, start, end, x, y, plotTop, volumeBottom };
+            const path = (values) => {
+              let started = false;
+              return values
+                .map((value, i) => {
+                  if (!finite(value)) {
+                    started = false;
+                    return "";
+                  }
+                  const command = started ? "L" : "M";
+                  started = true;
+                  return `${command}${x(i).toFixed(2)} ${y(value).toFixed(2)}`;
+                })
+                .join(" ");
+            };
+            const grids = [0, 0.5, 1]
+              .map((ratio) => {
+                const value = low + (high - low) * ratio,
+                  yy = y(value);
+                return `<line x1="0" x2="${end + 2}" y1="${yy}" y2="${yy}" class="mk-grid"/><text x="${width - 2}" y="${yy + 4}" text-anchor="end" class="mk-axis-text">${value.toFixed(value > 999 ? 0 : 1)}</text>`;
+              })
+              .join("");
+            const candles = rows
+              .map((r, i) => {
+                const up = r.close >= r.open,
+                  color = up ? "mk-up" : "mk-down",
+                  xx = x(i);
+                const top = Math.min(y(r.open), y(r.close)),
+                  height = Math.max(1.3, Math.abs(y(r.open) - y(r.close)));
+                const volHeight =
+                  (r.volume / maxVolume) * (volumeBottom - volumeTop);
+                return `<g class="${color}"><line x1="${xx}" x2="${xx}" y1="${y(r.high)}" y2="${y(r.low)}" class="mk-wick"/><rect x="${xx - bodyWidth / 2}" y="${top}" width="${bodyWidth}" height="${height}" class="mk-candle"/><rect x="${xx - bodyWidth / 2}" y="${volumeBottom - volHeight}" width="${bodyWidth}" height="${volHeight}" class="mk-volume"/></g>`;
+              })
+              .join("");
+            const latest = rows.at(-1);
+            return `<div class="mk-chart" data-market-chart tabindex="0" role="slider" aria-label="${en ? "Daily candles. Use left and right arrows to inspect prices." : "日线图，按左右方向键查看每日价格"}" aria-valuemin="0" aria-valuemax="${rows.length - 1}" aria-valuenow="${rows.length - 1}" aria-valuetext="${esc(`${latest.date} ${en ? "Close" : "收盘"} ${fmt(latest.close)}`)}">
+      <svg viewBox="0 0 420 183" preserveAspectRatio="none" aria-hidden="true">${grids}${candles}<path class="mk-ma5" d="${path(ma5)}"/><path class="mk-ma20" d="${path(ma20)}"/><line x1="0" x2="${end + 2}" y1="120" y2="120" class="mk-grid"/><text x="${width - 2}" y="141" text-anchor="end" class="mk-axis-text">${en ? "Vol" : "成交量"}</text><text x="${width - 2}" y="156" text-anchor="end" class="mk-axis-text">${esc(chartVolumeUnit === "source units" ? "units" : chartVolumeUnit)}</text><text x="${start}" y="181" class="mk-axis-text">${esc(shortDate(rows[0].date))}</text><text x="${end}" y="181" text-anchor="end" class="mk-axis-text">${esc(shortDate(latest.date))}</text><g class="mk-cross" visibility="hidden"><line data-market-cross y1="${plotTop}" y2="${volumeBottom}"/><circle data-market-dot r="3.5"/></g></svg>
+      <div class="mk-tooltip" data-market-tip hidden></div>
+    </div>`;
+          }
+          function render() {
+            chartNode = null;
+            inspected = -1;
+            geometry = null;
+            rows = [];
+            const items = allItems();
+            const item = selectedItem(items),
+              index = items.find((r) => r.instrumentType === "index"),
+              stocks = items
+                .filter((r) => r.instrumentType === "stock")
+                .slice(0, 3);
+            const quote = item?.currentQuote;
+            const main = item
+              ? `
+      <div class="mk-heading"><div class="mk-name"><h2>${esc(name(item))}</h2><span>${esc(item.symbol)}</span></div><div class="mk-ranges" aria-label="${en ? "Trading days" : "交易日范围"}">${[10, 30, 60].map((n) => `<button type="button" data-market-range="${n}" aria-pressed="${n === range}">${n}${en ? "D" : "日"}</button>`).join("")}</div></div>
+      <div class="mk-quote"><strong>${currencySign(item)}${fmt(quote.price)}${item.instrumentType === "index" ? `<small>${priceUnit(item)}</small>` : ""}</strong><span class="${tone(quote.changePercent)}">${signed(quote.changePercent)}</span><span class="mk-quote-label">${en ? "Latest" : "最新价"}</span></div>
+      <div class="mk-legend"><span><i class="mk-ma5-key"></i>MA5</span><span><i class="mk-ma20-key"></i>MA20</span><span class="mk-adjustment">${item.instrumentType === "index" ? (en ? "Daily" : "日线") : en ? (item.adjustment === "unadjusted" ? "Daily · unadjusted" : "Daily · adjusted") : item.adjustment === "unadjusted" ? "日线 · 不复权" : "日线 · 前复权"}</span></div>
+      ${graph(item)}`
+              : `<div class="mk-noquote"><strong>${symbol === null ? (en ? "S&P 500" : "上证指数") : esc(symbol)}</strong><span>${en ? "Quotes are unavailable. Refresh to try again." : "暂无可用行情，刷新后重试"}</span></div>`;
+            return `<div class="mk-shell mini-canvas"><section class="mk-main mini-widget" aria-label="${en ? "Daily price chart" : "日线走势"}">
+      ${main}
+    </section><aside class="mk-watch mini-widget" aria-label="${en ? "Watchlist" : "自选列表"}"><div class="mk-watch-title">${en ? "Watchlist" : "我的自选"}<span>${stocks.length}</span></div><button type="button" class="mk-index" data-market-index aria-pressed="${symbol === null || item?.instrumentType === "index"}"><span>${en ? "Market" : "大盘"}</span><strong>${esc(index ? name(index) : en ? "S&P 500" : "上证指数")}</strong></button>${stocks.map((r) => `<button type="button" class="mk-watch-row" data-market-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol === symbol}" title="${esc(name(r))}"><span class="mk-watch-identity"><span class="mk-watch-name">${esc(name(r))}</span><span class="mk-watch-code">${esc(r.symbol)}</span></span><span class="mk-watch-price">${currencySign(r)}${fmt(r.currentQuote.price)}<span class="${tone(r.currentQuote.changePercent)}">${signed(r.currentQuote.changePercent)}</span></span></button>`).join("")}${stocks.length ? "" : `<span class="mk-watch-empty">${en ? "No quotes available" : "暂无可用报价"}</span>`}</aside><section class="mk-details mini-widget" aria-label="${en ? "Latest session quote details" : "最新交易日报价详情"}"><div class="mk-details-title">${en ? "Session prices" : "当日报价"}<span>${priceUnit(item)}</span></div><dl>${[
+      [en ? "Open" : "今开", quote?.open],
+      [en ? "High" : "最高", quote?.high],
+      [en ? "Low" : "最低", quote?.low],
+      [en ? "Prev close" : "昨收", quote?.previousClose],
+    ]
+      .map(
+        ([label, value]) =>
+          `<div><dt>${label}</dt><dd>${fmt(value)}</dd></div>`,
+      )
+      .join("")}</dl></section></div>`;
+          }
+          function show(index, node) {
+            if (!node || !geometry || !rows.length) return;
+            chartNode = node;
+            inspected = Math.max(
+              0,
+              Math.min(rows.length - 1, Math.round(index)),
+            );
+            const row = rows[inspected],
+              xx = geometry.x(inspected),
+              yy = geometry.y(row.close);
+            const cross = node.querySelector(".mk-cross"),
+              line = node.querySelector("[data-market-cross]"),
+              dot = node.querySelector("[data-market-dot]"),
+              tip = node.querySelector("[data-market-tip]");
+            if (!cross || !line || !dot || !tip) return;
+            cross.setAttribute("visibility", "visible");
+            line.setAttribute("x1", String(xx));
+            line.setAttribute("x2", String(xx));
+            dot.setAttribute("cx", String(xx));
+            dot.setAttribute("cy", String(yy));
+            const labels = en ? ["O", "H", "L", "C"] : ["开", "高", "低", "收"];
+            tip.innerHTML = `<div class="mk-tip-date"><strong>${esc(row.date)}</strong><span>${en ? "Vol " : "量 "}${volume(row.volume)} ${esc(chartVolumeUnit)}</span></div><div class="mk-tip-values">${[row.open, row.high, row.low, row.close].map((v, i) => `<span><i>${labels[i]}</i>${fmt(v)}</span>`).join("")}</div>`;
+            tip.hidden = false;
+            tip.classList.toggle("mk-tip-left", inspected >= rows.length / 2);
+            node.setAttribute("aria-valuenow", String(inspected));
+            node.setAttribute(
+              "aria-valuetext",
+              `${row.date}, ${en ? "Open" : "开盘"} ${fmt(row.open)}, ${en ? "High" : "最高"} ${fmt(row.high)}, ${en ? "Low" : "最低"} ${fmt(row.low)}, ${en ? "Close" : "收盘"} ${fmt(row.close)}`,
+            );
+          }
+          function pointer(event) {
+            const node = event.target?.closest?.("[data-market-chart]");
+            if (!node || !geometry) return;
+            const bounds = node.getBoundingClientRect();
+            if (!bounds.width) return;
+            const xx =
+              ((event.clientX - bounds.left) / bounds.width) * geometry.width;
+            show(
+              ((xx - geometry.start) / (geometry.end - geometry.start)) *
+                rows.length -
+                0.5,
+              node,
+            );
+          }
+          function leave() {
+            if (chartNode) {
+              chartNode
+                .querySelector(".mk-cross")
+                ?.setAttribute("visibility", "hidden");
+              const tip = chartNode.querySelector("[data-market-tip]");
+              if (tip) tip.hidden = true;
+            }
+            chartNode = null;
+            inspected = -1;
+          }
+          function click(button) {
+            if (button?.dataset && "marketIndex" in button.dataset) {
+              symbol = null;
+              leave();
+              api.render();
+              return true;
+            }
+            if (button?.dataset?.marketSymbol) {
+              if (
+                allItems().some(
+                  (item) => item.symbol === button.dataset.marketSymbol,
+                )
+              ) {
+                symbol = button.dataset.marketSymbol;
+                leave();
+                api.render();
+              }
+              return true;
+            }
+            if (button?.dataset?.marketRange) {
+              const next = Number(button.dataset.marketRange);
+              if ([10, 30, 60].includes(next)) {
+                range = next;
+                leave();
+                api.render();
+              }
+              return true;
+            }
+            return false;
+          }
+          function key(event) {
+            const node = event.target?.closest?.("[data-market-chart]");
+            if (!node || !geometry) return;
+            const keys = ["ArrowLeft", "ArrowRight", "Home", "End", "Escape"];
+            if (!keys.includes(event.key)) return;
+            event.preventDefault();
+            if (event.key === "Escape") {
+              leave();
+              return;
+            }
+            const current = inspected < 0 ? rows.length - 1 : inspected;
+            show(
+              event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? rows.length - 1
+                  : current + (event.key === "ArrowLeft" ? -1 : 1),
+              node,
+            );
+          }
+          const getSelectedItem = () => selectedItem(allItems());
+          return { render, click, pointer, leave, key, getSelectedItem };
+        }
+
+        function createBusinessScene(api) {
+          const { en, esc } = api;
+          const t = (zh, english) => (en ? english : zh);
+          // Sample store: organic growth, a paid campaign, and weekly partner orders have distinct rhythms.
+          const channels = [
+            {
+              id: "direct",
+              name: t("品牌官网", "Web store"),
+              color: "#1986ed",
+              orders: [
+                82, 85, 80, 89, 96, 104, 88, 91, 95, 98, 97, 103, 111, 99, 104,
+                101, 110, 114, 117, 126, 109, 113, 121, 118, 129, 136, 132, 123,
+              ],
+            },
+            {
+              id: "social",
+              name: t("社媒投放", "Paid social"),
+              color: "#72bcd8",
+              orders: [
+                42, 39, 47, 65, 109, 143, 120, 78, 57, 45, 43, 48, 51, 49, 45,
+                39, 44, 48, 50, 54, 47, 44, 39, 33, 29, 35, 30, 27,
+              ],
+            },
+            {
+              id: "partner",
+              name: t("渠道合作", "Partners"),
+              color: "#a69ee8",
+              orders: [
+                12, 15, 14, 46, 68, 21, 9, 13, 12, 16, 49, 75, 23, 11, 15, 17,
+                18, 53, 84, 25, 13, 16, 19, 17, 60, 91, 29, 14,
+              ],
+            },
+          ];
+          const rows = Array.from({ length: 28 }, (_, d) =>
+            channels.map((channel, c) => {
+              const orders = channel.orders[d];
+              const refundRate =
+                [0.021, 0.052, 0.013][c] + ((d + c * 2) % 6) * 0.002;
+              const refunds = Math.round(orders * refundRate);
+              const averagePrice =
+                [218, 169, 284][c] +
+                [7, 11, 19][c] * Math.sin((d + c * 4) * [0.49, 0.77, 0.31][c]);
+              const gross = Math.round(orders * averagePrice);
+              const refundAmount = Math.round(refunds * averagePrice);
+              const conversion =
+                [0.047, 0.032, 0.064][c] *
+                (1 + 0.13 * Math.sin(d * 0.61 + c * 2));
+              return {
+                date: `09-${String(d + 1).padStart(2, "0")}`,
+                day: d,
+                channel: channel.id,
+                orders,
+                refunds,
+                gross,
+                refundAmount,
+                visits: Math.round(orders / conversion),
+              };
+            }),
+          ).flat();
+          let days = 14,
+            channel = "all",
+            detail = false;
+          const sum = (rs) =>
+            rs.reduce(
+              (a, r) => ({
+                revenue: a.revenue + r.gross - r.refundAmount,
+                orders: a.orders + r.orders,
+                visits: a.visits + r.visits,
+                refunds: a.refunds + r.refunds,
+              }),
+              { revenue: 0, orders: 0, visits: 0, refunds: 0 },
+            );
+          const fmt = (n) =>
+            n.toLocaleString(en ? "en-US" : "zh-CN", {
+              maximumFractionDigits: 0,
+            });
+          const currency = (n) => "¥" + fmt(Math.round(n));
+          const groups = (rs) =>
+            [...new Set(rs.map((r) => r.date))].map((date) => ({
+              date,
+              ...sum(rs.filter((r) => r.date === date)),
+            }));
+          const pct = (a, b) => (b ? (a / b - 1) * 100 : 0);
+          function render() {
+            const current = rows.filter(
+              (r) =>
+                r.day >= 28 - days &&
+                (channel === "all" || r.channel === channel),
+            );
+            const prior = rows.filter(
+              (r) =>
+                r.day >= 28 - days * 2 &&
+                r.day < 28 - days &&
+                (channel === "all" || r.channel === channel),
+            );
+            const a = sum(current),
+              b = sum(prior),
+              daily = groups(current),
+              change = pct(a.revenue, b.revenue);
+            const breakdown = channels.map((c) => ({
+              ...c,
+              ...sum(
+                rows.filter((r) => r.day >= 28 - days && r.channel === c.id),
+              ),
+            }));
+            const total = breakdown.reduce((n, r) => n + r.revenue, 0),
+              winner = breakdown
+                .slice()
+                .sort((a, b) => b.revenue - a.revenue)[0];
+            const max = Math.max(...daily.map((r) => r.revenue)) * 1.15,
+              w = 350,
+              h = 145;
+            const coords = daily.map((r, i) => [
+              5 + (i * (w - 10)) / (daily.length - 1),
+              h - (r.revenue / max) * (h - 12),
+            ]);
+            const path = coords
+              .map(
+                ([x, y], i) =>
+                  `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`,
+              )
+              .join(" ");
+            const chart = detail
+              ? `<div class="bi-detail"><table><thead><tr><th>${t("日期", "Date")}</th><th>${t("净收入", "Net revenue")}</th><th>${t("订单", "Orders")}</th><th>${t("退款", "Refunds")}</th></tr></thead><tbody>${daily
+                  .slice()
+                  .reverse()
+                  .map(
+                    (r) =>
+                      `<tr><td>${r.date}</td><td>${currency(r.revenue)}</td><td>${fmt(r.orders)}</td><td>${fmt(r.refunds)}</td></tr>`,
+                  )
+                  .join("")}</tbody></table></div>`
+              : `<svg class="bi-chart" viewBox="0 0 350 174" role="img" aria-label="${t("每日净收入趋势", "Daily net revenue")}"><defs><linearGradient id="bi-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#58b3ff" stop-opacity=".28"/><stop offset="1" stop-color="#58b3ff" stop-opacity=".01"/></linearGradient></defs>${[24, 82, 140].map((y) => `<path d="M0 ${y}H350" stroke="#dce8f2" stroke-dasharray="3 4"/>`).join("")}<path d="${path} L345,145 L5,145Z" fill="url(#bi-fill)"/><path d="${path}" fill="none" stroke="#258cf0" stroke-width="2.5" stroke-linecap="round"/>${coords.map(([x, y], i) => `<g class="bi-point" tabindex="0" aria-label="${daily[i].date} ${currency(daily[i].revenue)}, ${daily[i].orders} ${t("单", "orders")}"><title>${daily[i].date} · ${currency(daily[i].revenue)} · ${daily[i].orders} ${t("单", "orders")}</title><rect x="${x - 10}" y="0" width="20" height="150" fill="transparent"/><circle cx="${x}" cy="${y}" r="3" fill="#258cf0"/><text x="${Math.max(50, Math.min(300, x))}" y="12" text-anchor="middle">${daily[i].date} · ${currency(daily[i].revenue)}</text></g>`).join("")}<text x="2" y="171">${daily[0].date}</text><text x="348" y="171" text-anchor="end">${daily.at(-1).date}</text></svg>`;
+            return `<section class="bi-scene mini-canvas"><section class="bi-summary mini-widget"><div class="bi-header"><strong>${t("线上商店", "Online store")}</strong><div class="bi-period" aria-label="${t("统计周期", "Reporting period")}">${[7, 14].map((n) => `<button type="button" data-bi-action="period" data-days="${n}" aria-pressed="${n === days}">${n}${t("天", "d")}</button>`).join("")}</div><span>${t("9 月", "September")}</span></div><div class="bi-kpis">${[
+              [
+                t("净收入", "Net revenue"),
+                currency(a.revenue),
+                `${change >= 0 ? "+" : ""}${change.toFixed(1)}% ${t("较上期", "vs prior")}`,
+              ],
+              [
+                t("订单", "Orders"),
+                fmt(a.orders),
+                `${fmt(a.refunds)} ${t("笔退款", "refunded")}`,
+              ],
+              [
+                t("客单价", "Net / order"),
+                currency(a.revenue / a.orders),
+                t("扣除退款", "After refunds"),
+              ],
+              [
+                t("转化率", "Conversion"),
+                ((a.orders / a.visits) * 100).toFixed(2) + "%",
+                `${fmt(a.visits)} ${t("次访问", "visits")}`,
+              ],
+            ]
+              .map(
+                ([title, val, hint]) =>
+                  `<div><span>${title}</span><strong>${val}</strong><small>${hint}</small></div>`,
+              )
+              .join(
+                "",
+              )}</div></section><div class="bi-main"><div class="bi-trend mini-widget"><header><span>${t("收入趋势", "Revenue trend")}${channel !== "all" ? " · " + channels.find((c) => c.id === channel).name : ""}</span><button type="button" data-bi-action="detail">${detail ? t("看图表", "Chart") : t("看明细", "Details")} ↗</button></header>${chart}</div><div class="bi-channels mini-widget"><header>${t("渠道贡献", "Revenue by channel")}<button type="button" data-bi-action="channel" data-channel="all" aria-pressed="${channel === "all"}">${t("全部", "All")}</button></header>${breakdown.map((c) => `<button class="bi-channel" type="button" data-bi-action="channel" data-channel="${c.id}" aria-pressed="${channel === c.id}"><span>${c.name}<b>${((c.revenue / total) * 100).toFixed(0)}%</b></span><i><em style="width:${(c.revenue / total) * 100}%;background:${c.color}"></em></i></button>`).join("")}<div class="bi-insight"><span>↗</span>${channel === "all" ? `${winner.name}${t("贡献", " drives ")} ${((winner.revenue / total) * 100).toFixed(0)}% ${t("净收入", "of net revenue")}` : t(`该渠道 ${days} 天净收入 ${currency(a.revenue)}，环比${change >= 0 ? "增长" : "下降"} ${Math.abs(change).toFixed(1)}%。`, `${days}-day net revenue ${currency(a.revenue)}, ${change >= 0 ? "up" : "down"} ${Math.abs(change).toFixed(1)}% vs the prior period.`)}</div></div></div></section>`;
+          }
+          function click(button) {
+            const action = button.dataset.biAction;
+            if (!action) return false;
+            if (action === "period")
+              days = Number(button.dataset.days) === 7 ? 7 : 14;
+            if (action === "channel")
+              channel = channels.some((c) => c.id === button.dataset.channel)
+                ? button.dataset.channel
+                : "all";
+            if (action === "detail") detail = !detail;
+            api.render();
+            return true;
+          }
+          return { render, click };
+        }
+
+        function createProjectScene(api) {
+          const { en, esc } = api;
+          const sampleDate = "2026-09-22";
+          const tasks = [
+            {
+              id: "scope",
+              phase: "design",
+              title: ["确认需求", "Agree on scope"],
+              owner: "Lin",
+              due: "2026-09-16",
+              status: "done",
+            },
+            {
+              id: "wireframes",
+              phase: "design",
+              title: ["页面结构", "Page structure"],
+              owner: "Lin",
+              due: "2026-09-17",
+              status: "done",
+            },
+            {
+              id: "visuals",
+              phase: "design",
+              title: ["视觉设计", "Visual design"],
+              owner: "Mia",
+              due: "2026-09-19",
+              status: "done",
+            },
+            {
+              id: "handoff",
+              phase: "design",
+              title: ["设计交付", "Design handoff"],
+              owner: "Mia",
+              due: "2026-09-20",
+              status: "done",
+            },
+            {
+              id: "homepage",
+              phase: "build",
+              title: ["首页与落地页", "Home and campaign pages"],
+              owner: "Alex",
+              due: "2026-09-20",
+              status: "done",
+            },
+            {
+              id: "search",
+              phase: "build",
+              title: ["商品搜索与筛选", "Product search and filters"],
+              owner: "Alex",
+              due: "2026-09-20",
+              status: "done",
+            },
+            {
+              id: "analytics",
+              phase: "build",
+              title: ["转化漏斗埋点", "Conversion funnel tracking"],
+              owner: "Jo",
+              due: "2026-09-21",
+              status: "done",
+            },
+            {
+              id: "payment",
+              phase: "build",
+              title: ["支付回调联调", "Payment callback integration"],
+              owner: "Alex",
+              due: "2026-09-21",
+              status: "blocked",
+              blocker: ["支付沙箱权限待开通", "Payment sandbox access pending"],
+            },
+            {
+              id: "account",
+              phase: "build",
+              title: ["账号与订单权限", "Account and order access"],
+              owner: "Jo",
+              due: "2026-09-24",
+              status: "active",
+            },
+            {
+              id: "test-plan",
+              phase: "qa",
+              title: ["测试清单", "Test plan"],
+              owner: "Sam",
+              due: "2026-09-22",
+              status: "done",
+            },
+            {
+              id: "acceptance",
+              phase: "qa",
+              title: ["验收测试", "Acceptance testing"],
+              owner: "Sam",
+              due: "2026-09-25",
+              status: "todo",
+            },
+            {
+              id: "release",
+              phase: "qa",
+              title: ["上线检查", "Launch checks"],
+              owner: "Lin",
+              due: "2026-09-27",
+              status: "todo",
+            },
+          ];
+          const phases = [
+            {
+              id: "design",
+              label: ["设计", "Design"],
+              milestone: ["设计交付", "Design handoff"],
+              due: "2026-09-20",
+            },
+            {
+              id: "build",
+              label: ["开发", "Build"],
+              milestone: ["联调完成", "Integration ready"],
+              due: "2026-09-25",
+            },
+            {
+              id: "qa",
+              label: ["验收", "QA"],
+              milestone: ["官网上线", "Website launch"],
+              due: "2026-09-27",
+            },
+          ];
+          const labels = en
+            ? {
+                title: "Website launch",
+                schedule: "Launch Sep 27",
+                complete: "done",
+                resolve: "Unblock",
+                phases: "Project phase",
+                markDone: "Mark complete",
+                markOpen: "Mark incomplete",
+                status: {
+                  done: "Complete",
+                  active: "In progress",
+                  todo: "To do",
+                  blocked: "Blocked",
+                },
+                sampleHint: "Sample status as of September 22, 2026",
+                saved: "Project progress updated",
+              }
+            : {
+                title: "官网上线",
+                schedule: "9月27日上线",
+                complete: "完成",
+                resolve: "解除阻塞",
+                phases: "项目阶段",
+                markDone: "标记完成",
+                markOpen: "取消完成",
+                status: {
+                  done: "已完成",
+                  active: "进行中",
+                  todo: "待开始",
+                  blocked: "有阻塞",
+                },
+                sampleHint: "按 2026 年 9 月 22 日的样例状态计算",
+                saved: "项目进度已更新",
+              };
+          const text = (pair) => pair[en ? 1 : 0];
+          const validStatuses = new Set(["done", "active", "todo", "blocked"]);
+          const saved = api.readState("project", null);
+          const raw =
+            saved && typeof saved === "object" && saved.version === 1
+              ? saved
+              : {};
+          const state = {
+            version: 1,
+            phase: phases.some((phase) => phase.id === raw.phase)
+              ? raw.phase
+              : "build",
+            taskStatus: Object.fromEntries(
+              tasks.map((task) => [
+                task.id,
+                validStatuses.has(raw.taskStatus?.[task.id]) &&
+                (raw.taskStatus[task.id] !== "blocked" || task.blocker)
+                  ? raw.taskStatus[task.id]
+                  : task.status,
+              ]),
+            ),
+          };
+          const getStatus = (task) => state.taskStatus[task.id];
+          const isDone = (task) => getStatus(task) === "done";
+          const isLate = (task) => !isDone(task) && task.due < sampleDate;
+          const date = (value) => value.slice(5).replace("-", ".");
+          const persist = () => {
+            api.saveState("project", {
+              version: 1,
+              phase: state.phase,
+              taskStatus: { ...state.taskStatus },
+            });
+            api.render();
+          };
+          function render() {
+            const done = tasks.filter(isDone).length;
+            const overdue = tasks.filter(isLate).length;
+            const blocked = tasks.filter(
+              (task) => getStatus(task) === "blocked",
+            );
+            const percent = Math.round((done / tasks.length) * 100);
+            const milestone = phases.find((phase) =>
+              tasks.some((task) => task.phase === phase.id && !isDone(task)),
+            );
+            // Keep unfinished work visible first, while preserving a task's order as it is checked off.
+            const selected = tasks
+              .filter((task) => task.phase === state.phase)
+              .sort(
+                (a, b) =>
+                  Number(a.status === "done") - Number(b.status === "done"),
+              );
+            return `<section class="project-scene mini-canvas" aria-label="${esc(labels.title)}">
+      <div class="pm-main mini-widget">
+        <header class="pm-heading"><h2 class="pm-title">${esc(labels.title)}</h2><span class="pm-health${blocked.length || overdue ? " pm-at-risk" : ""}">${blocked.length || overdue ? (en ? "At risk" : "有风险") : en ? "On track" : "按计划"}</span></header>
+        <div class="pm-tabs" role="tablist" aria-label="${esc(labels.phases)}">${phases
+          .map((phase) => {
+            const group = tasks.filter((task) => task.phase === phase.id);
+            return `<button class="pm-tab" type="button" role="tab" aria-selected="${state.phase === phase.id}" aria-controls="pm-task-list" data-project-action="phase" data-id="${phase.id}" data-focus-key="phase-${phase.id}">${esc(text(phase.label))}<span>${group.filter(isDone).length}/${group.length}</span></button>`;
+          })
+          .join("")}</div>
+        <div class="pm-task-list" id="pm-task-list" role="tabpanel" aria-label="${esc(text(phases.find((phase) => phase.id === state.phase).label))}">${selected
+          .map((task) => {
+            const status = getStatus(task);
+            const checked = isDone(task);
+            const late = isLate(task);
+            const needsFollowUp = status === "blocked" || late;
+            return `<div class="pm-task-row${checked ? " pm-is-done" : ""}${status === "blocked" ? " pm-is-blocked" : ""}" data-task-id="${task.id}">
+            <button class="pm-task" type="button" role="checkbox" aria-checked="${checked}" aria-label="${esc(text(task.title) + " · " + task.owner + " · " + labels.status[status] + " · " + (checked ? labels.markOpen : labels.markDone))}" data-project-action="task" data-id="${task.id}">
+              <span class="pm-check" aria-hidden="true">${checked ? "✓" : ""}</span>
+              <span class="pm-task-copy"><span class="pm-task-name">${esc(text(task.title))}</span><span class="pm-task-meta"><span class="pm-owner">${esc(task.owner)}</span><span aria-hidden="true">·</span><span class="pm-due${late ? " pm-is-late" : ""}">${date(task.due)}${late ? (en ? " · Late" : " · 延期") : ""}</span></span></span>
+              <span class="pm-status pm-status-${status}">${esc(labels.status[status])}</span>
+            </button>
+            ${needsFollowUp ? `<div class="pm-task-note${status === "blocked" ? " pm-task-blocked" : " pm-task-overdue"}"><span>${esc(status === "blocked" ? text(task.blocker) : en ? "Past the planned due date" : "已超过计划截止日")}</span>${status === "blocked" ? `<button type="button" class="pm-resolve" data-project-action="unblock" data-id="${task.id}">${esc(labels.resolve)}</button>` : ""}</div>` : ""}
+          </div>`;
+          })
+          .join("")}</div>
+      </div>
+      <aside class="pm-summary mini-widget" aria-label="${en ? "Project progress" : "项目进度"}">
+        <h3 class="pm-label">${en ? "Project progress" : "项目进度"}</h3>
+        <div class="pm-overview" title="${esc(labels.sampleHint)}"><strong class="pm-percentage">${percent}<span>%</span></strong><span class="pm-total">${done} / ${tasks.length} ${esc(labels.complete)}</span></div>
+        <div class="pm-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${tasks.length}" aria-valuenow="${done}" aria-label="${esc(labels.complete)}"><span style="transform:scaleX(${done / tasks.length})"></span></div>
+        <span class="pm-schedule">${esc(labels.schedule)}</span>
+      </aside>
+      <aside class="pm-milestone mini-widget">
+        <h3 class="pm-label">${en ? "Milestones" : "里程碑"}</h3>
+        <div class="pm-timeline">${phases
+          .map((phase) => {
+            const complete = tasks
+              .filter((task) => task.phase === phase.id)
+              .every(isDone);
+            const current = milestone?.id === phase.id;
+            return `<button type="button" class="pm-milestone-item${complete ? " is-complete" : ""}${current ? " is-current" : ""}" data-project-action="phase" data-id="${phase.id}" data-focus-key="milestone-${phase.id}" aria-label="${esc(text(phase.milestone) + " · " + date(phase.due))}"><span class="pm-milestone-dot" aria-hidden="true">${complete ? "✓" : ""}</span><span class="pm-milestone-copy"><span>${esc(text(phase.milestone))}</span><time>${date(phase.due)}</time></span></button>`;
+          })
+          .join("")}</div>
+      </aside>
+    </section>`;
+          }
+          function click(button, event) {
+            const action = button?.getAttribute("data-project-action");
+            if (!action) return false;
+            const id = button.getAttribute("data-id");
+            if (action === "phase") {
+              if (!phases.some((phase) => phase.id === id)) return false;
+              if (state.phase === id) return true;
+              state.phase = id;
+            } else {
+              const task = tasks.find((task) => task.id === id);
+              if (!task) return false;
+              if (action === "task")
+                state.taskStatus[id] = isDone(task) ? "todo" : "done";
+              else if (action === "unblock") {
+                if (getStatus(task) !== "blocked") return true;
+                state.taskStatus[id] = "active";
+              } else return false;
+            }
+            event?.preventDefault?.();
+            persist();
+            return true;
+          }
+          return { render, click };
+        }
+
+        function createNewsScene(api) {
+          const { en, esc } = api,
+            t = (zh, english) => (en ? english : zh);
+          let filter = "all",
+            selected = null,
+            selectedMail = null;
+          const initial = api.readState("news", {});
+          const validIds = (value) =>
+            Array.isArray(value)
+              ? value
+                  .filter((v) => typeof v === "string" && v.length < 500)
+                  .slice(-100)
+              : [];
+          let saved = new Set(validIds(initial.saved)),
+            read = new Set(validIds(initial.read));
+          const mailRead = new Set(validIds(initial.mailRead));
+          const safeArticle = (item) =>
+            item &&
+            typeof item.id === "string" &&
+            typeof item.title === "string" &&
+            typeof item.url === "string" &&
+            item.id.length < 500 &&
+            item.url.length < 1000;
+          const archive = new Map(
+            (Array.isArray(initial.archive) ? initial.archive : [])
+              .filter(safeArticle)
+              .slice(-50)
+              .map((item) => [item.id, item]),
+          );
+          const remember = () =>
+            api.saveState("news", {
+              saved: [...saved].slice(-50),
+              read: [...read].slice(-100),
+              archive: [...archive.values()].slice(-50),
+              mailRead: [...mailRead],
+            });
+          const items = () =>
+            (api.getData()?.news?.items || []).filter(
+              (item) =>
+                item?.id != null &&
+                typeof item.title === "string" &&
+                typeof item.url === "string",
+            );
+          const lookup = () => [
+            ...new Map(
+              [...archive.values(), ...items()].map((item) => [
+                String(item.id),
+                item,
+              ]),
+            ).values(),
+          ];
+          const stamp = (v) => {
+            const d = new Date(v);
+            return Number.isNaN(d.valueOf())
+              ? ""
+              : d.toLocaleDateString(en ? "en-US" : "zh-CN", {
+                  month: "short",
+                  day: "numeric",
+                });
+          };
+          const mails = [
+            {
+              id: "sample-launch-review",
+              from: t("产品团队", "Product team"),
+              subject: t(
+                "上线评审，请确认时间",
+                "Launch review: confirm your slot",
+              ),
+              time: "09:10",
+              urgent: true,
+              summary: t(
+                "周五 15:00 进行上线评审，议题和材料已整理好。请在今天下班前确认是否参加。",
+                "The launch review is Friday at 3 pm. The agenda and materials are ready. Please confirm your availability today.",
+              ),
+            },
+            {
+              id: "sample-design-update",
+              from: t("设计团队", "Design team"),
+              subject: t("首页设计稿已更新", "Updated homepage designs"),
+              time: "08:45",
+              urgent: false,
+              summary: t(
+                "新版首页设计稿已更新，包含移动端布局和交互说明。欢迎在评审前留下反馈。",
+                "The updated homepage designs include the mobile layout and interaction notes. Feedback is welcome before the review.",
+              ),
+            },
+          ];
+          function newsList(stories) {
+            if (!stories.length)
+              return `<div class="nw-empty">${filter === "saved" ? t("收藏的文章会出现在这里", "Your saved articles appear here") : t("暂无可用资讯", "No articles available")}</div>`;
+            const groups = new Map();
+            stories.forEach((item) => {
+              const date = stamp(item.publishedAt);
+              if (!groups.has(date)) groups.set(date, []);
+              groups.get(date).push(item);
+            });
+            let index = 0;
+            return `<div class="nw-list">${[...groups]
+              .map(
+                ([date, articles]) =>
+                  `<section class="nw-day">${date ? `<h4>${esc(date)}</h4>` : ""}${articles
+                    .map((item) => {
+                      const lead = index++ === 0;
+                      return `<article class="nw-item ${lead ? "nw-lead" : ""} ${read.has(String(item.id)) ? "nw-read" : ""}"><button type="button" class="nw-story" data-news-action="detail" data-id="${esc(item.id)}"><h3>${esc(item.title)}</h3>${lead && item.summary ? `<p>${esc(item.summary)}</p>` : ""}</button><button type="button" class="nw-save" data-news-action="save" data-id="${esc(item.id)}" aria-label="${saved.has(String(item.id)) ? t("取消收藏", "Unsave") : t("收藏", "Save")} ${esc(item.title)}" aria-pressed="${saved.has(String(item.id))}">${saved.has(String(item.id)) ? "★" : "☆"}</button></article>`;
+                    })
+                    .join("")}</section>`,
+              )
+              .join("")}</div>`;
+          }
+          function mailWidget() {
+            const detail = mails.find((item) => item.id === selectedMail);
+            const unread = mails.filter(
+              (item) => !mailRead.has(item.id),
+            ).length;
+            const urgent = mails.filter((item) => item.urgent).length;
+            return `<section class="nw-mail mini-widget" aria-label="${t("我的邮件，示例", "My mail, sample")}"><header class="nw-widget-heading">${detail ? `<button type="button" class="nw-back" data-news-action="mail-back">← ${t("返回邮件", "Back to mail")}</button>` : `<strong>${t("我的邮件", "My mail")}</strong>`}<span class="nw-sample">${t("示例", "Sample")}</span></header>${detail ? `<article class="nw-mail-detail"><h3>${esc(detail.subject)}</h3><div class="nw-mail-from">${esc(detail.from)}<time>${detail.time}</time></div><p>${esc(detail.summary)}</p><button type="button" class="nw-mail-read" data-news-action="mail-read" data-id="${detail.id}" ${mailRead.has(detail.id) ? "disabled" : ""}>${mailRead.has(detail.id) ? t("已读", "Read") : t("标为已读", "Mark as read")}</button></article>` : `<div class="nw-mail-counts"><span>${t("未读", "Unread")} <b>${unread}</b></span><span>${t("紧急", "Urgent")} <b>${urgent}</b></span></div><div class="nw-mail-list">${mails.map((item) => `<button type="button" class="nw-mail-item ${mailRead.has(item.id) ? "is-read" : "is-unread"}" data-news-action="mail" data-id="${item.id}"><span class="nw-mail-from"><strong>${esc(item.from)}</strong>${item.urgent ? `<span class="nw-urgent">${t("紧急", "Urgent")}</span>` : ""}<time>${item.time}</time></span><span class="nw-mail-subject">${esc(item.subject)}</span></button>`).join("")}</div>`}</section>`;
+          }
+          function render() {
+            const data = api.getData(),
+              all = items();
+            const stories = (filter === "saved" ? lookup() : all)
+              .filter((item) =>
+                filter === "saved" ? saved.has(String(item.id)) : true,
+              )
+              .sort(
+                (a, b) =>
+                  (Date.parse(b.publishedAt) || 0) -
+                  (Date.parse(a.publishedAt) || 0),
+              );
+            const detail = lookup().find(
+              (item) => String(item.id) === selected,
+            );
+            const projects = (data?.repositories?.items || [])
+              .filter((item) => typeof item.name === "string")
+              .slice(0, 2);
+            const categories = [
+              ["all", t("全部", "All")],
+              ["saved", t("已收藏", "Saved")],
+            ];
+            const newsContent = detail
+              ? `<article class="nw-detail"><button type="button" class="nw-back" data-news-action="back">← ${t("返回", "Back")}</button><h3>${esc(detail.title)}</h3><div class="nw-meta">${stamp(detail.publishedAt)}</div><p>${esc(detail.summary || t("查看原文，了解这条更新的完整内容。", "Read the original article for the full story."))}</p><div class="nw-actions"><button type="button" data-news-action="open" data-id="${esc(detail.id)}">${t("阅读原文", "Read article")} ↗</button><button type="button" data-news-action="save" data-id="${esc(detail.id)}" aria-pressed="${saved.has(String(detail.id))}">${saved.has(String(detail.id)) ? t("已收藏", "Saved") : t("收藏", "Save")}</button></div></article>`
+              : newsList(stories);
+            return `<section class="nw-scene mini-canvas"><section class="nw-news mini-widget" aria-label="${t("今日资讯", "Today’s news")}"><header class="nw-widget-heading"><strong>${t("今日资讯", "Today’s news")}</strong><nav class="nw-filters" aria-label="${t("资讯列表", "News list")}">${categories.map(([id, label]) => `<button type="button" data-news-action="filter" data-filter="${esc(id)}" aria-pressed="${filter === id}">${esc(label)}</button>`).join("")}</nav></header>${newsContent}</section>${mailWidget()}<section class="nw-projects mini-widget" aria-label="${t("开源发现", "Open-source picks")}"><header class="nw-widget-heading"><strong>${t("开源发现", "Open-source picks")}</strong></header><div class="nw-repos">${projects.map((item) => `<button type="button" class="nw-repo" data-news-action="repo" data-id="${esc(item.id)}" aria-label="${esc(item.name)} ${t("打开项目", "Open repository")}"><p>${esc(item.description || t("打开项目，查看说明", "Open the repository to learn more"))}</p><span class="nw-repo-meta"><strong>${esc(item.name)}</strong><span>☆ ${Number(item.stars || 0).toLocaleString(en ? "en-US" : "zh-CN")}</span><span aria-hidden="true">↗</span></span></button>`).join("") || `<div class="nw-empty">${data?.repositories?.reason === "rate_limited" ? t("GitHub 暂时限流，稍后刷新", "GitHub rate limit. Try later.") : t("暂时无法获取项目", "Projects are temporarily unavailable")}</div>`}</div></section></section>`;
+          }
+          function click(button) {
+            const action = button.dataset.newsAction,
+              id = button.dataset.id;
+            if (!action) return false;
+            const item = lookup().find((item) => String(item.id) === id);
+            if (action === "filter") {
+              filter = button.dataset.filter === "saved" ? "saved" : "all";
+              selected = null;
+            }
+            if (action === "back") selected = null;
+            if (action === "detail" && item) {
+              selected = id;
+            }
+            if (action === "save" && item) {
+              if (saved.has(id)) {
+                saved.delete(id);
+                archive.delete(id);
+              } else {
+                saved.add(id);
+                archive.set(id, {
+                  id,
+                  title: item.title.slice(0, 240),
+                  url: item.url,
+                  publishedAt: item.publishedAt,
+                  source: item.source,
+                  category: item.category,
+                  summary: item.summary?.slice(0, 320),
+                });
+                if (saved.size > 50) {
+                  const oldest = saved.values().next().value;
+                  saved.delete(oldest);
+                  archive.delete(oldest);
+                }
+              }
+              remember();
+            }
+            if (action === "open" && item) {
+              read.add(id);
+              remember();
+              api.openUrl(item.url);
+            }
+            if (action === "repo") {
+              const repo = api
+                .getData()
+                ?.repositories?.items?.find((r) => String(r.id) === id);
+              if (repo) api.openUrl(repo.url);
+            }
+            if (action === "mail" && mails.some((mail) => mail.id === id))
+              selectedMail = id;
+            if (action === "mail-back") selectedMail = null;
+            if (
+              action === "mail-read" &&
+              mails.some((mail) => mail.id === id)
+            ) {
+              mailRead.add(id);
+              remember();
+            }
+            api.render();
+            return true;
+          }
+          return { render, click };
+        }
+
+        async function init() {
+          await loadState();
+          if (destroyed) return;
+          const api = {
+            en,
+            esc,
+            render,
+            getData: () => payload,
+            readState: (key, fallback) => state[key] ?? fallback,
+            saveState,
+            openUrl,
+          };
+          scenes = [
+            createMarketScene(api),
+            createBusinessScene(api),
+            createProjectScene(api),
+            createNewsScene(api),
+          ];
+          board.addEventListener("click", (event) => {
+            const button = event.target.closest("button");
+            if (!button) return;
+            scenes[active]?.click?.(button, event);
+          });
+          board.addEventListener("pointermove", (event) =>
+            scenes[active]?.pointer?.(event),
+          );
+          board.addEventListener("pointerout", (event) => {
+            const chart = event.target.closest("[data-market-chart]");
+            if (chart && !chart.contains(event.relatedTarget))
+              scenes[active]?.leave?.();
+          });
+          board.addEventListener("keydown", (event) =>
+            scenes[active]?.key?.(event),
+          );
+          tabs.forEach((tab, i) => {
+            tab.addEventListener("click", () => select(i));
+            tab.addEventListener("keydown", (event) => {
+              if (
+                ["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)
+              ) {
+                event.preventDefault();
+                const next =
+                  event.key === "Home"
+                    ? 0
+                    : event.key === "End"
+                      ? 3
+                      : (i + (event.key === "ArrowRight" ? 1 : 3)) % 4;
+                select(next);
+                tabs[next].focus({ preventScroll: true });
+              }
+            });
+          });
+          stage.addEventListener("pointerleave", () =>
+            scenes[active]?.leave?.(),
+          );
+          stage.addEventListener(
+            "pointerdown",
+            () => {
+              pointerMode = true;
+              keyboardFocus = false;
+            },
+            true,
+          );
+          stage.addEventListener(
+            "keydown",
+            () => {
+              pointerMode = false;
+              keyboardFocus = true;
+            },
+            true,
+          );
+          stage.addEventListener("focusin", (event) => {
+            keyboardFocus =
+              !pointerMode || event.target.matches(":focus-visible");
+          });
+          stage.addEventListener("focusout", (event) => {
+            if (!stage.contains(event.relatedTarget)) {
+              pointerMode = false;
+              keyboardFocus = false;
+            }
+          });
+          select(0);
+          motion();
+        }
+        document.addEventListener("visibilitychange", motion);
+        reduce.addEventListener("change", motion);
+        let observer;
+        if (typeof IntersectionObserver === "function") {
+          observer = new IntersectionObserver(
+            (entries) => {
+              visible = entries[0]?.isIntersecting ?? true;
+              motion();
+            },
+            { threshold: 0.05 },
+          );
+          observer.observe(stage);
+        }
+        window.addEventListener(
+          "pagehide",
+          () => {
+            destroyed = true;
+            cancelAnimationFrame(frame);
+            clearTimeout(pendingTimer);
+            observer?.disconnect();
+            atmosphereObserver?.disconnect();
+            window.removeEventListener("resize", resizeAtmosphere);
+            off.forEach((fn) => {
+              if (typeof fn === "function") fn();
+            });
+            document.removeEventListener("visibilitychange", motion);
+            reduce.removeEventListener("change", motion);
+          },
+          { once: true },
+        );
+        init();
+      })();
+    </script>
+  </body>
+</html>

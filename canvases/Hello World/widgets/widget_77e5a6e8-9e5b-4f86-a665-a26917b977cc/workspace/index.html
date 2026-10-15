@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>待办与打卡</title>
+<style>
+  :root{
+
+    --ink:#000000;
+    --ink-2:rgba(0,0,0,.64); --ink-3:rgba(0,0,0,.48); --ink-4:rgba(0,0,0,.32);
+    --blue:#007CFF; --blue-soft:#91D4FF; --navy:#002E58;
+    --panel-line:rgba(0,46,88,.14);
+    --k-sans:var(--kimi-font-sans,"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","MiSans","Microsoft YaHei",sans-serif);
+    --k-mono:var(--kimi-font-mono,"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace);
+    --k-r:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--k-sans); color:var(--ink); background:transparent; overflow:hidden; font-size:13px; -webkit-font-smoothing:antialiased;}
+  button,input{font:inherit;}
+
+
+  .card{
+    container-type:size;
+    --padx:clamp(14px,4cqi,22px); --pady:clamp(12px,2.4cqb,18px);
+    position:relative; height:100vh;
+    border-radius:var(--k-r); overflow:hidden;
+    padding:var(--pady) var(--padx);
+    border:1px solid rgba(0,46,88,.10);
+    background:
+      radial-gradient(90% 80% at 96% 0%, #EFF8FF 0%, rgba(239,248,255,0) 55%),
+      linear-gradient(172deg, #FFFFFF 0%, #F7FBFF 100%);
+    display:flex; flex-direction:column;
+    color:var(--ink);
+  }
+  .card::after{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.45;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .card > *{position:relative; z-index:1;}
+
+
+  header{
+    flex:none;
+    margin-bottom:clamp(9px,1.8cqb,14px);
+  }
+  .tag-row{
+    display:flex; align-items:center; justify-content:flex-start; gap:10px;
+    min-width:0; margin-bottom:6px;
+  }
+  .pill-tag{
+    flex:none;
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--k-mono); font-size:10.5px; font-weight:500; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--ink-3); white-space:nowrap;
+  }
+  .pill-tag::before{content:""; width:14px; height:8px; background:var(--blue); border-radius:2px;}
+  .title-row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px; min-width:0;
+  }
+  .title{
+    font-family:var(--k-sans);
+    font-size:clamp(22px,7.5cqi,30px);
+    font-weight:800; letter-spacing:-.03em; line-height:1.02;
+    margin:0; text-align:left; color:var(--ink);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+  }
+
+  .pin-guide{
+    position:absolute; z-index:5; pointer-events:none;
+    top:8px; right:8px;
+    display:flex; flex-direction:column; align-items:flex-end; gap:5px;
+  }
+  .pin-guide .pin-box{
+    width:34px; height:34px;
+    border:1.5px dashed rgba(0,124,255,.65);
+    border-radius:10px;
+  }
+  .pin-guide .pin-note{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:var(--k-sans); font-size:11px; font-weight:600;
+    color:var(--blue, #007CFF); letter-spacing:.01em; line-height:1.3;
+    white-space:nowrap;
+    text-shadow:0 1px 0 rgba(255,255,255,.8);
+  }
+  .pin-guide .pin-note svg{flex:none; width:11px; height:11px; display:block;}
+
+  .cols{flex:1; min-height:0; display:flex; flex-direction:column; gap:clamp(8px,1.6cqb,12px);}
+  .cols > section{min-width:0;}
+
+
+  .panel{
+    position:relative;
+    flex:1; min-height:0;
+    padding:clamp(8px,1.6cqb,12px) 2px;
+  }
+  .panel + .panel{border-top:1px solid rgba(0,0,0,.10);}
+  .panel > *{position:relative; z-index:1;}
+
+  .sec-head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+    margin-bottom:9px;
+  }
+  .sec-title{font-size:13px; font-weight:800; color:var(--ink); letter-spacing:-.01em;}
+  .sec-meta{
+    font-family:var(--k-mono); color:var(--ink-3); font-size:11px; letter-spacing:.02em;
+    font-variant-numeric:tabular-nums; white-space:nowrap;
+  }
+  .sec-meta.party{color:var(--blue); font-weight:700;}
+
+
+  .progress{
+    height:5px; border-radius:99px;
+    background:rgba(0,46,88,.08);
+    overflow:hidden; margin-bottom:9px;
+  }
+  .progress i{
+    display:block; height:100%; width:0; border-radius:99px;
+    background:linear-gradient(90deg, #91D4FF 0%, #007CFF 100%);
+    transition:width .3s ease;
+  }
+
+  .add-row{display:flex; gap:7px; margin-bottom:7px;}
+  .add-row input{
+    flex:1; min-width:0; min-height:31px;
+    padding:4px 12px;
+    border:1px solid rgba(0,46,88,.16);
+    border-radius:8px;
+    background:rgba(255,255,255,.92);
+    color:var(--ink); font-size:13px;
+  }
+  .add-row input::placeholder{color:var(--ink-3);}
+  .add-row input:focus{outline:none; border-color:var(--blue);}
+  .add-row button{
+    flex:none; min-width:31px; min-height:31px;
+    padding:3px 13px;
+    border:0; border-radius:999px;
+    background:linear-gradient(165deg, #00A1FF 0%, #007CFF 55%, #0066D6 100%);
+    color:#fff; font-size:15px; font-weight:600;
+    cursor:pointer; white-space:nowrap;
+    box-shadow:0 6px 14px rgba(0,64,132,.25);
+    transition:transform .15s cubic-bezier(.3,1.5,.5,1), box-shadow .2s;
+  }
+  .add-row button:hover{transform:scale(1.05); box-shadow:0 8px 18px rgba(0,64,132,.32);}
+  .add-row button:active{transform:scale(.95);}
+
+  .todo-list{list-style:none; margin:0; padding:0; overflow-y:auto; max-height:100%;}
+  .todo-item{
+    display:flex; align-items:flex-start; gap:10px;
+    min-height:32px;
+    padding:4px; margin:0 -4px;
+    border-radius:6px; min-width:0;
+    border-bottom:1px solid rgba(0,46,88,.09);
+    transition:background .12s;
+  }
+  .todo-item:last-child{border-bottom:0;}
+  .todo-item:hover{background:#EFF8FF;}
+
+
+  .todo-check{
+    flex:none; width:19px; height:19px; padding:0; margin-top:2px;
+    border:1.5px solid rgba(0,46,88,.26);
+    border-radius:50%;
+    background:#fff;
+    cursor:pointer; position:relative;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color .18s ease, transform .12s ease;
+  }
+  .todo-check:hover{border-color:#0AB9E6; transform:scale(1.12);}
+  .todo-check:active{transform:scale(.88);}
+  .todo-check .dot{
+    width:50%; height:50%; border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #5FE0FF 0%, #0AB9E6 55%, #0096C9 100%);
+    transform:scale(0);
+    transition:transform .3s cubic-bezier(.34,1.9,.44,1);
+  }
+  .todo-item.done .todo-check{border-color:#0AB9E6;}
+  .todo-item.done .todo-check .dot{transform:scale(1);}
+
+  .todo-text{
+    flex:1; min-width:0;
+    white-space:normal; word-break:break-word; overflow-wrap:anywhere;
+    font-size:13px; line-height:1.4; color:var(--ink);
+    transition:color .15s;
+  }
+  .todo-item.done .todo-text{
+    text-decoration:line-through;
+    text-decoration-color:var(--ink-4);
+    color:var(--ink-3);
+  }
+  .todo-del{
+    flex:none; width:24px; height:24px; margin-top:0;
+    border:none; border-radius:6px;
+    background:transparent; color:var(--ink-3);
+    font-size:15px; line-height:1; cursor:pointer;
+    opacity:0;
+    transition:opacity .12s, background .12s, color .12s;
+  }
+  .todo-item:hover .todo-del,
+  .todo-del:focus-visible{opacity:1;}
+  .todo-del:hover{background:#D9EDFF; color:var(--ink);}
+  .todo-empty{padding:12px 0; color:var(--ink-3); font-size:12px; text-align:center;}
+
+
+  .day-head{
+    display:grid;
+    grid-template-columns:48px repeat(7,1fr);
+    gap:4px; margin-bottom:8px; align-items:center;
+  }
+  .day-head .corner{min-width:0;}
+  .day-head span.d{
+    text-align:center; color:var(--ink-3);
+    font-family:var(--k-mono); font-size:10px;
+    padding:2px 0; border-radius:4px;
+  }
+  .day-head span.d.today{
+    background:var(--blue);
+    color:#fff; font-weight:700;
+  }
+
+  .habit{
+    display:grid;
+    grid-template-columns:48px repeat(7,1fr);
+    gap:4px; align-items:center; margin-bottom:5px;
+  }
+  .habit-name{
+    font-size:11px; font-weight:650; color:var(--ink-2);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+  }
+  .habit-name .emoji{display:none;}
+
+  .cell{
+    position:relative; min-width:0; width:100%;
+    aspect-ratio:1; max-height:22px; max-width:22px;
+    padding:0; border:1px solid rgba(0,46,88,.14);
+    border-radius:5px;
+    background:rgba(255,255,255,.85);
+    cursor:pointer;
+    transition:background .12s, transform .12s;
+    justify-self:center;
+  }
+  .cell:hover{transform:scale(1.12); background:#D9EDFF;}
+  .cell.today-col{box-shadow:0 0 0 1.5px var(--blue-soft);}
+  .cell.on{background:var(--blue); border-color:var(--blue);}
+  .cell.on::after{
+    content:"✓";
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; color:#fff;
+  }
+
+  .habit-foot{
+    display:flex; align-items:baseline; justify-content:center; gap:8px;
+    margin-top:9px; padding-top:9px;
+    border-top:1px solid rgba(0,46,88,.10);
+    font-family:var(--k-mono); font-size:11px; color:var(--ink-3);
+    font-variant-numeric:tabular-nums; min-width:0;
+  }
+  .habit-foot b{color:var(--blue); font-weight:700; font-size:13px;}
+
+
+  @container (max-width: 300px){
+    .day-head, .habit{grid-template-columns:40px repeat(7,1fr);}
+    .pin-guide{display:none;}
+  }
+  @container (max-height: 470px){
+    .card{--pady:12px;}
+    header{margin-bottom:8px;}
+    .title{font-size:22px;}
+    .panel{padding:9px 10px;}
+    .todo-item{min-height:28px;}
+    .day-head, .habit{grid-template-columns:42px repeat(7,1fr);}
+    .cell{max-width:18px; max-height:18px;}
+    .habit-foot{display:none;}
+  }
+
+  .tag-row{display:none !important;}
+
+  .pill-tag::before{background:#91D4FF;}
+  .progress i{background:linear-gradient(90deg, #D9EDFF 0%, #91D4FF 100%);}
+  .add-row input:focus{border-color:#91D4FF;}
+  .add-row button{
+    background:linear-gradient(165deg, #A6DEFF 0%, #91D4FF 100%);
+    color:#002E58;
+    box-shadow:0 6px 14px rgba(145,212,255,.55);
+  }
+  .add-row button:hover{box-shadow:0 8px 18px rgba(145,212,255,.7);}
+  .todo-check:hover{border-color:#91D4FF;}
+  .todo-item.done .todo-check{background:#91D4FF; border-color:#91D4FF; color:#002E58;}
+  .day-head span.d.today{background:#91D4FF; color:#002E58;}
+  .cell.today-col{box-shadow:0 0 0 1.5px #D9EDFF;}
+  .cell:hover{background:#D9EDFF;}
+  .cell.on{background:#91D4FF; border-color:#91D4FF;}
+  .cell.on::after{color:#002E58;}
+  .todo-item:hover{background:#F7FBFF;}
+  .todo-del:hover{background:#D9EDFF;}
+  .sec-meta.party{color:#007CFF;}
+  .habit-foot b{color:#007CFF;}
+
+  .card { background: #F7FBFF; box-shadow: none !important; }
+  .card * { box-shadow: none !important; text-shadow: none !important; }
+  .progress i { background: #91D4FF; }
+  .add-row button { background: #91D4FF; box-shadow: none !important; }
+  .add-row button:hover { background: #91D4FF; box-shadow: none !important; }
+  .cell.today-col { box-shadow: none !important; }
+
+  .title { font-size: 22px !important; font-weight: 800; line-height: 1.08; letter-spacing: 0; }
+  .pill-tag, .pin-guide .pin-note, .sec-meta, .day-head span.d, .habit-name, .cell.on::after, .habit-foot { font-size: 12px !important; line-height: 1.4; }
+  body > :first-child { border: none !important; outline: none !important; }
+
+  /* ===== 魔法条（mana bar） ===== */
+  .mana-wrap{display:flex; align-items:center; gap:8px; flex:none; margin-right:44px;}
+  .mana-bar{
+    position:relative; width:clamp(96px,28cqi,150px); height:20px;
+    border-radius:999px; overflow:hidden;
+    background:rgba(0,46,88,.10);
+    border:1.5px solid rgba(10,185,230,.55);
+  }
+  .mana-fill{
+    position:absolute; top:1px; bottom:1px; left:1px; width:0%;
+    border-radius:999px;
+    background:linear-gradient(180deg, #6FE3FF 0%, #0AB9E6 48%, #0090C2 100%);
+    background-image:
+      repeating-linear-gradient(115deg, rgba(255,255,255,.38) 0 6px, rgba(255,255,255,0) 6px 12px),
+      linear-gradient(180deg, #6FE3FF 0%, #0AB9E6 48%, #0090C2 100%);
+    background-size:17px 100%, 100% 100%;
+    animation:manaFlow .9s linear infinite;
+    transition:width .55s cubic-bezier(.22,1.5,.36,1);
+  }
+  @keyframes manaFlow{from{background-position:0 0, 0 0;}to{background-position:17px 0, 0 0;}}
+  .mana-text{
+    position:absolute; inset:0; z-index:1;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--k-mono); font-size:10.5px; font-weight:700;
+    letter-spacing:.14em;
+    color:#00354D; pointer-events:none; user-select:none;
+  }
+  .mana-check{
+    flex:none; width:22px; height:22px; padding:0;
+    border:1.5px solid rgba(0,46,88,.26); border-radius:50%;
+    background:#fff; cursor:pointer; position:relative;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color .18s ease, transform .12s ease;
+  }
+  .mana-check:hover{border-color:#0AB9E6; transform:scale(1.12);}
+  .mana-check:active{transform:scale(.86);}
+  .mana-check .dot{
+    width:50%; height:50%; border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #5FE0FF 0%, #0AB9E6 55%, #0096C9 100%);
+    transform:scale(0);
+    transition:transform .3s cubic-bezier(.34,1.9,.44,1);
+  }
+  .mana-check.on{border-color:#0AB9E6;}
+  .mana-check.on .dot{transform:scale(1);}
+
+  /* ===== 粒子与冲击波 ===== */
+  .spark{
+    position:absolute; width:5px; height:5px; border-radius:50%;
+    background:#0AB9E6; pointer-events:none; z-index:6;
+    box-shadow:0 0 6px rgba(10,185,230,.9) !important;
+  }
+  .ring-wave{
+    position:absolute; border-radius:50%;
+    border:2px solid rgba(10,185,230,.85);
+    pointer-events:none; z-index:6;
+  }
+
+  /* ===== mission complete ===== */
+  @keyframes cardShake{
+    0%,100%{transform:translate(0,0) rotate(0deg);}
+    20%{transform:translate(-2px,1px) rotate(-.4deg);}
+    40%{transform:translate(2px,-1px) rotate(.4deg);}
+    60%{transform:translate(-2px,-1px) rotate(-.3deg);}
+    80%{transform:translate(2px,1px) rotate(.3deg);}
+  }
+  .card.mission-complete{animation:cardShake .42s ease 2;}
+  @keyframes mcPop{
+    0%{transform:scale(.5);}
+    55%{transform:scale(1.22);}
+    100%{transform:scale(1);}
+  }
+  .card.mission-complete .mana-text{
+    animation:mcPop .45s cubic-bezier(.3,1.7,.4,1);
+    color:#FFFFFF !important; font-weight:800;
+    font-size:9px; letter-spacing:.05em;
+  }
+  .mana-bar{transition:width .4s cubic-bezier(.22,1.4,.36,1);}
+  .card.mission-complete .mana-bar{width:clamp(136px,36cqi,176px);}
+  @keyframes barFlash{
+    0%,100%{border-color:rgba(10,185,230,.55);}
+    50%{border-color:#0AB9E6;}
+  }
+  .card.mission-complete .mana-bar{animation:barFlash .4s ease 4;}
+  .card.mission-complete .mana-fill{animation:manaFlow .35s linear infinite;}
+</style>
+
+</head>
+<body>
+<main class="card" aria-label="待办与打卡">
+  <header>
+    <div class="tag-row">
+      <span class="pill-tag">TODAY</span>
+    </div>
+    <div class="title-row">
+      <div class="title">待办打卡</div>
+      <div class="mana-wrap">
+        <div class="mana-bar" id="manaBar">
+          <i class="mana-fill" id="manaFill"></i>
+          <span class="mana-text" id="manaText">doing</span>
+        </div>
+        <button class="mana-check" id="manaCheck" type="button" aria-label="完成任务">
+          <span class="dot"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="pin-guide" aria-hidden="true">
+    <span class="pin-box"></span>
+    <span class="pin-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.8V6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4.8l2.2 2.7a.6.6 0 0 1-.47.98H7.27a.6.6 0 0 1-.47-.98L9 10.8Z"/></svg>
+      点这里 pin 到桌面使用～
+    </span>
+  </div>
+
+  <div class="cols">
+    <section class="panel" aria-label="待办">
+      <div class="sec-head">
+        <span class="sec-title">待办</span>
+        <span class="sec-meta" id="todoCount">0/0</span>
+      </div>
+      <div class="progress"><i id="todoBar"></i></div>
+      <form class="add-row" id="addForm">
+        <input id="addInput" type="text" placeholder="添加一条待办…" maxlength="120" autocomplete="off" />
+        <button type="submit">＋</button>
+      </form>
+      <ul class="todo-list" id="todoList"></ul>
+    </section>
+
+    <section class="panel" aria-label="习惯打卡">
+      <div class="sec-head">
+        <span class="sec-title">习惯打卡</span>
+        <span class="sec-meta" id="weekLabel"></span>
+      </div>
+      <div class="day-head" id="dayHead"></div>
+      <div id="habitRows"></div>
+      <div class="habit-foot">
+        <span>本周完成率 <b id="rateN">0%</b></span>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+"use strict";
+(function () {
+    "use strict";
+    var TODO_KEY = "daimon_onboarding_todo";
+    var HABIT_KEY = "daimon_onboarding_habit";
+    var DAY_NAMES = ["一", "二", "三", "四", "五", "六", "日"];
+    var HABITS = [
+        { id: "water", name: "喝水", emoji: "💧" },
+        { id: "sport", name: "运动", emoji: "🏃" },
+        { id: "read", name: "阅读", emoji: "📖" },
+        { id: "sleep", name: "早睡", emoji: "🌙" }
+    ];
+    var card = document.querySelector(".card");
+    function burstAt(el, count, spread) {
+        var hr = card.getBoundingClientRect();
+        var r = el.getBoundingClientRect();
+        var cx = r.left - hr.left + r.width / 2;
+        var cy = r.top - hr.top + r.height / 2;
+        var ring = document.createElement("i");
+        ring.className = "ring-wave";
+        var rw = Math.max(r.width, 18);
+        ring.style.width = rw + "px";
+        ring.style.height = rw + "px";
+        ring.style.left = (cx - rw / 2) + "px";
+        ring.style.top = (cy - rw / 2) + "px";
+        card.appendChild(ring);
+        var ringAnim = ring.animate([
+            { transform: "scale(.4)", opacity: .9 },
+            { transform: "scale(2.2)", opacity: 0 }
+        ], { duration: 480, easing: "cubic-bezier(.2,.7,.3,1)" });
+        ringAnim.onfinish = function () { ring.remove(); };
+        for (var i = 0; i < count; i++) {
+            (function () {
+                var p = document.createElement("i");
+                p.className = "spark";
+                p.style.left = (cx - 2.5) + "px";
+                p.style.top = (cy - 2.5) + "px";
+                card.appendChild(p);
+                var a = Math.random() * Math.PI * 2;
+                var d = spread * (0.55 + Math.random() * 0.75);
+                var dx = Math.cos(a) * d;
+                var dy = Math.sin(a) * d - 6;
+                var anim = p.animate([
+                    { transform: "translate(0,0) scale(1)", opacity: 1 },
+                    { transform: "translate(" + dx + "px," + dy + "px) scale(.15)", opacity: 0 }
+                ], { duration: 420 + Math.random() * 320, easing: "cubic-bezier(.15,.8,.3,1)" });
+                anim.onfinish = function () { p.remove(); };
+            })();
+        }
+    }
+    function load(key, fallback) {
+        try {
+            var raw = localStorage.getItem(key);
+            if (!raw)
+                return fallback;
+            return JSON.parse(raw);
+        }
+        catch (e) {
+            return fallback;
+        }
+    }
+    function save(key, val) {
+        try {
+            localStorage.setItem(key, JSON.stringify(val));
+        }
+        catch (e) { }
+    }
+    var todoList = document.getElementById("todoList");
+    var todoCount = document.getElementById("todoCount");
+    var todoBar = document.getElementById("todoBar");
+    var manaFill = document.getElementById("manaFill");
+    var manaText = document.getElementById("manaText");
+    var manaCheck = document.getElementById("manaCheck");
+    var celebrating = false;
+    var addForm = document.getElementById("addForm");
+    var addInput = document.getElementById("addInput");
+    var todos = load(TODO_KEY, null);
+    if (!Array.isArray(todos)) {
+        todos = [
+            { id: 1, text: "把这张卡拖到你喜欢的位置", done: false },
+            { id: 2, text: "在右边给“喝水”打一个卡", done: false },
+            { id: 3, text: "散步 20 分钟", done: false }
+        ];
+        save(TODO_KEY, todos);
+    }
+    function renderTodos() {
+        todoList.textContent = "";
+        if (todos.length === 0) {
+            var empty = document.createElement("li");
+            empty.className = "todo-empty";
+            empty.textContent = "全部清空了，加一条试试";
+            todoList.appendChild(empty);
+        }
+        todos.forEach(function (t) {
+            var li = document.createElement("li");
+            li.className = "todo-item" + (t.done ? " done" : "");
+            var cb = document.createElement("button");
+            cb.type = "button";
+            cb.className = "todo-check";
+            cb.setAttribute("role", "checkbox");
+            cb.setAttribute("aria-checked", t.done ? "true" : "false");
+            cb.setAttribute("aria-label", t.text);
+            cb.innerHTML = '<span class="dot"></span>';
+            cb.addEventListener("click", function () {
+                t.done = !t.done;
+                save(TODO_KEY, todos);
+                if (t.done) {
+                    burstAt(cb, 9, 30);
+                }
+                renderTodos();
+            });
+            var span = document.createElement("span");
+            span.className = "todo-text";
+            span.textContent = t.text;
+            span.title = t.text;
+            var del = document.createElement("button");
+            del.type = "button";
+            del.className = "todo-del";
+            del.textContent = "\u00d7";
+            del.setAttribute("aria-label", "删除：" + t.text);
+            del.addEventListener("click", function () {
+                todos = todos.filter(function (x) { return x !== t; });
+                save(TODO_KEY, todos);
+                renderTodos();
+            });
+            li.appendChild(cb);
+            li.appendChild(span);
+            li.appendChild(del);
+            todoList.appendChild(li);
+        });
+        var done = todos.filter(function (t) { return t.done; }).length;
+        var allDone = todos.length > 0 && done === todos.length;
+        todoCount.textContent = allDone ? "全部完成" : done + "/" + todos.length;
+        todoCount.className = "sec-meta" + (allDone ? " party" : "");
+        todoBar.style.width = todos.length ? Math.round(done / todos.length * 100) + "%" : "0%";
+        manaFill.style.width = todos.length ? Math.round(done / todos.length * 100) + "%" : "0%";
+        if (!celebrating) {
+            manaText.textContent = "doing";
+        }
+    }
+    addForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var text = addInput.value.trim();
+        if (!text)
+            return;
+        todos.push({ id: Date.now(), text: text, done: false });
+        save(TODO_KEY, todos);
+        addInput.value = "";
+        renderTodos();
+    });
+    function isoWeekKey(date) {
+        var d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+        var week1 = new Date(d.getFullYear(), 0, 4);
+        var week = 1 + Math.round(((d - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+        return d.getFullYear() + "-W" + (week < 10 ? "0" + week : week);
+    }
+    var weekKey = isoWeekKey(new Date());
+    var todayIdx = (new Date().getDay() + 6) % 7;
+    function freshHabitData() {
+        var cells = {};
+        HABITS.forEach(function (h) {
+            cells[h.id] = [false, false, false, false, false, false, false];
+        });
+        return { week: weekKey, cells: cells };
+    }
+    var habitData = load(HABIT_KEY, null);
+    if (!habitData || habitData.week !== weekKey || !habitData.cells) {
+        habitData = freshHabitData();
+        save(HABIT_KEY, habitData);
+    }
+    HABITS.forEach(function (h) {
+        if (!Array.isArray(habitData.cells[h.id]) || habitData.cells[h.id].length !== 7) {
+            habitData.cells[h.id] = [false, false, false, false, false, false, false];
+        }
+    });
+    var dayHead = document.getElementById("dayHead");
+    var habitRows = document.getElementById("habitRows");
+    var rateN = document.getElementById("rateN");
+    var weekLabel = document.getElementById("weekLabel");
+    weekLabel.textContent = weekKey;
+    var corner = document.createElement("span");
+    corner.className = "corner";
+    dayHead.appendChild(corner);
+    DAY_NAMES.forEach(function (name, i) {
+        var s = document.createElement("span");
+        s.className = "d" + (i === todayIdx ? " today" : "");
+        s.textContent = name;
+        dayHead.appendChild(s);
+    });
+    function updateRate() {
+        var elapsed = todayIdx + 1;
+        var checked = 0;
+        HABITS.forEach(function (h) {
+            for (var i = 0; i < elapsed; i++) {
+                if (habitData.cells[h.id][i])
+                    checked++;
+            }
+        });
+        rateN.textContent = Math.round(checked / (HABITS.length * elapsed) * 100) + "%";
+    }
+    function buildHabits() {
+        habitRows.textContent = "";
+        HABITS.forEach(function (h) {
+            var wrap = document.createElement("div");
+            wrap.className = "habit";
+            wrap.dataset.h = h.id;
+            var name = document.createElement("span");
+            name.className = "habit-name";
+            name.innerHTML = '<span class="emoji">' + h.emoji + '</span>' + h.name;
+            wrap.appendChild(name);
+            for (var i = 0; i < 7; i++) {
+                (function (idx) {
+                    var btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.className = "cell"
+                        + (idx === todayIdx ? " today-col" : "")
+                        + (habitData.cells[h.id][idx] ? " on" : "");
+                    btn.setAttribute("aria-label", h.name + " 周" + DAY_NAMES[idx]);
+                    btn.setAttribute("aria-pressed", habitData.cells[h.id][idx] ? "true" : "false");
+                    btn.addEventListener("click", function () {
+                        habitData.cells[h.id][idx] = !habitData.cells[h.id][idx];
+                        save(HABIT_KEY, habitData);
+                        btn.classList.toggle("on", habitData.cells[h.id][idx]);
+                        btn.setAttribute("aria-pressed", habitData.cells[h.id][idx] ? "true" : "false");
+                        updateRate();
+                    });
+                    wrap.appendChild(btn);
+                })(i);
+            }
+            habitRows.appendChild(wrap);
+        });
+    }
+    manaCheck.addEventListener("click", function () {
+        if (celebrating)
+            return;
+        celebrating = true;
+        card.classList.add("mission-complete");
+        manaCheck.classList.add("on");
+        manaText.textContent = "mission complete!";
+        manaFill.style.width = "100%";
+        burstAt(manaCheck, 14, 48);
+        var hr = card.getBoundingClientRect();
+        for (var k = 0; k < 5; k++) {
+            (function (n) {
+                setTimeout(function () {
+                    var ghost = { getBoundingClientRect: function () {
+                            return {
+                                left: hr.left + hr.width * (0.12 + Math.random() * 0.76),
+                                top: hr.top + hr.height * (0.08 + Math.random() * 0.4),
+                                width: 4, height: 4
+                            };
+                        } };
+                    burstAt(ghost, 6, 36);
+                }, 150 * (n + 1));
+            })(k);
+        }
+        setTimeout(function () {
+            card.classList.remove("mission-complete");
+            manaCheck.classList.remove("on");
+            celebrating = false;
+            renderTodos();
+        }, 2400);
+    });
+    renderTodos();
+    buildHabits();
+    updateRate();
+})();
+</script>
+</body>
+</html>

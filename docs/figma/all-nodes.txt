@@ -1,0 +1,955 @@
+total lines: 967
+0:2 canvas Internal Only Canvas
+ 49:243 variable-set Collection 1
+ 49:258 variable Colors/Brand Colors/互动红
+ 49:259 variable Colors/Brand Colors/互动蓝
+ 49:262 variable Colors/Brand Colors/纯黑
+ 49:263 variable Colors/Brand Colors/纯白
+ 50:378 variable Avatar | 头像/CornerRedius | 圆角/CornerRedius-24*3px
+ 50:379 variable Avatar | 头像/CornerRedius | 圆角/CornerRedius-16*3px
+ 50:380 variable Avatar | 头像/CornerRedius | 圆角/CornerRedius-20*3px
+ 50:381 variable Avatar | 头像/CornerRedius | 圆角/CornerRedius-36*6px
+ 50:382 variable Avatar | 头像/CornerRedius | 圆角/CornerRedius-40*8px
+ 50:383 variable Avatar | 头像/CornerRedius | 圆角/CornerRedius-28*3px
+ 50:384 variable Avatar | 头像/CornerRedius | 圆角/CornerRedius-32*6px
+ 50:385 variable Avatar | 头像/CornerRedius | 圆角/CornerRedius-48*8px
+ 50:386 variable Avatar | 头像/CornerRedius | 圆角/CornerRedius-64*10px
+ 50:388 rounded-rectangle Userpic/Avater_LJB
+ 51:643 variable Colors/Accent Colors/深琥珀 | Dark Amber
+ 51:644 variable Colors/Accent Colors/品红 | Magenta
+ 51:645 variable Colors/Accent Colors/海绿 | Sea green
+ 51:646 variable Colors/Accent Colors/波斯蓝 | Persian blue
+ 51:647 variable Colors/Accent Colors/锌黄 | Zinc Yellow
+ 51:648 variable Colors/Accent Colors/芒橙 | Mango Tango
+ 51:649 variable Colors/Accent Colors/水晶紫 | Amethyst
+ 51:650 variable Colors/Accent Colors/红橙 | Red-orange
+ 51:651 variable Colors/Accent Colors/浅橙 | Shiny orange
+ 51:652 variable Colors/Accent Colors/苍紫 | Thistle
+ 51:653 variable Colors/Accent Colors/夏绿 | Summer Green
+ 51:654 variable Colors/Accent Colors/浅绿 | Aquamarine
+ 51:655 variable Colors/Accent Colors/茜红 | Alizarin red
+ 51:656 variable Colors/Accent Colors/莓粉 | Strawberry Pink
+ 51:657 variable Colors/Accent Colors/蔚蓝 | Azure
+ 51:658 variable Colors/Accent Colors/冷天蓝 | Frosty skies
+ 51:659 variable Colors/Accent Colors/莓红 | Strawberry Red
+ 51:660 variable Colors/Accent Colors/春绿 | Spring Green
+ 57:6 rounded-rectangle Black&amp;White/DarkTheme_Text
+ 57:7 text 标题1 | Headline1
+ 57:8 text 标题2 | Headline2
+ 57:9 text 标题3 | Headline3
+ 57:10 text 标题4 | Headline4
+ 57:11 text 标题5 | Headline5
+ 57:12 text 标题6 | Headline6
+ 57:13 text 标题7 | Headline7
+ 57:14 text 普通文本 | Text
+ 57:15 text 强调副标题 | Subtitle Bold
+ 57:16 text 按钮标签 | Button Label
+ 57:17 text 迷你按钮标签 | Mini-button label
+ 57:18 text 描述文本 | Description
+ 57:19 text 迷你描述文本 | Mini-description
+ 58:109 text Header/标题1 | Headline1
+ 58:110 text Header/标题2 | Headline2
+ 58:111 text Header/标题3 | Headline3
+ 58:112 text Header/标题4 | Headline4
+ 58:113 text Header/标题5 | Headline5
+ 58:114 text Header/标题6 | Headline6
+ 58:115 text Header/标题7 | Headline7
+ 58:116 text 普通文本 | Text
+ 58:117 text 强调文本 | Text Bold
+ 58:118 text 副标题 | Subtitle
+ 58:119 text 强调副标题 | Subtitle Bold
+ 58:120 text 按钮标签 | Button Label
+ 58:121 text 迷你按钮标签 | Mini-button label
+ 58:122 text 描述文本 | Description
+ 58:123 text 迷你描述文本 | Mini-description
+ 60:125 rounded-rectangle Black&amp;White/DarkTheme_Frame
+ 60:126 rounded-rectangle Black&amp;White/DarkTheme_Gray-11
+ 60:127 rounded-rectangle Black&amp;White/DarkTheme_Gray-10
+ 60:128 rounded-rectangle Black&amp;White/DarkTheme_Gray-9
+ 60:129 rounded-rectangle Black&amp;White/DarkTheme_Gray-8
+ 60:130 rounded-rectangle Black&amp;White/DarkTheme_Gray-7
+ 60:131 rounded-rectangle Black&amp;White/DarkTheme_Gray-6
+ 60:132 rounded-rectangle Black&amp;White/DarkTheme_Gray-5
+ 60:133 rounded-rectangle Black&amp;White/DarkTheme_Gray-4
+ 60:134 rounded-rectangle Black&amp;White/DarkTheme_Gray-3
+ 60:135 rounded-rectangle Black&amp;White/DarkTheme_Gray-2
+ 60:136 rounded-rectangle Black&amp;White/DarkTheme_Gray-1
+ 60:137 rounded-rectangle Black&amp;White/DarkTheme_Gray-0
+ 60:138 rounded-rectangle Black&amp;White/WhiteTheme_Gray-0
+ 60:139 rounded-rectangle Black&amp;White/WhiteTheme_Gray-1
+ 60:140 rounded-rectangle Black&amp;White/WhiteTheme_Gray-2
+ 60:141 rounded-rectangle Black&amp;White/WhiteTheme_Gray-3
+ 60:142 rounded-rectangle Black&amp;White/WhiteTheme_Gray-4
+ 60:143 rounded-rectangle Black&amp;White/WhiteTheme_Gray-5
+ 60:144 rounded-rectangle Black&amp;White/WhiteTheme_Gray-6
+ 60:145 rounded-rectangle Black&amp;White/WhiteTheme_Gray-7
+ 60:146 rounded-rectangle Black&amp;White/WhiteTheme_Gray-8
+ 60:147 rounded-rectangle Black&amp;White/WhiteTheme_Gray-9
+ 60:148 rounded-rectangle Black&amp;White/WhiteTheme_Gray-10
+ 60:149 rounded-rectangle Black&amp;White/WhiteTheme_Gray-11
+ 61:297 rounded-rectangle Dark Theme / Gray - 1
+ 61:298 rounded-rectangle Dark Theme / Gray - 2
+ 61:299 rounded-rectangle Dark Theme / Gray - 3
+ 61:300 rounded-rectangle Dark Theme / Gray - 4
+ 61:301 rounded-rectangle Dark Theme / Gray - 5
+ 61:302 rounded-rectangle Dark Theme / Gray - 6
+ 61:303 rounded-rectangle Dark Theme / Gray - 7
+ 61:304 rounded-rectangle Dark Theme / Gray - 8
+ 61:305 rounded-rectangle Dark Theme / Gray - 9
+ 61:306 rounded-rectangle Dark Theme / Gray - 10
+ 61:307 rounded-rectangle Dark Theme / Gray - 11
+ 61:308 rounded-rectangle Dark Theme / Gray - 0
+ 61:309 rounded-rectangle White Theme/Gray - 0
+ 61:310 rounded-rectangle White Theme / Gray - 1
+ 61:311 rounded-rectangle White Theme / Gray - 2
+ 61:312 rounded-rectangle White Theme / Gray - 3
+ 61:313 rounded-rectangle White Theme / Gray - 4
+ 61:314 rounded-rectangle White Theme / Gray - 5
+ 61:315 rounded-rectangle White Theme / Gray - 6
+ 61:316 rounded-rectangle White Theme / Gray - 7
+ 61:317 rounded-rectangle White Theme / Gray - 8
+ 61:318 rounded-rectangle White Theme / Gray - 9
+ 61:319 rounded-rectangle White Theme / Gray - 10
+ 61:320 rounded-rectangle White Theme / Gray - 11
+ 61:321 rounded-rectangle Userpic/1
+ 61:322 rounded-rectangle Userpic / 2
+ 61:323 rounded-rectangle Userpic / 3
+ 61:324 rounded-rectangle Userpic/4
+ 61:325 rounded-rectangle Userpic / 5
+ 61:326 rounded-rectangle Userpic / 6
+ 61:327 rounded-rectangle Userpic / 7
+ 61:328 rounded-rectangle Userpic / 8
+ 61:329 rounded-rectangle Userpic / 9
+ 61:330 rounded-rectangle Userpic / 10
+ 61:331 rounded-rectangle Userpic / 11
+ 61:332 rounded-rectangle Userpic / 12
+ 61:333 rounded-rectangle Userpic / 13
+ 61:334 rounded-rectangle Userpic / 14
+ 61:335 rounded-rectangle Userpic / 15
+ 61:336 rounded-rectangle Userpic / 16
+ 61:337 rounded-rectangle Userpic / 17
+ 61:338 rounded-rectangle Userpic / 18
+ 61:339 rounded-rectangle Userpic/19
+ 61:340 rounded-rectangle Userpic / 20
+ 61:341 rounded-rectangle Userpic / 21
+ 61:342 rounded-rectangle Userpic / 22
+ 61:343 rounded-rectangle Accents/蔚蓝 | Azure
+ 61:344 rounded-rectangle Accents/春绿 | Spring Green
+ 61:345 rounded-rectangle Accents/水晶紫 | Amethyst
+ 61:346 rounded-rectangle Accents/芒橙 | Mango Tango
+ 61:347 rounded-rectangle Accents/锌黄 | Zinc Yellow
+ 61:348 rounded-rectangle Accents/波斯蓝 | Persian blue
+ 61:349 rounded-rectangle Accents/海绿 | Sea green
+ 61:350 rounded-rectangle Accents/品红 | Magenta
+ 61:351 rounded-rectangle Accents/莓红 | Strawberry Red
+ 61:352 rounded-rectangle Accents/深琥珀 | Dark Amber
+ 61:353 rounded-rectangle Accents/茜红 | Alizarin red
+ 61:354 rounded-rectangle Accents/冷天蓝 | Frosty skies
+ 61:355 rounded-rectangle Accents/莓粉 | Strawberry Pink
+ 61:356 rounded-rectangle Accents/夏绿 | Summer Green
+ 61:357 rounded-rectangle Accents/浅橙 | Shiny orange
+ 61:358 rounded-rectangle Accents/苍紫 | Thistle
+ 61:359 rounded-rectangle Accents/红橙 | Red-orange
+ 61:360 rounded-rectangle Accents/浅绿 | Aquamarine
+ 63:362 rounded-rectangle Dark Theme / Gray - 9
+ 63:363 symbol Car
+ 63:366 rounded-rectangle Dark Theme / Gray - 3
+ 63:367 text Text
+ 63:368 text Button label
+ 63:369 rounded-rectangle Зеленый
+ 63:370 text Description
+ 63:371 rounded-rectangle Dark Theme / Gray - 0
+ 63:372 text Header/H6
+ 63:373 text Header/H7
+ 63:374 rounded-rectangle Dark Theme / Gray - 10
+ 63:375 text Header/H5
+ 63:376 rounded-rectangle Dark Theme / Gray - 5
+ 63:377 text Subtitle
+ 63:378 rounded-rectangle Accents/Sea green
+ 63:379 rounded-rectangle Dark Theme / Gray - 11
+ 63:380 symbol Bitcoin btc
+ 63:384 rounded-rectangle Dark Theme / Gray - 1
+ 63:385 rounded-rectangle Dark Theme / Gray - 7
+ 63:386 symbol avalanche avax
+ 63:390 rounded-rectangle Accents/Frosty skies
+ 63:391 symbol Ethereum eth
+ 63:401 rounded-rectangle Accents/Spring Green
+ 63:402 symbol stacks
+ 63:406 symbol Cardano ada
+ 63:439 symbol Near protocol
+ 63:441 rounded-rectangle Dark Theme / Gray - 4
+ 63:442 rounded-rectangle Dark Theme / Gray - 6
+ 63:443 rounded-rectangle Accents/Persian blue
+ 63:444 rounded-rectangle Dark Theme / Gray - 8
+ 63:445 rounded-rectangle Dark Theme / Gray - 2
+ 63:446 rounded-rectangle Accents/Amethyst
+ 63:447 rounded-rectangle Accents/Mango Tango
+ 63:448 rounded-rectangle Accents/Strawberry Red
+ 63:449 rounded-rectangle Accents/Alizarin red
+ 64:1585 symbol Frame
+ 64:1588 rounded-rectangle white
+ 64:2272 text Header/H3
+ 64:2273 symbol Shirt
+ 64:2276 text Text Bold
+ 64:2277 symbol Coin
+ 64:2280 rounded-rectangle Blue
+ 64:2281 text Form/Body 1 Form Active
+ 64:2282 symbol More horizontal mini
+ 64:2285 symbol More mini
+ 64:2288 symbol Menu 1 mini
+ 64:2291 symbol Menu 2 mini
+ 64:2294 symbol Arrow down mini
+ 64:2297 text Mini-button label
+ 64:2298 frame Dark theme
+  64:2299 symbol Kind=Primary, Options=Default, Interactions=Enabled, Size=L,
+  64:2301 symbol Kind=Primary, Options=Default, Interactions=Disabled, Size=L
+  64:2303 symbol Kind=Primary, Options=Default, Interactions=Hover, Size=L, S
+  64:2305 symbol Kind=Primary, Options=Icon right, Interactions=Enabled, Size
+  64:2308 symbol Kind=Primary, Options=Icon, Interactions=Enabled, Size=L, Sh
+  64:2310 symbol Kind=Primary, Options=Icon, Interactions=Hover, Size=L, Shap
+  64:2312 symbol Kind=Primary, Options=Icon, Interactions=Disabled, Size=L, S
+  64:2314 symbol Kind=Primary, Options=Icon left, Interactions=Enabled, Size=
+  64:2317 symbol Kind=Primary, Options=Icon left and right, Interactions=Enab
+  64:2321 symbol Kind=Primary, Options=Icon right, Interactions=Disabled, Siz
+  64:2324 symbol Kind=Primary, Options=Icon left, Interactions=Disabled, Size
+  64:2327 symbol Kind=Primary, Options=Icon left and right, Interactions=Disa
+  64:2331 symbol Kind=Primary, Options=Icon right, Interactions=Hover, Size=L
+  64:2334 symbol Kind=Primary, Options=Icon left, Interactions=Hover, Size=L,
+  64:2337 symbol Kind=Primary, Options=Icon left and right, Interactions=Hove
+  64:2341 symbol Kind=Primary, Options=Default, Interactions=Enabled, Size=M,
+  64:2343 symbol Kind=Primary, Options=Icon right, Interactions=Enabled, Size
+  64:2346 symbol Kind=Primary, Options=Icon, Interactions=Enabled, Size=M, Sh
+  64:2348 symbol Kind=Primary, Options=Icon, Interactions=Hover, Size=M, Shap
+  64:2350 symbol Kind=Primary, Options=Icon, Interactions=Disabled, Size=M, S
+  64:2352 symbol Kind=Primary, Options=Icon left, Interactions=Enabled, Size=
+  64:2355 symbol Kind=Primary, Options=Icon left and right, Interactions=Enab
+  64:2359 symbol Kind=Primary, Options=Default, Interactions=Disabled, Size=M
+  64:2361 symbol Kind=Primary, Options=Icon right, Interactions=Disabled, Siz
+  64:2364 symbol Kind=Primary, Options=Icon left, Interactions=Disabled, Size
+  64:2367 symbol Kind=Primary, Options=Icon left and right, Interactions=Disa
+  64:2371 symbol Kind=Primary, Options=Default, Interactions=Hover, Size=M, S
+  64:2373 symbol Kind=Primary, Options=Icon right, Interactions=Hover, Size=M
+  64:2376 symbol Kind=Primary, Options=Icon left, Interactions=Hover, Size=M,
+  64:2379 symbol Kind=Primary, Options=Icon left and right, Interactions=Hove
+  64:2383 symbol Kind=Primary, Options=Icon, Interactions=Disabled, Size=S, S
+  64:2385 symbol Kind=Primary, Options=Icon, Interactions=Hover, Size=S, Shap
+  64:2387 symbol Kind=Primary, Options=Icon, Interactions=Enabled, Size=S, Sh
+  64:2389 symbol Kind=Primary, Options=Icon left and right, Interactions=Disa
+  64:2393 symbol Kind=Primary, Options=Icon left and right, Interactions=Hove
+  64:2397 symbol Kind=Primary, Options=Icon left and right, Interactions=Enab
+  64:2401 symbol Kind=Primary, Options=Icon left, Interactions=Disabled, Size
+  64:2404 symbol Kind=Primary, Options=Icon left, Interactions=Hover, Size=S,
+  64:2407 symbol Kind=Primary, Options=Icon left, Interactions=Enabled, Size=
+  64:2410 symbol Kind=Primary, Options=Icon right, Interactions=Disabled, Siz
+  64:2413 symbol Kind=Primary, Options=Icon right, Interactions=Hover, Size=S
+  64:2416 symbol Kind=Primary, Options=Icon right, Interactions=Enabled, Size
+  64:2419 symbol Kind=Primary, Options=Default, Interactions=Disabled, Size=S
+  64:2421 symbol Kind=Primary, Options=Default, Interactions=Hover, Size=S, S
+  64:2423 symbol Kind=Primary, Options=Default, Interactions=Enabled, Size=S,
+  64:2425 symbol Kind=Secondary, Options=Default, Interactions=Enabled, Size=
+  64:2427 symbol Kind=Secondary, Options=Default, Interactions=Disabled, Size
+  64:2429 symbol Kind=Secondary, Options=Default, Interactions=Hover, Size=L,
+  64:2431 symbol Kind=Secondary, Options=Icon right, Interactions=Enabled, Si
+  64:2434 symbol Kind=Secondary, Options=Icon, Interactions=Enabled, Size=L, 
+  64:2436 symbol Kind=Secondary, Options=Icon, Interactions=Hover, Size=L, Sh
+  64:2438 symbol Kind=Secondary, Options=Icon, Interactions=Disabled, Size=L,
+  64:2440 symbol Kind=Secondary, Options=Icon left, Interactions=Enabled, Siz
+  64:2443 symbol Kind=Secondary, Options=Icon left and right, Interactions=En
+  64:2447 symbol Kind=Secondary, Options=Icon right, Interactions=Disabled, S
+  64:2450 symbol Kind=Secondary, Options=Icon left, Interactions=Disabled, Si
+  64:2453 symbol Kind=Secondary, Options=Icon left and right, Interactions=Di
+  64:2457 symbol Kind=Secondary, Options=Icon right, Interactions=Hover, Size
+  64:2460 symbol Kind=Secondary, Options=Icon left, Interactions=Hover, Size=
+  64:2463 symbol Kind=Secondary, Options=Icon left and right, Interactions=Ho
+  64:2467 symbol Kind=Secondary, Options=Default, Interactions=Enabled, Size=
+  64:2469 symbol Kind=Secondary, Options=Icon right, Interactions=Enabled, Si
+  64:2472 symbol Kind=Secondary, Options=Icon, Interactions=Enabled, Size=M, 
+  64:2474 symbol Kind=Secondary, Options=Icon, Interactions=Hover, Size=M, Sh
+  64:2476 symbol Kind=Secondary, Options=Icon, Interactions=Disabled, Size=M,
+  64:2478 symbol Kind=Secondary, Options=Icon left, Interactions=Enabled, Siz
+  64:2481 symbol Kind=Secondary, Options=Icon left and right, Interactions=En
+  64:2485 symbol Kind=Secondary, Options=Default, Interactions=Disabled, Size
+  64:2487 symbol Kind=Secondary, Options=Icon right, Interactions=Disabled, S
+  64:2490 symbol Kind=Secondary, Options=Icon left, Interactions=Disabled, Si
+  64:2493 symbol Kind=Secondary, Options=Icon left and right, Interactions=Di
+  64:2497 symbol Kind=Secondary, Options=Default, Interactions=Hover, Size=M,
+  64:2499 symbol Kind=Secondary, Options=Icon right, Interactions=Hover, Size
+  64:2502 symbol Kind=Secondary, Options=Icon left, Interactions=Hover, Size=
+  64:2505 symbol Kind=Secondary, Options=Icon left and right, Interactions=Ho
+  64:2509 symbol Kind=Secondary, Options=Icon, Interactions=Disabled, Size=S,
+  64:2511 symbol Kind=Secondary, Options=Icon, Interactions=Hover, Size=S, Sh
+  64:2513 symbol Kind=Secondary, Options=Icon, Interactions=Enabled, Size=S, 
+  64:2515 symbol Kind=Secondary, Options=Icon left and right, Interactions=Di
+  64:2519 symbol Kind=Secondary, Options=Icon left and right, Interactions=Ho
+  64:2523 symbol Kind=Secondary, Options=Icon left and right, Interactions=En
+  64:2527 symbol Kind=Secondary, Options=Icon left, Interactions=Disabled, Si
+  64:2530 symbol Kind=Secondary, Options=Icon left, Interactions=Hover, Size=
+  64:2533 symbol Kind=Secondary, Options=Icon left, Interactions=Enabled, Siz
+  64:2536 symbol Kind=Secondary, Options=Icon right, Interactions=Disabled, S
+  64:2539 symbol Kind=Secondary, Options=Icon right, Interactions=Hover, Size
+  64:2542 symbol Kind=Secondary, Options=Icon right, Interactions=Enabled, Si
+  64:2545 symbol Kind=Secondary, Options=Default, Interactions=Disabled, Size
+  64:2547 symbol Kind=Secondary, Options=Default, Interactions=Hover, Size=S,
+  64:2549 symbol Kind=Secondary, Options=Default, Interactions=Enabled, Size=
+  64:2551 symbol Kind=Tetriary, Options=Default, Interactions=Enabled, Size=L
+  64:2553 symbol Kind=Tetriary, Options=Default, Interactions=Disabled, Size=
+  64:2555 symbol Kind=Tetriary, Options=Default, Interactions=Hover, Size=L, 
+  64:2557 symbol Kind=Tetriary, Options=Icon right, Interactions=Enabled, Siz
+  64:2560 symbol Kind=Tetriary, Options=Icon, Interactions=Enabled, Size=L, S
+  64:2562 symbol Kind=Tetriary, Options=Icon, Interactions=Hover, Size=L, Sha
+  64:2564 symbol Kind=Tetriary, Options=Icon, Interactions=Disabled, Size=L, 
+  64:2566 symbol Kind=Tetriary, Options=Icon left, Interactions=Enabled, Size
+  64:2569 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Ena
+  64:2573 symbol Kind=Tetriary, Options=Icon right, Interactions=Disabled, Si
+  64:2576 symbol Kind=Tetriary, Options=Icon left, Interactions=Disabled, Siz
+  64:2579 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Dis
+  64:2583 symbol Kind=Tetriary, Options=Icon right, Interactions=Hover, Size=
+  64:2586 symbol Kind=Tetriary, Options=Icon left, Interactions=Hover, Size=L
+  64:2589 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Hov
+  64:2593 symbol Kind=Tetriary, Options=Default, Interactions=Enabled, Size=M
+  64:2595 symbol Kind=Tetriary, Options=Icon right, Interactions=Enabled, Siz
+  64:2598 symbol Kind=Tetriary, Options=Icon, Interactions=Enabled, Size=M, S
+  64:2600 symbol Kind=Tetriary, Options=Icon, Interactions=Hover, Size=M, Sha
+  64:2602 symbol Kind=Tetriary, Options=Icon, Interactions=Disabled, Size=M, 
+  64:2604 symbol Kind=Tetriary, Options=Icon left, Interactions=Enabled, Size
+  64:2607 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Ena
+  64:2611 symbol Kind=Tetriary, Options=Default, Interactions=Disabled, Size=
+  64:2613 symbol Kind=Tetriary, Options=Icon right, Interactions=Disabled, Si
+  64:2616 symbol Kind=Tetriary, Options=Icon left, Interactions=Disabled, Siz
+  64:2619 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Dis
+  64:2623 symbol Kind=Tetriary, Options=Default, Interactions=Hover, Size=M, 
+  64:2625 symbol Kind=Tetriary, Options=Icon right, Interactions=Hover, Size=
+  64:2628 symbol Kind=Tetriary, Options=Icon left, Interactions=Hover, Size=M
+  64:2631 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Hov
+  64:2635 symbol Kind=Tetriary, Options=Icon, Interactions=Disabled, Size=S, 
+  64:2637 symbol Kind=Tetriary, Options=Icon, Interactions=Hover, Size=S, Sha
+  64:2639 symbol Kind=Tetriary, Options=Icon, Interactions=Enabled, Size=S, S
+  64:2641 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Dis
+  64:2645 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Hov
+  64:2649 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Ena
+  64:2653 symbol Kind=Tetriary, Options=Icon left, Interactions=Disabled, Siz
+  64:2656 symbol Kind=Tetriary, Options=Icon left, Interactions=Hover, Size=S
+  64:2659 symbol Kind=Tetriary, Options=Icon left, Interactions=Enabled, Size
+  64:2662 symbol Kind=Tetriary, Options=Icon right, Interactions=Disabled, Si
+  64:2665 symbol Kind=Tetriary, Options=Icon right, Interactions=Hover, Size=
+  64:2668 symbol Kind=Tetriary, Options=Icon right, Interactions=Enabled, Siz
+  64:2671 symbol Kind=Tetriary, Options=Default, Interactions=Disabled, Size=
+  64:2673 symbol Kind=Tetriary, Options=Default, Interactions=Hover, Size=S, 
+  64:2675 symbol Kind=Tetriary, Options=Default, Interactions=Enabled, Size=S
+  64:2677 symbol Kind=Ghost, Options=Default, Interactions=Enabled, Size=L, S
+  64:2679 symbol Kind=Ghost, Options=Default, Interactions=Disabled, Size=L, 
+  64:2681 symbol Kind=Ghost, Options=Default, Interactions=Hover, Size=L, Sha
+  64:2683 symbol Kind=Ghost, Options=Icon right, Interactions=Enabled, Size=L
+  64:2686 symbol Kind=Ghost, Options=Icon, Interactions=Enabled, Size=L, Shap
+  64:2688 symbol Kind=Ghost, Options=Icon, Interactions=Hover, Size=L, Shape=
+  64:2690 symbol Kind=Ghost, Options=Icon, Interactions=Disabled, Size=L, Sha
+  64:2692 symbol Kind=Ghost, Options=Icon left, Interactions=Enabled, Size=L,
+  64:2695 symbol Kind=Ghost, Options=Icon left and right, Interactions=Enable
+  64:2699 symbol Kind=Ghost, Options=Icon right, Interactions=Disabled, Size=
+  64:2702 symbol Kind=Ghost, Options=Icon left, Interactions=Disabled, Size=L
+  64:2705 symbol Kind=Ghost, Options=Icon left and right, Interactions=Disabl
+  64:2709 symbol Kind=Ghost, Options=Icon right, Interactions=Hover, Size=L, 
+  64:2712 symbol Kind=Ghost, Options=Icon left, Interactions=Hover, Size=L, S
+  64:2715 symbol Kind=Ghost, Options=Icon left and right, Interactions=Hover,
+  64:2719 symbol Kind=Ghost, Options=Default, Interactions=Enabled, Size=M, S
+  64:2721 symbol Kind=Ghost, Options=Icon right, Interactions=Enabled, Size=M
+  64:2724 symbol Kind=Ghost, Options=Icon, Interactions=Enabled, Size=M, Shap
+  64:2726 symbol Kind=Ghost, Options=Icon, Interactions=Hover, Size=M, Shape=
+  64:2728 symbol Kind=Ghost, Options=Icon, Interactions=Disabled, Size=M, Sha
+  64:2730 symbol Kind=Ghost, Options=Icon left, Interactions=Enabled, Size=M,
+  64:2733 symbol Kind=Ghost, Options=Icon left and right, Interactions=Enable
+  64:2737 symbol Kind=Ghost, Options=Default, Interactions=Disabled, Size=M, 
+  64:2739 symbol Kind=Ghost, Options=Icon right, Interactions=Disabled, Size=
+  64:2742 symbol Kind=Ghost, Options=Icon left, Interactions=Disabled, Size=M
+  64:2745 symbol Kind=Ghost, Options=Icon left and right, Interactions=Disabl
+  64:2749 symbol Kind=Ghost, Options=Default, Interactions=Hover, Size=M, Sha
+  64:2751 symbol Kind=Ghost, Options=Icon right, Interactions=Hover, Size=M, 
+  64:2754 symbol Kind=Ghost, Options=Icon left, Interactions=Hover, Size=M, S
+  64:2757 symbol Kind=Ghost, Options=Icon left and right, Interactions=Hover,
+  64:2761 symbol Kind=Ghost, Options=Icon, Interactions=Disabled, Size=S, Sha
+  64:2763 symbol Kind=Ghost, Options=Icon, Interactions=Hover, Size=S, Shape=
+  64:2765 symbol Kind=Ghost, Options=Icon, Interactions=Enabled, Size=S, Shap
+  64:2767 symbol Kind=Ghost, Options=Icon left and right, Interactions=Disabl
+  64:2771 symbol Kind=Ghost, Options=Icon left and right, Interactions=Hover,
+  64:2775 symbol Kind=Ghost, Options=Icon left and right, Interactions=Enable
+  64:2779 symbol Kind=Ghost, Options=Icon left, Interactions=Disabled, Size=S
+  64:2782 symbol Kind=Ghost, Options=Icon left, Interactions=Hover, Size=S, S
+  64:2785 symbol Kind=Ghost, Options=Icon left, Interactions=Enabled, Size=S,
+  64:2788 symbol Kind=Ghost, Options=Icon right, Interactions=Disabled, Size=
+  64:2791 symbol Kind=Ghost, Options=Icon right, Interactions=Hover, Size=S, 
+  64:2794 symbol Kind=Ghost, Options=Icon right, Interactions=Enabled, Size=S
+  64:2797 symbol Kind=Ghost, Options=Default, Interactions=Disabled, Size=S, 
+  64:2799 symbol Kind=Ghost, Options=Default, Interactions=Hover, Size=S, Sha
+  64:2801 symbol Kind=Ghost, Options=Default, Interactions=Enabled, Size=S, S
+  64:2803 symbol Kind=Primary, Options=Default, Interactions=Enabled, Size=L,
+  64:2805 symbol Kind=Primary, Options=Default, Interactions=Disabled, Size=L
+  64:2807 symbol Kind=Primary, Options=Default, Interactions=Hover, Size=L, S
+  64:2809 symbol Kind=Primary, Options=Icon right, Interactions=Enabled, Size
+  64:2812 symbol Kind=Primary, Options=Icon, Interactions=Enabled, Size=L, Sh
+  64:2814 symbol Kind=Primary, Options=Icon, Interactions=Hover, Size=L, Shap
+  64:2816 symbol Kind=Primary, Options=Icon, Interactions=Disabled, Size=L, S
+  64:2818 symbol Kind=Primary, Options=Icon left, Interactions=Enabled, Size=
+  64:2821 symbol Kind=Primary, Options=Icon left and right, Interactions=Enab
+  64:2825 symbol Kind=Primary, Options=Icon right, Interactions=Disabled, Siz
+  64:2828 symbol Kind=Primary, Options=Icon left, Interactions=Disabled, Size
+  64:2831 symbol Kind=Primary, Options=Icon left and right, Interactions=Disa
+  64:2835 symbol Kind=Primary, Options=Icon right, Interactions=Hover, Size=L
+  64:2838 symbol Kind=Primary, Options=Icon left, Interactions=Hover, Size=L,
+  64:2841 symbol Kind=Primary, Options=Icon left and right, Interactions=Hove
+  64:2845 symbol Kind=Primary, Options=Default, Interactions=Enabled, Size=M,
+  64:2847 symbol Kind=Primary, Options=Icon right, Interactions=Enabled, Size
+  64:2850 symbol Kind=Primary, Options=Icon, Interactions=Enabled, Size=M, Sh
+  64:2852 symbol Kind=Primary, Options=Icon, Interactions=Hover, Size=M, Shap
+  64:2854 symbol Kind=Primary, Options=Icon, Interactions=Disabled, Size=M, S
+  64:2856 symbol Kind=Primary, Options=Icon left, Interactions=Enabled, Size=
+  64:2859 symbol Kind=Primary, Options=Icon left and right, Interactions=Enab
+  64:2863 symbol Kind=Primary, Options=Default, Interactions=Disabled, Size=M
+  64:2865 symbol Kind=Primary, Options=Icon right, Interactions=Disabled, Siz
+  64:2868 symbol Kind=Primary, Options=Icon left, Interactions=Disabled, Size
+  64:2871 symbol Kind=Primary, Options=Icon left and right, Interactions=Disa
+  64:2875 symbol Kind=Primary, Options=Default, Interactions=Hover, Size=M, S
+  64:2877 symbol Kind=Primary, Options=Icon right, Interactions=Hover, Size=M
+  64:2880 symbol Kind=Primary, Options=Icon left, Interactions=Hover, Size=M,
+  64:2883 symbol Kind=Primary, Options=Icon left and right, Interactions=Hove
+  64:2887 symbol Kind=Primary, Options=Icon, Interactions=Disabled, Size=S, S
+  64:2889 symbol Kind=Primary, Options=Icon, Interactions=Hover, Size=S, Shap
+  64:2891 symbol Kind=Primary, Options=Icon, Interactions=Enabled, Size=S, Sh
+  64:2893 symbol Kind=Primary, Options=Icon left and right, Interactions=Disa
+  64:2897 symbol Kind=Primary, Options=Icon left and right, Interactions=Hove
+  64:2901 symbol Kind=Primary, Options=Icon left and right, Interactions=Enab
+  64:2905 symbol Kind=Primary, Options=Icon left, Interactions=Disabled, Size
+  64:2908 symbol Kind=Primary, Options=Icon left, Interactions=Hover, Size=S,
+  64:2911 symbol Kind=Primary, Options=Icon left, Interactions=Enabled, Size=
+  64:2914 symbol Kind=Primary, Options=Icon right, Interactions=Disabled, Siz
+  64:2917 symbol Kind=Primary, Options=Icon right, Interactions=Hover, Size=S
+  64:2920 symbol Kind=Primary, Options=Icon right, Interactions=Enabled, Size
+  64:2923 symbol Kind=Primary, Options=Default, Interactions=Disabled, Size=S
+  64:2925 symbol Kind=Primary, Options=Default, Interactions=Hover, Size=S, S
+  64:2927 symbol Kind=Primary, Options=Default, Interactions=Enabled, Size=S,
+  64:2929 symbol Kind=Secondary, Options=Default, Interactions=Enabled, Size=
+  64:2931 symbol Kind=Secondary, Options=Default, Interactions=Disabled, Size
+  64:2933 symbol Kind=Secondary, Options=Default, Interactions=Hover, Size=L,
+  64:2935 symbol Kind=Secondary, Options=Icon right, Interactions=Enabled, Si
+  64:2938 symbol Kind=Secondary, Options=Icon, Interactions=Enabled, Size=L, 
+  64:2940 symbol Kind=Secondary, Options=Icon, Interactions=Hover, Size=L, Sh
+  64:2942 symbol Kind=Secondary, Options=Icon, Interactions=Disabled, Size=L,
+  64:2944 symbol Kind=Secondary, Options=Icon left, Interactions=Enabled, Siz
+  64:2947 symbol Kind=Secondary, Options=Icon left and right, Interactions=En
+  64:2951 symbol Kind=Secondary, Options=Icon right, Interactions=Disabled, S
+  64:2954 symbol Kind=Secondary, Options=Icon left, Interactions=Disabled, Si
+  64:2957 symbol Kind=Secondary, Options=Icon left and right, Interactions=Di
+  64:2961 symbol Kind=Secondary, Options=Icon right, Interactions=Hover, Size
+  64:2964 symbol Kind=Secondary, Options=Icon left, Interactions=Hover, Size=
+  64:2967 symbol Kind=Secondary, Options=Icon left and right, Interactions=Ho
+  64:2971 symbol Kind=Secondary, Options=Default, Interactions=Enabled, Size=
+  64:2973 symbol Kind=Secondary, Options=Icon right, Interactions=Enabled, Si
+  64:2976 symbol Kind=Secondary, Options=Icon, Interactions=Enabled, Size=M, 
+  64:2978 symbol Kind=Secondary, Options=Icon, Interactions=Hover, Size=M, Sh
+  64:2980 symbol Kind=Secondary, Options=Icon, Interactions=Disabled, Size=M,
+  64:2982 symbol Kind=Secondary, Options=Icon left, Interactions=Enabled, Siz
+  64:2985 symbol Kind=Secondary, Options=Icon left and right, Interactions=En
+  64:2989 symbol Kind=Secondary, Options=Default, Interactions=Disabled, Size
+  64:2991 symbol Kind=Secondary, Options=Icon right, Interactions=Disabled, S
+  64:2994 symbol Kind=Secondary, Options=Icon left, Interactions=Disabled, Si
+  64:2997 symbol Kind=Secondary, Options=Icon left and right, Interactions=Di
+  64:3001 symbol Kind=Secondary, Options=Default, Interactions=Hover, Size=M,
+  64:3003 symbol Kind=Secondary, Options=Icon right, Interactions=Hover, Size
+  64:3006 symbol Kind=Secondary, Options=Icon left, Interactions=Hover, Size=
+  64:3009 symbol Kind=Secondary, Options=Icon left and right, Interactions=Ho
+  64:3013 symbol Kind=Secondary, Options=Icon, Interactions=Disabled, Size=S,
+  64:3015 symbol Kind=Secondary, Options=Icon, Interactions=Hover, Size=S, Sh
+  64:3017 symbol Kind=Secondary, Options=Icon, Interactions=Enabled, Size=S, 
+  64:3019 symbol Kind=Secondary, Options=Icon left and right, Interactions=Di
+  64:3023 symbol Kind=Secondary, Options=Icon left and right, Interactions=Ho
+  64:3027 symbol Kind=Secondary, Options=Icon left and right, Interactions=En
+  64:3031 symbol Kind=Secondary, Options=Icon left, Interactions=Disabled, Si
+  64:3034 symbol Kind=Secondary, Options=Icon left, Interactions=Hover, Size=
+  64:3037 symbol Kind=Secondary, Options=Icon left, Interactions=Enabled, Siz
+  64:3040 symbol Kind=Secondary, Options=Icon right, Interactions=Disabled, S
+  64:3043 symbol Kind=Secondary, Options=Icon right, Interactions=Hover, Size
+  64:3046 symbol Kind=Secondary, Options=Icon right, Interactions=Enabled, Si
+  64:3049 symbol Kind=Secondary, Options=Default, Interactions=Disabled, Size
+  64:3051 symbol Kind=Secondary, Options=Default, Interactions=Hover, Size=S,
+  64:3053 symbol Kind=Secondary, Options=Default, Interactions=Enabled, Size=
+  64:3055 symbol Kind=Tetriary, Options=Default, Interactions=Enabled, Size=L
+  64:3057 symbol Kind=Tetriary, Options=Default, Interactions=Disabled, Size=
+  64:3059 symbol Kind=Tetriary, Options=Default, Interactions=Hover, Size=L, 
+  64:3061 symbol Kind=Tetriary, Options=Icon right, Interactions=Enabled, Siz
+  64:3064 symbol Kind=Tetriary, Options=Icon, Interactions=Enabled, Size=L, S
+  64:3066 symbol Kind=Tetriary, Options=Icon, Interactions=Hover, Size=L, Sha
+  64:3068 symbol Kind=Tetriary, Options=Icon, Interactions=Disabled, Size=L, 
+  64:3070 symbol Kind=Tetriary, Options=Icon left, Interactions=Enabled, Size
+  64:3073 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Ena
+  64:3077 symbol Kind=Tetriary, Options=Icon right, Interactions=Disabled, Si
+  64:3080 symbol Kind=Tetriary, Options=Icon left, Interactions=Disabled, Siz
+  64:3083 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Dis
+  64:3087 symbol Kind=Tetriary, Options=Icon right, Interactions=Hover, Size=
+  64:3090 symbol Kind=Tetriary, Options=Icon left, Interactions=Hover, Size=L
+  64:3093 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Hov
+  64:3097 symbol Kind=Tetriary, Options=Default, Interactions=Enabled, Size=M
+  64:3099 symbol Kind=Tetriary, Options=Icon right, Interactions=Enabled, Siz
+  64:3102 symbol Kind=Tetriary, Options=Icon, Interactions=Enabled, Size=M, S
+  64:3104 symbol Kind=Tetriary, Options=Icon, Interactions=Hover, Size=M, Sha
+  64:3106 symbol Kind=Tetriary, Options=Icon, Interactions=Disabled, Size=M, 
+  64:3108 symbol Kind=Tetriary, Options=Icon left, Interactions=Enabled, Size
+  64:3111 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Ena
+  64:3115 symbol Kind=Tetriary, Options=Default, Interactions=Disabled, Size=
+  64:3117 symbol Kind=Tetriary, Options=Icon right, Interactions=Disabled, Si
+  64:3120 symbol Kind=Tetriary, Options=Icon left, Interactions=Disabled, Siz
+  64:3123 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Dis
+  64:3127 symbol Kind=Tetriary, Options=Default, Interactions=Hover, Size=M, 
+  64:3129 symbol Kind=Tetriary, Options=Icon right, Interactions=Hover, Size=
+  64:3132 symbol Kind=Tetriary, Options=Icon left, Interactions=Hover, Size=M
+  64:3135 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Hov
+  64:3139 symbol Kind=Tetriary, Options=Icon, Interactions=Disabled, Size=S, 
+  64:3141 symbol Kind=Tetriary, Options=Icon, Interactions=Hover, Size=S, Sha
+  64:3143 symbol Kind=Tetriary, Options=Icon, Interactions=Enabled, Size=S, S
+  64:3145 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Dis
+  64:3149 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Hov
+  64:3153 symbol Kind=Tetriary, Options=Icon left and right, Interactions=Ena
+  64:3157 symbol Kind=Tetriary, Options=Icon left, Interactions=Disabled, Siz
+  64:3160 symbol Kind=Tetriary, Options=Icon left, Interactions=Hover, Size=S
+  64:3163 symbol Kind=Tetriary, Options=Icon left, Interactions=Enabled, Size
+  64:3166 symbol Kind=Tetriary, Options=Icon right, Interactions=Disabled, Si
+  64:3169 symbol Kind=Tetriary, Options=Icon right, Interactions=Hover, Size=
+  64:3172 symbol Kind=Tetriary, Options=Icon right, Interactions=Enabled, Siz
+  64:3175 symbol Kind=Tetriary, Options=Default, Interactions=Disabled, Size=
+  64:3177 symbol Kind=Tetriary, Options=Default, Interactions=Hover, Size=S, 
+  64:3179 symbol Kind=Tetriary, Options=Default, Interactions=Enabled, Size=S
+  64:3181 symbol Kind=Ghost, Options=Default, Interactions=Enabled, Size=L, S
+  64:3183 symbol Kind=Ghost, Options=Default, Interactions=Disabled, Size=L, 
+  64:3185 symbol Kind=Ghost, Options=Default, Interactions=Hover, Size=L, Sha
+  64:3187 symbol Kind=Ghost, Options=Icon right, Interactions=Enabled, Size=L
+  64:3190 symbol Kind=Ghost, Options=Icon, Interactions=Enabled, Size=L, Shap
+  64:3192 symbol Kind=Ghost, Options=Icon, Interactions=Hover, Size=L, Shape=
+  64:3194 symbol Kind=Ghost, Options=Icon, Interactions=Disabled, Size=L, Sha
+  64:3196 symbol Kind=Ghost, Options=Icon left, Interactions=Enabled, Size=L,
+  64:3199 symbol Kind=Ghost, Options=Icon left and right, Interactions=Enable
+  64:3203 symbol Kind=Ghost, Options=Icon right, Interactions=Disabled, Size=
+  64:3206 symbol Kind=Ghost, Options=Icon left, Interactions=Disabled, Size=L
+  64:3209 symbol Kind=Ghost, Options=Icon left and right, Interactions=Disabl
+  64:3213 symbol Kind=Ghost, Options=Icon right, Interactions=Hover, Size=L, 
+  64:3216 symbol Kind=Ghost, Options=Icon left, Interactions=Hover, Size=L, S
+  64:3219 symbol Kind=Ghost, Options=Icon left and right, Interactions=Hover,
+  64:3223 symbol Kind=Ghost, Options=Default, Interactions=Enabled, Size=M, S
+  64:3225 symbol Kind=Ghost, Options=Icon right, Interactions=Enabled, Size=M
+  64:3228 symbol Kind=Ghost, Options=Icon, Interactions=Enabled, Size=M, Shap
+  64:3230 symbol Kind=Ghost, Options=Icon, Interactions=Hover, Size=M, Shape=
+  64:3232 symbol Kind=Ghost, Options=Icon, Interactions=Disabled, Size=M, Sha
+  64:3234 symbol Kind=Ghost, Options=Icon left, Interactions=Enabled, Size=M,
+  64:3237 symbol Kind=Ghost, Options=Icon left and right, Interactions=Enable
+  64:3241 symbol Kind=Ghost, Options=Default, Interactions=Disabled, Size=M, 
+  64:3243 symbol Kind=Ghost, Options=Icon right, Interactions=Disabled, Size=
+  64:3246 symbol Kind=Ghost, Options=Icon left, Interactions=Disabled, Size=M
+  64:3249 symbol Kind=Ghost, Options=Icon left and right, Interactions=Disabl
+  64:3253 symbol Kind=Ghost, Options=Default, Interactions=Hover, Size=M, Sha
+  64:3255 symbol Kind=Ghost, Options=Icon right, Interactions=Hover, Size=M, 
+  64:3258 symbol Kind=Ghost, Options=Icon left, Interactions=Hover, Size=M, S
+  64:3261 symbol Kind=Ghost, Options=Icon left and right, Interactions=Hover,
+  64:3265 symbol Kind=Ghost, Options=Icon, Interactions=Disabled, Size=S, Sha
+  64:3267 symbol Kind=Ghost, Options=Icon, Interactions=Hover, Size=S, Shape=
+  64:3269 symbol Kind=Ghost, Options=Icon, Interactions=Enabled, Size=S, Shap
+  64:3271 symbol Kind=Ghost, Options=Icon left and right, Interactions=Disabl
+  64:3275 symbol Kind=Ghost, Options=Icon left and right, Interactions=Hover,
+  64:3279 symbol Kind=Ghost, Options=Icon left and right, Interactions=Enable
+  64:3283 symbol Kind=Ghost, Options=Icon left, Interactions=Disabled, Size=S
+  64:3286 symbol Kind=Ghost, Options=Icon left, Interactions=Hover, Size=S, S
+  64:3289 symbol Kind=Ghost, Options=Icon left, Interactions=Enabled, Size=S,
+  64:3292 symbol Kind=Ghost, Options=Icon right, Interactions=Disabled, Size=
+  64:3295 symbol Kind=Ghost, Options=Icon right, Interactions=Hover, Size=S, 
+  64:3298 symbol Kind=Ghost, Options=Icon right, Interactions=Enabled, Size=S
+  64:3301 symbol Kind=Ghost, Options=Default, Interactions=Disabled, Size=S, 
+  64:3303 symbol Kind=Ghost, Options=Default, Interactions=Hover, Size=S, Sha
+  64:3305 symbol Kind=Ghost, Options=Default, Interactions=Enabled, Size=S, S
+ 64:3307 text Subtitle Semi Bold
+ 64:3308 symbol Arrow down
+ 64:3357 symbol Netflix
+ 64:3361 text Mini Description
+ 65:3398 symbol Download
+ 65:3401 symbol Frame
+ 65:3404 symbol Coins
+ 65:3407 symbol House
+ 65:3410 symbol Gamepad
+ 65:3413 rounded-rectangle Accents/Dark Amber
+ 65:3414 rounded-rectangle Dark Theme / Gray - 1
+ 65:3415 text Кнопка-текст
+ 65:3416 rounded-rectangle Dark Theme / Gray - 5
+ 65:3417 rounded-rectangle Dark Theme / Gray - 0
+ 65:3418 text Обычный
+ 65:3419 rounded-rectangle Userpic / 10
+ 65:3420 rounded-rectangle Userpic/1
+ 65:3421 rounded-rectangle Userpic / 2
+ 65:3422 rounded-rectangle Userpic / 3
+ 65:3423 rounded-rectangle Userpic/4
+ 65:3424 rounded-rectangle Userpic / 6
+ 65:3425 rounded-rectangle Userpic / 7
+ 65:3426 rounded-rectangle Userpic / 8
+ 65:3427 rounded-rectangle Userpic / 9
+ 65:3428 rounded-rectangle Userpic / 22
+ 65:3429 rounded-rectangle Userpic / 21
+ 65:3430 rounded-rectangle Userpic / 20
+ 65:3431 rounded-rectangle Userpic/19
+ 65:3432 rounded-rectangle Userpic / 18
+ 65:3433 rounded-rectangle Userpic / 17
+ 65:3434 rounded-rectangle Userpic / 16
+ 65:3435 rounded-rectangle Userpic / 15
+ 65:3436 rounded-rectangle Userpic / 14
+ 65:3437 frame Avatar
+  65:3438 symbol Shape=Circle, Size=16, Photo?=No
+  65:3440 symbol Shape=Circle, Size=20px, Photo?=No
+  65:3442 symbol Shape=Circle, Size=24, Photo?=No
+  65:3444 symbol Shape=Circle, Size=28px, Photo?=No
+  65:3446 symbol Shape=Circle, Size=32px, Photo?=No
+  65:3448 symbol Shape=Circle, Size=36px, Photo?=No
+  65:3450 symbol Shape=Circle, Size=40px, Photo?=No
+  65:3452 symbol Shape=Circle, Size=48px, Photo?=No
+  65:3454 symbol Shape=Circle, Size=64px, Photo?=No
+  65:3456 symbol Shape=Square, Size=16, Photo?=No
+  65:3458 symbol Shape=Square, Size=20px, Photo?=No
+  65:3460 symbol Shape=Square, Size=24, Photo?=No
+  65:3462 symbol Shape=Square, Size=28px, Photo?=No
+  65:3464 symbol Shape=Square, Size=32px, Photo?=No
+  65:3466 symbol Shape=Square, Size=36px, Photo?=No
+  65:3468 symbol Shape=Square, Size=40px, Photo?=No
+  65:3470 symbol Shape=Square, Size=48px, Photo?=No
+  65:3472 symbol Shape=Square, Size=64px, Photo?=No
+  65:3474 symbol Shape=Square, Size=16px, Photo?=Yes
+  65:3477 symbol Shape=Square, Size=20px, Photo?=Yes
+  65:3480 symbol Shape=Square, Size=24, Photo?=Yes
+  65:3483 symbol Shape=Square, Size=28px, Photo?=Yes
+  65:3486 symbol Shape=Square, Size=32px, Photo?=Yes
+  65:3489 symbol Shape=Square, Size=36px, Photo?=Yes
+  65:3492 symbol Shape=Square, Size=40px, Photo?=Yes
+  65:3495 symbol Shape=Square, Size=48px, Photo?=Yes
+  65:3498 symbol Shape=Square, Size=64px, Photo?=Yes
+  65:3501 symbol Shape=Circle, Size=64px, Photo?=Yes
+  65:3504 symbol Shape=Circle, Size=16, Photo?=Yes
+  65:3507 symbol Shape=Circle, Size=20px, Photo?=Yes
+  65:3510 symbol Shape=Circle, Size=24, Photo?=Yes
+  65:3513 symbol Shape=Circle, Size=28px, Photo?=Yes
+  65:3516 symbol Shape=Circle, Size=32px, Photo?=Yes
+  65:3519 symbol Shape=Circle, Size=36px, Photo?=Yes
+  65:3522 symbol Shape=Circle, Size=40px, Photo?=Yes
+  65:3525 symbol Shape=Circle, Size=48px, Photo?=Yes
+ 65:3528 rounded-rectangle Userpic / 12
+ 65:3529 rounded-rectangle Userpic / 13
+ 65:3530 symbol Link
+ 65:3533 symbol Frame
+ 65:3536 text Header/H4
+ 65:3537 symbol Buildings outline
+ 65:3540 rounded-rectangle Black
+ 65:3541 rounded-rectangle Accents / Azure
+ 65:3542 symbol Money hand
+ 65:3545 symbol Money exchange
+ 65:3548 rounded-rectangle Красный
+ 65:3549 symbol Apple
+ 65:3551 symbol Coffee
+ 65:4195 rounded-rectangle White Theme / Gray - 1
+ 65:4196 rounded-rectangle White Theme / Gray - 4
+ 65:4204 symbol Finance logo
+ 65:4211 symbol Mini-Credit card / XS size / Horizontal
+ 65:4217 symbol Mini indicator
+ 65:4227 symbol Plane
+ 65:4230 symbol Table mini-row
+ 65:4236 symbol Pharmacy
+ 65:4239 symbol Search
+ 65:4242 symbol Mic mini
+ 65:4245 frame Dark theme
+  65:4246 symbol Shape=Rectangular, Size=L, Variants=Icon left and right
+  65:4251 symbol Shape=Rounded, Size=L, Variants=Icon left and right
+  65:4256 symbol Shape=Rectangular, Size=L, Variants=Icon left
+  65:4261 symbol Shape=Rounded, Size=L, Variants=Icon left
+  65:4266 symbol Shape=Rectangular, Size=L, Variants=Icon right
+  65:4271 symbol Shape=Rounded, Size=L, Variants=Icon right
+  65:4276 symbol Shape=Rectangular, Size=L, Variants=Text
+  65:4281 symbol Shape=Rounded, Size=L, Variants=Text
+  65:4286 symbol Shape=Rectangular, Size=M, Variants=Icon left and right
+  65:4291 symbol Shape=Rounded, Size=M, Variants=Icon left and right
+  65:4296 symbol Shape=Rectangular, Size=M, Variants=Icon left
+  65:4301 symbol Shape=Rounded, Size=M, Variants=Icon left
+  65:4306 symbol Shape=Rectangular, Size=M, Variants=Icon right
+  65:4311 symbol Shape=Rounded, Size=M, Variants=Icon right
+  65:4316 symbol Shape=Rectangular, Size=M, Variants=Text
+  65:4321 symbol Shape=Rounded, Size=M, Variants=Text
+  65:4326 symbol Shape=Rectangular, Size=S, Variants=Icon left and right
+  65:4331 symbol Shape=Rounded, Size=S, Variants=Icon left and right
+  65:4336 symbol Shape=Rectangular, Size=S, Variants=Icon left
+  65:4341 symbol Shape=Rounded, Size=S, Variants=Icon left
+  65:4346 symbol Shape=Rectangular, Size=S, Variants=Icon right
+  65:4351 symbol Shape=Rounded, Size=S, Variants=Icon right
+  65:4356 symbol Shape=Rectangular, Size=S, Variants=Text
+  65:4361 symbol Shape=Rounded, Size=S, Variants=Text
+ 65:4366 symbol Dashboard outline
+ 65:4369 symbol Documents
+ 65:4372 symbol Column chart outline
+ 65:4375 symbol Doc
+ 65:4378 symbol Smile outline
+ 65:4381 rounded-rectangle Blitz New/Primary
+ 65:4382 text Typography/Caption Bold
+ 65:4383 symbol runeShard-adaptive
+ 65:4385 rounded-rectangle League/Blue
+ 65:4386 text Form/Button
+ 65:4387 rounded-rectangle Grades/S-grade-tealScale
+ 65:4388 frame Tag
+  65:4389 symbol Option=Text, Size=S
+  65:4392 symbol Option=Icon left, Size=S
+  65:4396 symbol Option=Icon right, Size=S
+  65:4400 symbol Option=Icon, Size=S
+  65:4402 symbol Option=Icon, Size=M
+  65:4407 symbol Option=Icon left, Size=M
+  65:4414 symbol Option=Icon right, Size=M
+  65:4421 symbol Option=Text, Size=M
+  65:4423 symbol Option=Text, Size=L
+  65:4425 symbol Option=Icon right, Size=L
+  65:4432 symbol Option=Icon left, Size=L
+  65:4439 symbol Option=Icon, Size=L
+ 65:4444 symbol Add user
+ 65:4447 symbol Movie
+ 65:4450 symbol More
+ 65:4453 frame Dark theme
+  65:4454 symbol Size=Medium, Emphasis=Primary, Shape=Rounded, State=Informer
+  65:4459 symbol Size=Small, Emphasis=Primary, Shape=Rounded, State=Informer 
+  65:4464 symbol Size=Medium, Emphasis=Ghost, Shape=Rounded, State=Informer &
+  65:4469 symbol Size=Small, Emphasis=Ghost, Shape=Rounded, State=Informer &a
+  65:4474 symbol Size=Medium, Emphasis=Primary, Shape=Square, State=Informer 
+  65:4479 symbol Size=Small, Emphasis=Primary, Shape=Square, State=Informer &
+  65:4484 symbol Size=Medium, Emphasis=Ghost, Shape=Square, State=Informer &a
+  65:4489 symbol Size=Small, Emphasis=Ghost, Shape=Square, State=Informer &am
+  65:4494 symbol Size=Medium, Emphasis=Primary, Shape=Rounded, State=Icon
+  65:4499 symbol Size=Small, Emphasis=Primary, Shape=Rounded, State=Icon
+  65:4504 symbol Size=Medium, Emphasis=Ghost, Shape=Rounded, State=Icon
+  65:4509 symbol Size=Small, Emphasis=Ghost, Shape=Rounded, State=Icon
+  65:4514 symbol Size=Medium, Emphasis=Primary, Shape=Square, State=Icon
+  65:4519 symbol Size=Small, Emphasis=Primary, Shape=Square, State=Icon
+  65:4524 symbol Size=Medium, Emphasis=Ghost, Shape=Square, State=Icon
+  65:4529 symbol Size=Small, Emphasis=Ghost, Shape=Square, State=Icon
+  65:4534 symbol Size=Medium, Emphasis=Primary, Shape=Rounded, State=Informer
+  65:4538 symbol Size=Small, Emphasis=Primary, Shape=Rounded, State=Informer
+  65:4541 symbol Size=Medium, Emphasis=Ghost, Shape=Rounded, State=Informer
+  65:4545 symbol Size=Small, Emphasis=Ghost, Shape=Rounded, State=Informer
+  65:4548 symbol Size=Medium, Emphasis=Primary, Shape=Square, State=Informer
+  65:4552 symbol Size=Small, Emphasis=Primary, Shape=Square, State=Informer
+  65:4555 symbol Size=Medium, Emphasis=Ghost, Shape=Square, State=Informer
+  65:4559 symbol Size=Small, Emphasis=Ghost, Shape=Square, State=Informer
+  65:4562 symbol Size=Medium, Emphasis=Primary, Shape=Rounded, State=Text
+  65:4565 symbol Size=Small, Emphasis=Primary, Shape=Rounded, State=Text
+  65:4569 symbol Size=Medium, Emphasis=Ghost, Shape=Rounded, State=Text
+  65:4572 symbol Size=Small, Emphasis=Ghost, Shape=Rounded, State=Text
+  65:4574 symbol Size=Medium, Emphasis=Primary, Shape=Square, State=Text
+  65:4577 symbol Size=Small, Emphasis=Primary, Shape=Square, State=Text
+  65:4579 symbol Size=Medium, Emphasis=Ghost, Shape=Square, State=Text
+  65:4582 symbol Size=Small, Emphasis=Ghost, Shape=Square, State=Text
+ 65:4585 symbol Dashboard
+ 65:4588 symbol Coin 2
+ 65:4591 symbol Tag
+ 65:4594 symbol Wallet
+ 65:4597 symbol Charts
+ 65:4600 symbol Chat
+ 65:4603 symbol Avatar
+ 65:4606 rounded-rectangle White Theme/Gray - 0
+ 65:4607 rounded-rectangle White Theme / Gray - 8
+ 65:4608 rounded-rectangle White Theme / Gray - 5
+ 65:4609 symbol Star
+ 65:4612 symbol Trend up
+ 65:4615 symbol Tag
+ 65:4618 rounded-rectangle White Theme / Gray - 9
+ 65:4619 rounded-rectangle Accents/Moderate aquamarine
+ 65:4620 rounded-rectangle Accents/Verdepom
+ 65:4621 rounded-rectangle Accents/Thistle
+ 65:4622 rounded-rectangle White Theme / Gray - 2
+ 65:4623 rounded-rectangle Accents/A spunky red-orange
+ 65:4624 rounded-rectangle White Theme / Gray - 3
+ 65:4625 symbol Crown
+ 65:4628 symbol Safe
+ 65:4631 symbol Setting
+ 65:4634 rounded-rectangle White Theme / Gray - 7
+ 65:5499 symbol Setting 2
+ 65:5502 symbol Bell 2
+ 65:5505 symbol 4 square
+ 65:5508 symbol Column charts
+ 65:5511 rounded-rectangle White Theme / Gray - 11
+ 65:5809 rounded-rectangle Shadow
+ 65:5810 rounded-rectangle tooltip/text
+ 65:5811 rounded-rectangle Blitz New/shade-0
+ 65:5812 symbol Cancel
+ 65:6058 rounded-rectangle Accents/Shiny orange
+ 65:6059 rounded-rectangle White Theme / Gray - 6
+ 65:7649 rounded-rectangle depth  /  depth2
+ 65:12545 symbol Done
+ 67:12673 rounded-rectangle Userpic/Avater_YZ
+ 67:12678 rounded-rectangle Userpic/AVter_XW
+ 93:1840 text Header/H2
+ 93:1841 symbol Card with element 2 / M size / Horizontal
+ 93:1887 symbol Credit card
+ 93:1890 symbol Income / S widget
+ 93:1902 symbol Expense / S widget
+ 93:1915 symbol Credit card 2 / M size / Vertical
+ 93:1938 symbol Mini-Credit card / XS size / Vertical
+ 93:1944 symbol Dots
+ 93:1947 symbol Group 46
+ 93:1950 frame Stories
+  93:1951 symbol Option=1
+  93:1956 symbol Option=3
+  93:1958 symbol Option=2
+ 93:1961 symbol Card with element 1 / M size / Horizontal
+ 93:1999 symbol Calendar outline
+ 93:2002 symbol Tag
+ 93:2004 rounded-rectangle Accents/Crayola wild strawberries
+ 93:2005 symbol Cashback / S widget
+ 93:2018 symbol Credit limit / S widget
+ 93:2030 symbol Credit card / XS size / Horizontal
+ 93:2042 symbol Progress / S widget
+ 93:2049 frame Footer
+  93:2050 symbol Property 1=Dark theme, Instead_Dark theme=Default
+  93:2052 symbol Property 1=Light theme, Instead_Dark theme=Default
+ 93:2054 symbol Mini card
+ 93:2062 symbol Row
+ 93:2073 symbol Pie chart
+ 93:2082 rounded-rectangle White Theme / Gray - 10
+ 93:2083 rounded-rectangle Text Blue Gray 4
+ 93:2084 symbol Credit card 1 / M size / Horizontal
+ 93:2108 text Header/H1
+ 93:2109 symbol Plus
+ 93:2112 symbol Filter mini
+ 93:2115 frame Dark theme
+  93:2116 symbol Shape=Rectangular, Size=L, Variants=Icon left and right
+  93:2121 symbol Shape=Rounded, Size=L, Variants=Icon left and right
+  93:2126 symbol Shape=Rectangular, Size=L, Variants=Icon left
+  93:2131 symbol Shape=Rounded, Size=L, Variants=Icon left
+  93:2136 symbol Shape=Rectangular, Size=L, Variants=Icon right
+  93:2141 symbol Shape=Rounded, Size=L, Variants=Icon right
+  93:2146 symbol Shape=Rectangular, Size=L, Variants=Text
+  93:2151 symbol Shape=Rounded, Size=L, Variants=Text
+  93:2156 symbol Shape=Rectangular, Size=M, Variants=Icon left and right
+  93:2161 symbol Shape=Rounded, Size=M, Variants=Icon left and right
+  93:2166 symbol Shape=Rectangular, Size=M, Variants=Icon left
+  93:2171 symbol Shape=Rounded, Size=M, Variants=Icon left
+  93:2176 symbol Shape=Rectangular, Size=M, Variants=Icon right
+  93:2181 symbol Shape=Rounded, Size=M, Variants=Icon right
+  93:2186 symbol Shape=Rectangular, Size=M, Variants=Text
+  93:2191 symbol Shape=Rounded, Size=M, Variants=Text
+  93:2196 symbol Shape=Rectangular, Size=S, Variants=Icon left and right
+  93:2201 symbol Shape=Rounded, Size=S, Variants=Icon left and right
+  93:2206 symbol Shape=Rectangular, Size=S, Variants=Icon left
+  93:2211 symbol Shape=Rounded, Size=S, Variants=Icon left
+  93:2216 symbol Shape=Rectangular, Size=S, Variants=Icon right
+  93:2221 symbol Shape=Rounded, Size=S, Variants=Icon right
+  93:2226 symbol Shape=Rectangular, Size=S, Variants=Text
+  93:2231 symbol Shape=Rounded, Size=S, Variants=Text
+ 93:2236 frame Top menu
+  93:2237 symbol Log in=1, Menu=Dark
+  93:2270 symbol Log in=4, Menu=Dark
+  93:2297 symbol Log in=2, Menu=Dark
+  93:2324 symbol Log in=3, Menu=Dark
+  93:2347 symbol Log in=1, Menu=Light
+  93:2380 symbol Log in=4, Menu=Light
+  93:2407 symbol Log in=2, Menu=Light
+  93:2434 symbol Log in=3, Menu=Light
+ 93:2457 symbol Paypal
+ 93:2462 symbol Instargam
+ 93:2469 symbol Credit card 2 / Msize / Horizontal
+ 93:2500 symbol Informers
+ 93:2506 symbol Spend this week / M widget
+ 93:2533 symbol Total cashback / M widget
+ 93:2553 frame Side menu
+  93:2554 symbol Variant=5, Theme=Dark
+  93:2580 symbol Variant=3, Theme=Dark
+  93:2614 symbol Variant=4, Theme=Dark
+  93:2658 symbol Variant=1, Theme=Dark
+  93:2682 symbol Variant=2, Theme=Dark
+  93:2743 symbol Variant=4, Theme=Light
+  93:2790 symbol Variant=5, Theme=Light
+  93:2816 symbol Variant=3, Theme=Light
+  93:2850 symbol Variant=1, Theme=Light
+  93:2874 symbol Variant=2, Theme=Light
+ 93:2935 symbol Income 2 / XS widget
+ 93:2944 symbol Overall balance
+ 93:3083 symbol Bell
+ 93:3086 symbol User stroke
+ 93:3089 symbol Credit card / S size / Horizontal
+ 93:3113 rounded-rectangle тень для плашек и всякой хуиты
+ 93:3114 symbol Table row
+ 93:3125 symbol Frame
+ 93:3128 symbol Credit card with widget / L size / Horizontal
+ 93:3156 symbol Progress chart
+ 93:3163 symbol Income / XS widget
+ 93:3171 symbol Coins hand 2
+ 93:3174 symbol Last transfet / XS widget
+ 93:3182 symbol Income widget / L widget
+ 93:3204 symbol Cashback widget  / L widget
+ 93:3228 symbol Transfers widgets  / L widget
+ 93:3243 symbol Indicator
+ 93:3252 symbol Category / S widget
+ 93:3259 symbol Spending trend
+ 93:3305 rounded-rectangle small ball
+ 93:3306 symbol Diamonds
+ 93:3309 symbol Portfolio / M widget
+ 93:3319 symbol Calendar
+ 93:3322 symbol Cup
+ 93:3325 symbol Candle chart
+ 93:3328 symbol 24
+ 93:3331 symbol Income / M widget
+ 93:3348 symbol Expense / M widget
+ 93:3365 symbol Total / M widget
+ 93:3376 symbol Crypto / L widget
+ 93:3393 rounded-rectangle Accents/Zinc Yellow
+ 93:3394 symbol Informer
+ 93:3404 rounded-rectangle Purple Heart
+ 93:3405 symbol Credit card 1 / M size / Vertical
+ 93:3433 symbol Twitch
+ 93:3436 symbol Card
+ 93:3456 symbol Playstation
+ 93:3461 symbol Play
+ 93:3466 frame Mobile menu
+  93:3467 symbol Option=1, Light theme=Yes
+  93:3481 symbol Option=1, Light theme=No
+  93:3495 symbol Option=2, Light theme=No
+  93:3506 symbol Option=2, Light theme=Yes
+  93:3517 symbol Option=3, Light theme=No
+  93:3533 symbol Option=3, Light theme=Yes
+  93:3549 symbol Option=4, Light theme=No
+  93:3566 symbol Option=4, Light theme=Yes
+ 93:3583 rounded-rectangle Black / Black
+ 93:3584 symbol Status Bar
+ 93:3606 rounded-rectangle Userpic / 5
+ 93:3607 rounded-rectangle Userpic / 11
+ 93:3608 symbol Progress widget / L widget
+ 93:3632 text H2
+ 93:3633 rounded-rectangle Userpic / 12
+ 93:3634 rounded-rectangle Userpic / 13
+ 93:3635 rounded-rectangle Userpic / 10
+ 93:3636 text полузаголовок
+ 93:3637 symbol Code
+ 93:3640 symbol Artboard
+ 93:3643 symbol Target
+ 93:3646 text подпись
+ 93:3647 text Мини кнопка-текст
+ 93:3648 text Обычный жирный
+ 93:3649 rounded-rectangle Dark Theme / Gray - 3
+ 93:3650 symbol User
+ 93:3653 symbol Eye
+ 93:3656 symbol Smile
+ 93:3659 symbol Frame
+ 93:3662 symbol Speed up
+ 93:3665 symbol Volume
+ 93:3668 symbol 4k
+ 93:3671 symbol Modal
+ 93:3674 symbol Full screen
+ 93:3677 symbol Heart
+ 93:3680 symbol Send
+ 93:15876 rounded-rectangle Accents/Magenta
+ 93:15877 symbol Spending trend / M widget
+ 93:15891 symbol Overall balance / XL widget
+ 93:16030 symbol Expense widget / L widget
+ 93:16049 symbol Spending trend / XL widget
+ 93:16095 symbol Bubble chart
+ 93:16153 symbol Line chart v2
+ 93:16268 symbol Line chart v1
+ 93:16388 symbol Hex graph
+ 93:16731 symbol Candle chart
+ 93:17140 rounded-rectangle Dark Theme / Gray - 2
+ 93:17141 rounded-rectangle Зеленый
+ 93:17142 rounded-rectangle Dark Theme / Gray - 7
+ 93:17143 rounded-rectangle Dark Theme / Gray - 10
+ 93:17144 rounded-rectangle Dark Theme / Gray - 11
+ 93:17145 rounded-rectangle Dark Theme / Gray - 9

@@ -1,0 +1,18 @@
+---
+description: Web 预览交付方式 —— 除 Kimi Work 内置预览外，同时在默认 Chrome 打开
+alwaysApply: true
+---
+
+# Web 预览双通道交付
+
+在本项目交付 Web 页面/应用预览时，除在回复中给出 Kimi Work 预览卡片
+（`http://localhost:7100/` 链接 + 项目根目录）外，必须同时在用户的
+默认浏览器（Chrome）中打开相同 URL：
+
+```bash
+cmd /c start "" "http://localhost:7100/<route>"
+```
+
+- 打开前先 `curl` 确认 dev server 已在运行；未运行则先按 Kimi Work
+  预览规范启动/等待服务，不要自行常驻后台进程。
+- Chrome 窗口交给用户管理，不需要在结束前关闭。

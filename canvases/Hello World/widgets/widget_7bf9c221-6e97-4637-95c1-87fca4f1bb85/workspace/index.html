@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>便签 · 复刻咒语</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #91D4FF; }
+  body {
+    font-family: var(--kimi-font-sans,"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","MiSans","Microsoft YaHei",sans-serif);
+    color: #121212; overflow: hidden;
+  }
+  .stage { position: relative; width: 100%; height: 100%; min-height: 160px; overflow: hidden; background: #91D4FF; }
+  .el { position: absolute; }
+  button { font-size: inherit; font-family: inherit; }
+
+
+
+  h1.head { z-index: 2; font-weight: 700; line-height: 1.0; letter-spacing: -0.01em; color: #121212; white-space: nowrap; }
+
+  .notes { z-index: 2; display: flex; gap: 0.8em; }
+  .note {
+    position: relative; flex: 1; min-width: 0; text-align: left; cursor: pointer;
+    display: flex; flex-direction: column; gap: 0.45em;
+    padding: 1em 1.05em; background: #007CFF; border: none; border-radius: 0;
+    color: #FFFFFF; font-family: inherit; overflow: hidden;
+    transition: transform 0.14s cubic-bezier(0.3, 1.4, 0.5, 1), background 0.14s;
+    animation: drift 9s ease-in-out infinite;
+  }
+  @keyframes drift {
+    0%   { translate: 0 0; }
+    25%  { translate: 3px -6px; }
+    50%  { translate: -2px -9px; }
+    75%  { translate: -4px -3px; }
+    100% { translate: 0 0; }
+  }
+  .note:hover { transform: translateY(-2px); background: #0066D6; }
+  .note:active { transform: scale(0.985); }
+  .note .who { font-size: 1em; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; line-height: 1.25; }
+  .note .what {
+    flex: 1; font-size: 1em; line-height: 1.5; color: rgba(255, 255, 255, 0.92);
+    overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--clamp, 8);
+  }
+  .note .what .kw { font-weight: 700; color: #D9EDFF; }
+
+  .note.dark { background: #002E58; color: #FFFFFF; }
+  .note.dark:hover { background: #002E58; }
+  .note.dark .what { color: rgba(255, 255, 255, 0.92); }
+  .note.dark .what .kw { color: #91D4FF; }
+  .note .ok {
+    position: absolute; top: 0; right: 0; padding: 0.25em 0.7em;
+    background: #FFFFFF; color: #007CFF; font-size: 0.78em; font-weight: 600;
+    opacity: 0; transform: translateY(-4px);
+    transition: opacity 0.15s, transform 0.15s; pointer-events: none; z-index: 3;
+  }
+  .note.dark .ok { background: #FFFFFF; color: #002E58; }
+
+  .note.light { background: #FFFFFF; color: #121212; }
+  .note.light:hover { background: #EFF8FF; }
+  .note.light .who::before { background: #007CFF; }
+  .note.light .who .num { color: rgba(18, 18, 18, 0.5); }
+  .note.light .what { color: rgba(18, 18, 18, 0.9); }
+  .note.light .what .kw { color: #007CFF; }
+  .note.light .ok { background: #002E58; color: #FFFFFF; }
+  .note.copied .ok { opacity: 1; transform: translateY(0); }
+
+
+  .field { z-index: 0; overflow: hidden; cursor: crosshair; }
+  .field canvas { width: 100%; height: 100%; display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .note { transition: none; animation: none; }
+    .note .ok { transition: none; }
+  }
+
+  html, body, .stage { background: #F5F6F7; }
+  .note { color: #121212; }
+  .note:nth-child(1), .note:nth-child(1):hover { background: #C5E1EC; }
+  .note:nth-child(2), .note:nth-child(2):hover { background: #6FB9DA; }
+  .note:nth-child(3), .note:nth-child(3):hover { background: #6FA1D3; }
+  .note:nth-child(4), .note:nth-child(4):hover { background: #FFFFFF; }
+  .note:nth-child(5), .note:nth-child(5):hover { background: #CDE5EE; }
+  .note .who { color: #121212; }
+  .note .what,
+  .note.light .what,
+  .note.dark .what { color: #121212 !important; }
+  .note .what .kw,
+  .note.light .what .kw,
+  .note.dark .what .kw { color: #121212 !important; font-weight: 700; }
+  .note .what,
+  .note .what .kw { color: #515151 !important; }
+  .note .ok,
+  .note.light .ok,
+  .note.dark .ok { background: #FFFFFF !important; color: #121212 !important; }
+  .note.copied .ok { opacity: 1; transform: translateY(0); }
+
+  h1.head { font-size: 36px !important; font-weight: 700; line-height: 1.08; letter-spacing: 0; }
+  .note .ok { font-size: 12px; line-height: 1.4; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+</head>
+<body>
+<main class="stage" aria-label="复刻咒语便签墙">
+  <div class="el field" id="field" aria-hidden="true"><canvas></canvas></div>
+  <h1 class="el head">点击下方 prompt，get 同款</h1>
+  <div class="el notes" id="notes"></div>
+</main>
+
+<script>
+"use strict";
+const FAMS = ["-+/", "()*", "▲K#⬢"];
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function cellHash(a, b) {
+    let h = (Math.imul(a + 1, 374761393) + Math.imul(b + 1, 668265263)) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+let FCELL = 18;
+const fState = { on: false, ctx: null, w: 0, h: 0, cols: 0, rows: 0, offX: 0, offY: 0, holes: [] };
+const P = { x: -1e4, y: -1e4, t: -1e4 };
+function setupField(w, h) {
+    const cv = document.querySelector(".field canvas");
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.max(1, Math.round(w * dpr));
+    cv.height = Math.max(1, Math.round(h * dpr));
+    const ctx = cv.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fState.ctx = ctx;
+    fState.w = w;
+    fState.h = h;
+    FCELL = clamp(Math.round(h / 18), 12, 20);
+    fState.cols = Math.ceil(w / FCELL);
+    fState.rows = Math.max(1, Math.floor(h / FCELL));
+    fState.offX = (w - fState.cols * FCELL) / 2;
+    fState.offY = (h - fState.rows * FCELL) / 2;
+    fState.on = true;
+}
+function holeFactor(x, y) {
+    let f = 1;
+    const hs = fState.holes;
+    for (let i = 0; i < hs.length; i++) {
+        const ho = hs[i];
+        const dx = Math.max(ho.x - x, 0, x - (ho.x + ho.w));
+        const dy = Math.max(ho.y - y, 0, y - (ho.y + ho.h));
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < ho.feather)
+            f *= (1 - ho.f) + ho.f * (dist / ho.feather);
+    }
+    return f;
+}
+function drawField(t) {
+    if (!fState.on)
+        return;
+    const { ctx, w, h, cols, rows, offX, offY } = fState;
+    ctx.clearRect(0, 0, w, h);
+    const breathe = 0.85 + 0.25 * Math.sin(t * 0.14 + 1);
+    let rip = null;
+    const dt = t - P.t;
+    if (dt >= 0 && dt < 1.5) {
+        const sig = FCELL * 2.6;
+        rip = { amp: 0.55 * Math.exp(-dt * 2.0), phase: dt * 9, s2: 2 * sig * sig };
+    }
+    const zb1 = cols / 3, zb2 = 2 * cols / 3;
+    const buckets = [[], []];
+    for (let r = 0; r < rows; r++) {
+        const y = offY + r * FCELL + FCELL / 2;
+        for (let c = 0; c < cols; c++) {
+            const reg = c < zb1 + Math.sin(r * 0.4 + t * 0.15) * 1.5 ? 0
+                : c < zb2 + Math.sin(r * 0.35 - t * 0.12 + 2) * 1.5 ? 1 : 2;
+            const x = offX + c * FCELL + FCELL / 2;
+            let d = 0.52
+                + (0.24 * Math.sin(r * 0.55 - t * 0.5 + reg * 2.1)
+                    + 0.12 * Math.sin(c * 0.09 + t * 0.23)) * breathe
+                + (cellHash(c * 5 + reg, r * 3 + 1) - 0.5) * 0.14;
+            if (rip) {
+                const dx = x - P.x, dy = y - P.y;
+                const q = (dx * dx + dy * dy) / rip.s2;
+                if (q < 9)
+                    d += rip.amp * Math.exp(-q) * Math.cos(rip.phase - Math.sqrt(q) * 3);
+            }
+            d *= holeFactor(x, y);
+            d = Math.max(0, Math.min(1, d));
+            if (d < 0.3)
+                continue;
+            const fam = FAMS[reg];
+            const ch = fam[Math.min(fam.length - 1, Math.floor((d - 0.3) / 0.7 * fam.length))];
+            buckets[cellHash(c, r) < 0.5 ? 0 : 1].push(x, y, ch, d < 0.5 ? "#91D4FF" : d < 0.72 ? "#00A1FF" : "#007CFF");
+        }
+    }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const sizes = [Math.max(12, FCELL * 0.8), Math.max(12, FCELL * 0.62)];
+    for (let b = 0; b < 2; b++) {
+        ctx.font = sizes[b] + 'px Menlo, "SF Mono", "DejaVu Sans Mono", monospace';
+        const a = buckets[b];
+        for (let i = 0; i < a.length; i += 4) {
+            ctx.fillStyle = a[i + 3];
+            ctx.fillText(a[i + 2], a[i], a[i + 1] + sizes[b] * 0.03);
+        }
+    }
+}
+let raf = 0, lastF = 0;
+function loop(now) {
+    raf = requestAnimationFrame(loop);
+    if (now - lastF < 66)
+        return;
+    lastF = now;
+    drawField(now / 1000);
+}
+function startLoop() { if (!raf && !REDUCED && _tFix === null && !document.hidden)
+    raf = requestAnimationFrame(loop); }
+function stopLoop() { if (raf) {
+    cancelAnimationFrame(raf);
+    raf = 0;
+} }
+document.addEventListener("visibilitychange", () => { document.hidden ? stopLoop() : startLoop(); });
+const fieldEl = document.getElementById("field");
+fieldEl.addEventListener("pointermove", e => {
+    if (REDUCED)
+        return;
+    const rc = fieldEl.getBoundingClientRect();
+    P.x = e.clientX - rc.left;
+    P.y = e.clientY - rc.top;
+    P.t = performance.now() / 1000;
+}, { passive: true });
+const HEAD = "点击下方 prompt，get 同款";
+const FF = getComputedStyle(document.body).fontFamily;
+const mc = document.createElement("canvas").getContext("2d");
+const tw = (s, fs, w) => { mc.font = `${w} ${fs}px ${FF}`; return mc.measureText(s).width; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function pickCols(W, H) {
+    const a = W / H;
+    if (a >= 2.6)
+        return { n: 10, vert: false };
+    if (a >= 2.1)
+        return { n: 8, vert: false };
+    if (a >= 1.55)
+        return { n: 6, vert: false };
+    if (a >= 1.15)
+        return { n: 4, vert: false };
+    return { n: 5, vert: true };
+}
+function gridMetrics(W, H, n) {
+    const mx = 0.05 * W, my = 0.05 * H, g = 0.01 * W;
+    const iw = W - 2 * mx, ih = H - 2 * my;
+    const sCols = (iw - (n - 1) * g) / n;
+    const m = Math.max(1, Math.round((ih + g) / (sCols + g)));
+    const sRows = (ih - (m - 1) * g) / m;
+    const s = Math.min(sCols, sRows);
+    const ox = mx + (iw - n * s - (n - 1) * g) / 2;
+    const oy = my + (ih - m * s - (m - 1) * g) / 2;
+    return { n, m, s, g, ox, oy };
+}
+function zones(n, m, vert) {
+    if (vert)
+        return {
+            head: [0, 0, 5, 1],
+            notes: [0, 1, 5, m - 1]
+        };
+    if (m < 3 || n <= 4)
+        return {
+            head: [0, 0, n, 1],
+            notes: [0, 1, n, m - 1]
+        };
+    const headC = Math.min(n - 1, Math.max(5, Math.round(n * 0.6)));
+    return {
+        head: [0, 0, headC, 1],
+        notes: [0, 1, n, m - 1]
+    };
+}
+const $ = s => document.querySelector(s);
+function layout() {
+    const stage = $(".stage");
+    const W = stage.clientWidth, H = stage.clientHeight;
+    if (!W || !H)
+        return;
+    const { n, vert } = pickCols(W, H);
+    const gm = gridMetrics(W, H, n);
+    const z = zones(n, gm.m, vert);
+    const { s, g, ox, oy } = gm;
+    const X = i => ox + i * (s + g);
+    const Y = j => oy + j * (s + g);
+    const rect = ([i, j, cs, rs]) => ({ x: X(i), y: Y(j), w: cs * s + (cs - 1) * g, h: rs * s + (rs - 1) * g });
+    const hr = rect(z.head);
+    const headFs = 36;
+    const head = $(".head");
+    head.style.fontSize = headFs + "px";
+    head.style.left = hr.x + "px";
+    head.style.top = (hr.y + (hr.h - headFs) / 2) + "px";
+    const nr = rect(z.notes);
+    const notes = $("#notes");
+    notes.style.left = nr.x + "px";
+    notes.style.top = nr.y + "px";
+    notes.style.width = nr.w + "px";
+    notes.style.height = nr.h + "px";
+    notes.style.flexDirection = vert ? "column" : "row";
+    const MAXCH = 52;
+    let nfs = 26;
+    for (; nfs > 12; nfs -= 0.5) {
+        const gp = 0.8 * nfs;
+        const noteW = vert ? nr.w : (nr.w - 4 * gp) / 5;
+        const noteH = vert ? (nr.h - 4 * gp) / 5 : nr.h;
+        const cpl = Math.max(1, Math.floor((noteW - 2.1 * nfs) / nfs));
+        const lines = Math.floor((noteH - nfs * 3.7) / (nfs * 1.5));
+        if (lines >= 2 && cpl * lines >= MAXCH)
+            break;
+    }
+    notes.style.fontSize = nfs + "px";
+    const noteH2 = vert ? (nr.h - 4 * 0.8 * nfs) / 5 : nr.h;
+    notes.style.setProperty("--clamp", Math.max(2, Math.floor((noteH2 - nfs * 3.7) / (nfs * 1.5))));
+    const fe = $("#field");
+    fe.style.left = "0px";
+    fe.style.top = "0px";
+    fe.style.width = W + "px";
+    fe.style.height = H + "px";
+    setupField(W, H);
+    const pad = 0.5 * FCELL, feather = 1.6 * FCELL;
+    const holes = [{ x: hr.x - pad, y: hr.y - pad, w: hr.w + 2 * pad, h: hr.h + 2 * pad, f: 1, feather: feather }];
+    fState.holes = holes;
+    drawField(_tFix !== null ? _tFix : performance.now() / 1000);
+}
+const _q = new URLSearchParams(location.search);
+if (_q.has("w") && _q.has("h")) {
+    const st = document.querySelector(".stage");
+    st.style.width = _q.get("w") + "px";
+    st.style.height = _q.get("h") + "px";
+}
+const _tFix = _q.has("t") ? (parseFloat(_q.get("t")) || 0) : null;
+if (_tFix !== null)
+    window.__drawAt = () => drawField(_tFix);
+window.addEventListener("resize", layout);
+new ResizeObserver(layout).observe(document.querySelector(".stage"));
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => {
+    layout();
+    if (window.__drawAt)
+        window.__drawAt();
+});
+(function () {
+    "use strict";
+    var SPELLS = [
+        { who: "盯盘", light: true, what: "帮我做一个自选股盯盘 widget 放到画布上：关注茅台、五粮液和苹果，每个交易日收盘后自动抓收盘价和涨跌幅刷新" },
+        { who: "番茄钟", what: "做一个番茄钟组件：25 分钟专注 + 5 分钟休息，能开始 / 暂停 / 重置，今天完成几轮记在组件里" },
+        { who: "待办打卡", dark: true, what: "来一张待办 + 习惯打卡 widget：待办可增删勾选，习惯显示最近 7 天格子，数据存我本地不丢" },
+        { who: "每日简报", light: true, what: "建一个每日 AI 新闻简报 widget，配一个每天早 8 点的定时任务：先给 3 条核心摘要和为什么重要，再列来源链接" },
+        { who: "播放器", what: "做一个本地音乐播放器 widget：扫描我曲库里的歌生成列表，支持播放 / 暂停 / 切歌和进度条" }
+    ];
+    var NOTE_COLORS = ["#C5E1EC", "#6FB9DA", "#6FA1D3", "#FFFFFF", "#CDE5EE"];
+    for (var ci = NOTE_COLORS.length - 1; ci > 0; ci--) {
+        var cj = Math.floor(Math.random() * (ci + 1));
+        var tmp = NOTE_COLORS[ci];
+        NOTE_COLORS[ci] = NOTE_COLORS[cj];
+        NOTE_COLORS[cj] = tmp;
+    }
+    var KW = /(widget|组件|定时任务)/g;
+    var box = document.getElementById("notes");
+    SPELLS.forEach(function (s, i) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "note" + (s.dark ? " dark" : s.light ? " light" : "");
+        b.style.background = NOTE_COLORS[i % NOTE_COLORS.length];
+        b.style.animationDuration = (8.5 + i * 1.4) + "s";
+        b.style.animationDelay = (-i * 2.3) + "s";
+        var html = s.what.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+            .replace(KW, '<span class="kw">$1</span>');
+        b.innerHTML = '<span class="who">' + s.who + '</span>' +
+            '<span class="what">' + html + '</span>' +
+            '<span class="ok">已复制 ✓</span>';
+        b.addEventListener("click", function () {
+            var done = function () {
+                b.classList.remove("copied");
+                void b.offsetWidth;
+                b.classList.add("copied");
+                setTimeout(function () { b.classList.remove("copied"); }, 1600);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(s.what).then(done, done);
+            }
+            else {
+                done();
+            }
+        });
+        box.appendChild(b);
+    });
+})();
+layout();
+if (_tFix !== null)
+    window.__drawAt();
+else if (REDUCED)
+    drawField(0.7);
+else
+    startLoop();
+</script>
+</body>
+</html>

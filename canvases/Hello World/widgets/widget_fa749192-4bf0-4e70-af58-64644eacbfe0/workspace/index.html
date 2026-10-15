@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>电脑剩余空间</title>
+<style>
+  :root{
+
+    --blue:#007CFF; --blue-deep:#0066D6; --navy:#002E58;
+    --w-1:rgba(255,255,255,.92); --w-2:rgba(255,255,255,.66); --w-3:rgba(255,255,255,.48);
+    --ink:#000000;
+    --ink-2:rgba(0,0,0,.62); --ink-3:rgba(0,0,0,.46);
+
+    --t1:rgba(255,255,255,.06); --t2:rgba(255,255,255,.10); --t3:rgba(255,255,255,.16); --t4:rgba(255,255,255,.24);
+    --tk:rgba(145,212,255,.8);
+    --k-sans:var(--kimi-font-sans,"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","MiSans","Microsoft YaHei",sans-serif);
+    --k-mono:var(--kimi-font-mono,"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace);
+    --k-r:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--k-sans); color:var(--w-1); background:transparent; overflow:hidden; font-size:13px; -webkit-font-smoothing:antialiased;}
+  button{font:inherit;}
+
+
+  .card{
+    container-type:size;
+    --padx:clamp(16px,5cqi,24px); --pady:clamp(14px,2.8cqb,20px);
+    position:relative; height:100vh;
+    border-radius:var(--k-r); overflow:hidden;
+    padding:var(--pady) var(--padx);
+    background:radial-gradient(130% 120% at 82% 0%, #17242F 0%, #000000 62%);
+    display:flex; flex-direction:column;
+    gap:clamp(9px,2cqb,14px);
+  }
+  .card::after{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .card > *{position:relative; z-index:1;}
+
+
+  .texture{
+    position:absolute; inset:0; z-index:0;
+    display:flex; flex-direction:column; justify-content:flex-end; align-items:center;
+    pointer-events:none; overflow:hidden;
+    -webkit-mask:linear-gradient(180deg, transparent 0%, transparent 52%, #000 68%, #000 80%, transparent 97%);
+            mask:linear-gradient(180deg, transparent 0%, transparent 52%, #000 68%, #000 80%, transparent 97%);
+  }
+  .trow{white-space:nowrap; line-height:1; height:var(--cellH,13px);}
+  .tc{
+    display:inline-block; width:var(--cellW,8px); height:var(--cellH,13px);
+    font-family:var(--k-mono); font-size:11px; line-height:var(--cellH,13px);
+    text-align:center; font-style:normal;
+  }
+  .t1{color:var(--t1)} .t2{color:var(--t2)} .t3{color:var(--t3)} .t4{color:var(--t4)}
+  .tk{color:var(--tk); font-weight:600;}
+
+
+  .tag{
+    flex:none;
+    align-self:flex-start;
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--k-mono); font-size:10.5px; font-weight:500; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--w-3);
+  }
+  .tag::before{content:""; width:14px; height:8px; background:#91D4FF; border-radius:2px;}
+  h1{
+    flex:none;
+    margin:0; text-align:left;
+    font-family:var(--k-sans);
+    font-size:clamp(22px,7.5cqi,30px);
+    font-weight:800; letter-spacing:-.03em; line-height:1.02;
+    color:var(--w-1);
+  }
+
+
+  .hero{
+    position:relative; overflow:hidden;
+    flex:none;
+    display:flex; flex-direction:column; justify-content:center;
+    min-height:clamp(110px,24cqb,170px);
+    padding:clamp(16px,3cqb,24px) clamp(14px,4.4cqi,20px);
+    border-radius:11px;
+    background:
+      radial-gradient(95% 90% at 8% 0%, rgba(255,255,255,.42), transparent 58%),
+      linear-gradient(165deg, #A6DEFF 0%, #91D4FF 55%, #7CC6F6 100%);
+    box-shadow:0 16px 34px rgba(0,0,0,.42);
+    color:var(--ink);
+    text-align:left;
+  }
+  .hero > *{position:relative; z-index:2;}
+  .free-label{
+    font-family:var(--k-mono); font-size:10.5px; letter-spacing:.14em;
+    text-transform:uppercase; color:rgba(0,46,88,.66);
+    margin-bottom:5px;
+  }
+  .free{
+    font-size:clamp(30px,11cqi,46px);
+    font-weight:800; letter-spacing:-.03em; line-height:1.06;
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+  }
+  .sub{
+    margin-top:8px;
+    font-family:var(--k-mono); font-size:11px; letter-spacing:.02em;
+    color:rgba(0,46,88,.72);
+  }
+
+
+  .bar{
+    flex:none;
+    height:11px; overflow:hidden; border-radius:99px;
+    background:rgba(255,255,255,.13);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.10);
+  }
+  .bar i{
+    display:block; height:100%; width:0; border-radius:inherit;
+    background:linear-gradient(90deg, #91D4FF 0%, #007CFF 100%);
+    transition:width .5s ease;
+  }
+
+
+  .stats{flex:none; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0 18px; border-top:1px solid rgba(255,255,255,.14);}
+  .stat{
+    min-width:0;
+    padding:clamp(8px,1.8cqb,12px) 2px;
+  }
+  .stat span{display:block; font-family:var(--k-mono); font-size:10px; letter-spacing:.02em; color:rgba(255,255,255,.5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .stat b{display:block; margin-top:4px; font-size:clamp(15px,4.8cqi,18px); font-weight:800; color:#FFFFFF; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+
+  .sess{
+    flex:none; min-width:0;
+    padding:clamp(8px,1.8cqb,12px) 2px 2px;
+    border-top:1px solid rgba(255,255,255,.14);
+  }
+  .sess-head{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:9px; min-width:0;}
+  .sess-head span{font-family:var(--k-mono); font-size:10px; letter-spacing:.08em; color:rgba(255,255,255,.5); white-space:nowrap;}
+  .sess-head em{font-style:normal; font-family:var(--k-mono); font-size:10px; color:rgba(255,255,255,.35); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .sess-list{display:grid; gap:8px;}
+  .sess-row{display:flex; align-items:center; gap:8px; min-width:0;}
+  .sess-row .rank{flex:none; width:12px; font-family:var(--k-mono); font-size:10px; font-weight:700; color:#00A1FF;}
+  .sname{flex:1 1 auto; min-width:0; font-size:12px; font-weight:600; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .strack{flex:none; width:56px; height:7px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden;}
+  .strack i{display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg, #91D4FF 0%, #007CFF 100%); transition:width .5s ease;}
+  .smeta{flex:none; min-width:48px; text-align:right; font-family:var(--k-mono); font-size:10px; color:rgba(255,255,255,.5); font-variant-numeric:tabular-nums;}
+  .sess-empty{font-family:var(--k-mono); font-size:10.5px; color:rgba(255,255,255,.5);}
+
+
+  .foot{
+    margin-top:auto; flex:none;
+    display:flex; flex-direction:column; gap:10px;
+    min-width:0;
+  }
+  button{
+    width:100%;
+    border:none; border-radius:999px;
+    padding:10px 18px;
+    background:linear-gradient(172deg, #FFFFFF 0%, #F7FBFF 100%);
+    color:var(--blue-deep);
+    font:650 13px var(--k-sans);
+    cursor:pointer;
+    box-shadow:0 10px 24px rgba(0,0,0,.4);
+    transition:transform .16s cubic-bezier(.3,1.5,.5,1), box-shadow .25s, opacity .15s;
+  }
+  button:hover{transform:scale(1.02); box-shadow:0 14px 30px rgba(0,0,0,.48);}
+  button:active{transform:scale(.97);}
+  button[disabled]{opacity:.55; cursor:wait; transform:none;}
+  .hint{
+    min-width:0; text-align:center;
+    font-family:var(--k-mono); font-size:10px; letter-spacing:.02em;
+    color:var(--w-3);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  @container (max-height: 430px){
+    .card{--pady:12px; gap:8px;}
+    h1{font-size:22px;}
+    .hero{min-height:96px; padding:12px 14px;}
+    .free{font-size:28px;}
+    .stat{padding:8px 10px;}
+    button{padding:8px 16px;}
+    .sess{display:none;}
+  }
+
+  .tag{display:none !important;}
+  #go { color: #002E58 !important; }
+
+  .card { background: #070A0E !important; box-shadow: none !important; }
+  .hero { background: #91D4FF !important; box-shadow: none !important; }
+  .bar { box-shadow: none !important; }
+  .bar i { background: #91D4FF !important; }
+  .strack i { background: #007CFF !important; }
+  button { background: #91D4FF !important; color: #FFFFFF !important; box-shadow: none !important; }
+  button:hover { background: #91D4FF !important; box-shadow: none !important; }
+
+  h1 { font-size: 22px !important; font-weight: 800; line-height: 1.08; letter-spacing: 0; }
+  .tc, .tag, .free-label, .sub, .stat span, .sess-head span, .sess-head em, .sess-row .rank, .smeta, .sess-empty, .hint { font-size: 12px !important; line-height: 1.4; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+
+</head>
+<body>
+<main class="card" aria-label="电脑剩余空间">
+  <div class="texture" id="texture" aria-hidden="true"></div>
+  <span class="tag">REAL LOCAL DATA</span>
+  <h1>剩余空间</h1>
+  <section class="hero">
+    <div class="free-label">可用空间</div>
+    <div class="free" id="free">—</div>
+    <div class="sub" id="summary">等待首次扫描</div>
+  </section>
+  <div class="bar" aria-label="已使用比例"><i id="bar"></i></div>
+  <section class="stats">
+    <div class="stat"><span>总容量</span><b id="total">—</b></div>
+    <div class="stat"><span>已使用</span><b id="used">—</b></div>
+  </section>
+  <section class="sess" aria-label="空间去向（常用目录）">
+    <div class="sess-head"><span>空间去向 · 常用目录</span><em>真实目录大小</em></div>
+    <div class="sess-list" id="hotList">
+      <div class="sess-empty">扫描后显示空间都花在哪</div>
+    </div>
+  </section>
+  <div class="foot">
+    <button type="button" id="go">扫描</button>
+    <span class="hint" id="hint">数据来自本机 Python 标准库</span>
+  </div>
+</main>
+<script>
+"use strict";
+(function () {
+    "use strict";
+    var CELL_W = 8, CELL_H = 13;
+    var texture = document.getElementById("texture");
+    texture.style.setProperty("--cellW", CELL_W + "px");
+    texture.style.setProperty("--cellH", CELL_H + "px");
+    var POOLS = [
+        [" ", " ", " "],
+        ["-", "·", " ", " "],
+        ["+", "/", "(", ")"],
+        ["(", ")", "*", "/", "+"],
+        ["*", "▲", "#", "(", ")"],
+        ["#", "●", "▲", "*", "K"]
+    ];
+    function classFor(band, ch) {
+        if (ch === "K")
+            return "tc tk";
+        if (band <= 1)
+            return "tc t1";
+        if (band === 2)
+            return "tc t2";
+        if (band <= 4)
+            return "tc t3";
+        return "tc t4";
+    }
+    var cells = [];
+    function build() {
+        var W = document.documentElement.clientWidth;
+        var H = document.documentElement.clientHeight;
+        if (W < 40 || H < 40)
+            return;
+        var cols = Math.max(6, Math.floor(W / CELL_W));
+        var rows = Math.max(4, Math.floor(H / CELL_H));
+        texture.innerHTML = "";
+        cells = [];
+        for (var y = 0; y < rows; y++) {
+            var row = document.createElement("div");
+            row.className = "trow";
+            for (var x = 0; x < cols; x++) {
+                var gx = x / Math.max(1, cols - 1), gy = y / Math.max(1, rows - 1);
+                var d = gy * 0.72 + gx * 0.15;
+                d += Math.sin(gx * 8 + gy * 5) * 0.05;
+                d += (Math.random() - 0.5) * 0.1;
+                var band = Math.max(0, Math.min(5, Math.floor(d * 6)));
+                var pool = POOLS[band];
+                var ch = pool[Math.floor(Math.random() * pool.length)];
+                var s = document.createElement("i");
+                s.className = classFor(band, ch);
+                s.textContent = ch;
+                row.appendChild(s);
+                if (band > 0)
+                    cells.push({ el: s, band: band });
+            }
+            texture.appendChild(row);
+        }
+    }
+    setInterval(function () {
+        if (!cells.length)
+            return;
+        var n = Math.max(1, Math.floor(cells.length * 0.01));
+        for (var i = 0; i < n; i++) {
+            var c = cells[Math.floor(Math.random() * cells.length)];
+            var pool = POOLS[c.band];
+            var ch = pool[Math.floor(Math.random() * pool.length)];
+            c.el.textContent = ch;
+            c.el.className = classFor(c.band, ch);
+        }
+    }, 420);
+    var rebuildT = 0;
+    function scheduleBuild() { clearTimeout(rebuildT); rebuildT = setTimeout(build, 120); }
+    if (typeof ResizeObserver !== "undefined") {
+        new ResizeObserver(scheduleBuild).observe(document.documentElement);
+    }
+    window.addEventListener("resize", scheduleBuild);
+    setTimeout(build, 40);
+})();
+</script>
+<script>
+"use strict";
+(function () {
+    "use strict";
+    var el = function (id) { return document.getElementById(id); };
+    function bytes(value) {
+        var n = Number(value || 0), units = ["B", "KB", "MB", "GB", "TB"], i = 0;
+        while (n >= 1024 && i < units.length - 1) {
+            n /= 1024;
+            i += 1;
+        }
+        return (i < 3 ? Math.round(n) : n.toFixed(1)) + " " + units[i];
+    }
+    function renderHotspots(h) {
+        var box = el("hotList");
+        if (!box || !h || !Array.isArray(h.top) || !h.top.length)
+            return;
+        box.innerHTML = "";
+        h.top.forEach(function (row) {
+            var line = document.createElement("div");
+            line.className = "sess-row";
+            var name = document.createElement("span");
+            name.className = "sname";
+            name.textContent = row.label || "—";
+            var track = document.createElement("span");
+            track.className = "strack";
+            var fill = document.createElement("i");
+            fill.style.width = Math.max(4, Math.min(100, Number(row.pct || 0))) + "%";
+            track.appendChild(fill);
+            var meta = document.createElement("span");
+            meta.className = "smeta";
+            meta.textContent = Number(row.gb || 0).toFixed(1) + " GB";
+            line.appendChild(name);
+            line.appendChild(track);
+            line.appendChild(meta);
+            box.appendChild(line);
+        });
+    }
+    function render(data) {
+        if (!data || !Number.isFinite(Number(data.totalBytes)))
+            return;
+        el("free").textContent = bytes(data.freeBytes);
+        el("total").textContent = bytes(data.totalBytes);
+        el("used").textContent = bytes(data.usedBytes);
+        el("bar").style.width = Math.max(0, Math.min(100, Number(data.usedPct || 0))) + "%";
+        el("summary").textContent = (data.platform || "") + " · " + (data.mount || data.pathLabel || "") + " · " + Number(data.usedPct || 0).toFixed(1) + "% 已使用";
+        renderHotspots(data.hotspots);
+    }
+    var button = el("go");
+    function busy(on) { button.disabled = on; button.textContent = on ? "扫描中…" : "重新扫描"; }
+    button.addEventListener("click", function () {
+        if (!window.DaimonWidget || !window.DaimonWidget.emit)
+            return;
+        busy(true);
+        window.DaimonWidget.emit("submit", { reason: "storage-refresh" });
+    });
+    var widget = window.DaimonWidget;
+    if (widget) {
+        render(widget.data && widget.data.main);
+        if (widget.onDataChange)
+            widget.onDataChange(function (data) { busy(false); render(data && data.main); });
+        if (widget.onStatusChange)
+            widget.onStatusChange(function (status) { busy(status === "running"); });
+    }
+})();
+</script>
+</body>
+</html>

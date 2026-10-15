@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_964df7b3-2583-473f-8554-3bca241fd841",
+    "title": "Kimi",
+    "description": "Kimi 默认桌面宠物",
+    "kind": "pet",
+    "capabilities": [
+      "conversations.status",
+      "conversations.open",
+      "conversations.send",
+      "conversations.cancel"
+    ],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "createdAt": "2026-09-08T14:47:52.092Z",
+    "updatedAt": "2026-09-20T17:12:36.411Z"
+  }
+}

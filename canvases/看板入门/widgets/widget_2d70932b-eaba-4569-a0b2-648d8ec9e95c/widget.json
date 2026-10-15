@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_2d70932b-eaba-4569-a0b2-648d8ec9e95c",
+    "title": "搭建你的第一个看板",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "dashboard-tutorial:zh-CN:widget:starter-banner",
+      "sourceBundleId": "bundle_dashboard-tutorial-20"
+    },
+    "createdAt": "2026-10-13T02:47:05.248Z",
+    "updatedAt": "2026-10-13T02:47:05.248Z"
+  }
+}

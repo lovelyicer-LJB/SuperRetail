@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "kimi",
+  "name": "Kimi",
+  "description": "Kimi 默认桌面宠物",
+  "renderer": "rive",
+  "rive": {
+    "file": "pet.riv",
+    "stateMachine": "KimiAvator_homepage"
+  },
+  "theme": {
+    "bubble": {
+      "background": "#445F7E",
+      "foreground": "#FFFFFF",
+      "border": "#6D829A"
+    }
+  },
+  "provenance": {
+    "provider": "manual",
+    "summary": "Kimi desktop default"
+  }
+}

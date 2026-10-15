@@ -1,0 +1,139 @@
+/**
+ * LineChartV2C —— Pixso Charts | 图表页 Line chart v2
+ * (节点 63:543, 1536×457, 透明底)
+ *
+ * 设计值（DSL + SVG 导出实测）:
+ *  - 网格线 5 条 y=8/80/152/224/296, x36..1536, Gray-9 #1E1E24
+ *  - Y 轴 x35.5 y0..362 / X 轴 y362 x36..1536, Gray-6 #5B5B65
+ *  - 竖参考线 x558.5 / x1081.5, y8..361, Gray-7 #40404A
+ *  - Y 标签 3万~1万: Text 14/16 Gray-4 #8A8A98 @ 左端
+ *  - 月份标签 1月~12月 @ y381, Text 14/16 Gray-3 #A9A9B7 opacity .6
+ *  - 曲线区 1419.53×282 @ (36,48): 10 条贝塞尔彩带 strokeWidth 5,
+ *    蓝/紫渐变 + #B30DFF #E861A3 #F4B067 #F65B4A #DA155C #F0B3CE #FFF #F4B333
+ *  - 辉光 2 团 1034×540 (曲线层之上): 紫 rgba(97,30,215,.3) 中心 (-209,192),
+ *    红 rgba(215,30,30,.3) 中心 (667,186), 径向 rx517 ry270
+ *  - 迷你柱图 1500×42 @ y415: 66 柱, Gray-9 / rgba(72,7,234,.37) / Persian blue #4807EA
+ */
+
+__PATHS_TS__
+
+__COLORS_TS__
+
+__COLS_TS__
+
+__DATES_TS__
+
+const FONT = 'HarmonyOS Sans SC, Noto Sans SC, sans-serif'
+
+/** Y 轴标签: [文本, 中心 y]（原 10к~30к → 中文计数） */
+const Y_LABELS: Array<[string, number]> = [
+  ['3万', 8],
+  ['2.5万', 80],
+  ['2万', 152],
+  ['1.5万', 224],
+  ['1万', 296],
+]
+
+export function LineChartV2C() {
+  return (
+    <div className="sr-lv2 relative h-full w-full select-none overflow-hidden font-sans" style={{ containerType: 'size' }}>
+      <svg viewBox="0 0 1536 457" className="h-full w-full" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="sr-lv2-g1" gradientUnits="userSpaceOnUse" x1={36} y1={0} x2={1455.53} y2={0}>
+            <stop offset={0} stopColor="#0508E3" />
+            <stop offset={1} stopColor="#0586E3" />
+          </linearGradient>
+          <linearGradient id="sr-lv2-g2" gradientUnits="userSpaceOnUse" x1={36} y1={0} x2={1455.53} y2={0}>
+            <stop offset={0} stopColor="#4F07EF" />
+            <stop offset={1} stopColor="#0764EF" />
+          </linearGradient>
+          <radialGradient
+            id="sr-lv2-glow1"
+            gradientUnits="userSpaceOnUse"
+            cx={0}
+            cy={0}
+            r={517}
+            gradientTransform="translate(-245,144) scale(1,0.5222)"
+          >
+            <stop offset={0} stopColor="rgba(97,30,215,0.3)" />
+            <stop offset={1} stopColor="rgba(42,14,91,0)" />
+          </radialGradient>
+          <radialGradient
+            id="sr-lv2-glow2"
+            gradientUnits="userSpaceOnUse"
+            cx={0}
+            cy={0}
+            r={517}
+            gradientTransform="translate(631,138) scale(1,0.5222)"
+          >
+            <stop offset={0} stopColor="rgba(215,30,30,0.3)" />
+            <stop offset={1} stopColor="rgba(209,63,63,0)" />
+          </radialGradient>
+        </defs>
+
+        {/* 网格线 5 条 */}
+        {[8, 80, 152, 224, 296].map((y) => (
+          <line key={y} className="sr-lv2-fade" x1={36} y1={y} x2={1536} y2={y} stroke="#1E1E24" strokeWidth={1} />
+        ))}
+        {/* 竖参考线 + 坐标轴 */}
+        <line className="sr-lv2-fade" x1={558.5} y1={8} x2={558.5} y2={361} stroke="#40404A" strokeWidth={1} />
+        <line className="sr-lv2-fade" x1={1081.5} y1={8} x2={1081.5} y2={361} stroke="#40404A" strokeWidth={1} />
+        <line className="sr-lv2-fade" x1={35.5} y1={0} x2={35.5} y2={362} stroke="#5B5B65" strokeWidth={1} />
+        <line className="sr-lv2-fade" x1={36} y1={362} x2={1536} y2={362} stroke="#5B5B65" strokeWidth={1} />
+
+        {/* Y 轴标签 */}
+        {Y_LABELS.map(([t, cy]) => (
+          <text key={t} className="sr-lv2-fade" x={0} y={cy} dominantBaseline="central" fontSize={14} fontWeight={400} fill="#8A8A98" style={{ fontFamily: FONT }}>
+            {t}
+          </text>
+        ))}
+        {/* 月份标签 */}
+        {MONTHS.map(([t, cx]) => (
+          <text key={t} className="sr-lv2-fade" x={cx} y={389.5} textAnchor="middle" dominantBaseline="central" fontSize={14} fontWeight={400} fill="#A9A9B7" opacity={0.6} style={{ fontFamily: FONT }}>
+            {t}
+          </text>
+        ))}
+
+        {/* 曲线层 @ (36,48) */}
+        <g transform="translate(36,48)">
+          {CURVES.map((d, i) => (
+            <g key={i} className="sr-lv2-clip" style={{ animationDelay: `${i * 90}ms` }}>
+              <path
+                d={d}
+                fill="none"
+                stroke={CURVE_STYLES[i].stroke}
+                strokeWidth={5}
+                strokeLinejoin="round"
+                style={CURVE_STYLES[i].glow ? { filter: `drop-shadow(0 24px 40px ${CURVE_STYLES[i].glow})` } : undefined}
+              />
+            </g>
+          ))}
+          {/* 辉光 2 团（曲线之上） */}
+          <ellipse className="sr-lv2-glow" cx={272} cy={144} rx={517} ry={270} fill="url(#sr-lv2-glow1)" />
+          <ellipse className="sr-lv2-glow" cx={1148} cy={138} rx={517} ry={270} fill="url(#sr-lv2-glow2)" style={{ animationDelay: '.15s' }} />
+        </g>
+
+        {/* 迷你柱图 @ y415 */}
+        <g transform="translate(0,415)">
+          {COLUMNS.map(([x, y, w, h, fill, op], i) => (
+            <rect key={i} className="sr-lv2-col" x={x} y={y} width={w} height={h} fill={fill} opacity={op} style={{ animationDelay: `${300 + i * 12}ms` }} />
+          ))}
+        </g>
+      </svg>
+      <style>{`
+        .sr-lv2-clip { clip-path: inset(-30% 100% -30% 0); animation: sr-lv2-reveal 1s cubic-bezier(.22,1,.36,1) forwards; }
+        @keyframes sr-lv2-reveal { to { clip-path: inset(-30% -1% -30% 0); } }
+        .sr-lv2-fade { opacity: 0; animation: sr-lv2-fadein .7s ease-out .2s forwards; }
+        @keyframes sr-lv2-fadein { to { opacity: 1; } }
+        .sr-lv2-glow { opacity: 0; animation: sr-lv2-fadein 1.2s ease-out forwards; }
+        .sr-lv2-col { transform: scaleY(0); transform-origin: bottom; transform-box: fill-box; animation: sr-lv2-grow .5s cubic-bezier(.22,1,.36,1) forwards; }
+        @keyframes sr-lv2-grow { to { transform: scaleY(1); } }
+        @media (prefers-reduced-motion: reduce) {
+          .sr-lv2-clip { animation: none !important; clip-path: none; }
+          .sr-lv2-fade, .sr-lv2-glow { animation: none !important; opacity: 1; }
+          .sr-lv2-col { animation: none !important; transform: none; }
+        }
+      `}</style>
+    </div>
+  )
+}

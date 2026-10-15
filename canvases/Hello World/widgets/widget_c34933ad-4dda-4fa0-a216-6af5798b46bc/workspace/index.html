@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>番茄钟</title>
+<style>
+  :root{
+
+    --blue:#007CFF; --blue-deep:#0066D6; --navy:#002E58;
+    --w-1:rgba(255,255,255,.92); --w-2:rgba(255,255,255,.68); --w-3:rgba(255,255,255,.5);
+    --ink:#000000;
+    --ink-2:rgba(0,0,0,.60); --ink-3:rgba(0,0,0,.44);
+    --k-sans:var(--kimi-font-sans,"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","MiSans","Microsoft YaHei",sans-serif);
+    --k-mono:var(--kimi-font-mono,"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace);
+    --k-r:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--k-sans); color:var(--ink); background:transparent; overflow:hidden; font-size:13px; -webkit-font-smoothing:antialiased;}
+  button{font:inherit;}
+
+
+  .card{
+    container-type:size;
+    --padx:clamp(16px,5cqi,24px); --pady:clamp(14px,2.8cqb,20px);
+    position:relative; height:100vh;
+    border-radius:var(--k-r); overflow:hidden;
+    padding:var(--pady) var(--padx);
+    border:1px solid rgba(0,0,0,.08);
+    background:
+      radial-gradient(150% 100% at 0% 0%, rgba(255,255,255,.9), transparent 62%),
+      linear-gradient(172deg, #F7F8FA 0%, #ECEEF1 100%);
+    display:flex; flex-direction:column;
+  }
+  .card::after{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.4;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .card > *{position:relative; z-index:1;}
+
+
+  header{flex:none;}
+  .tag-row{
+    display:flex; align-items:center; justify-content:flex-start; gap:10px;
+    min-width:0; margin-bottom:6px;
+  }
+  .pill-tag{
+    flex:none;
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--k-mono); font-size:10.5px; font-weight:500; letter-spacing:.16em;
+    text-transform:uppercase; color:rgba(0,0,0,.46); white-space:nowrap;
+  }
+  .pill-tag::before{content:""; width:14px; height:8px; background:#007CFF; border-radius:2px;}
+  .title-row{
+    display:flex; flex-direction:column; align-items:flex-start; gap:3px;
+    min-width:0; margin-bottom:clamp(10px,2cqb,16px); text-align:left;
+  }
+  .title{
+    font-family:var(--k-sans);
+    font-size:clamp(22px,7.5cqi,30px);
+    font-weight:800; letter-spacing:-.03em; line-height:1.02;
+    color:#000000;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+  }
+  .rounds{
+    font-family:var(--k-mono); font-size:11px; letter-spacing:.02em;
+    color:rgba(0,0,0,.5); white-space:nowrap; flex:none;
+    font-variant-numeric:tabular-nums;
+  }
+
+
+  .seg{
+    flex:none;
+    display:flex; gap:6px;
+    justify-content:flex-start;
+    margin-bottom:clamp(10px,2cqb,16px);
+    flex-wrap:wrap;
+  }
+  .seg button{
+    flex:0 1 auto; min-width:0; min-height:29px;
+    border:1px solid rgba(0,0,0,.16);
+    border-radius:999px;
+    background:rgba(255,255,255,.7);
+    color:rgba(0,0,0,.55);
+    font-family:var(--k-mono); font-size:11px; letter-spacing:.02em;
+    padding:5px 13px;
+    cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .seg button:hover{border-color:rgba(0,0,0,.36); color:#000;}
+  .seg button[aria-selected="true"]{
+    background:linear-gradient(165deg, #00A1FF 0%, #007CFF 60%, #0066D6 100%);
+    border-color:transparent;
+    color:#FFFFFF;
+    font-weight:650;
+    box-shadow:0 8px 18px rgba(0,124,255,.3);
+  }
+
+
+  .stage{
+    position:relative;
+    flex:1; min-height:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:10px;
+    padding:clamp(10px,2cqb,16px) 8px;
+    color:var(--ink);
+  }
+  .stage > *{position:relative; z-index:2;}
+  .ring-wrap{
+    position:relative;
+    width:clamp(120px,42cqb,190px);
+    max-width:100%;
+  }
+  .ring-wrap svg{display:block; width:100%; height:auto;}
+  .ring-track{stroke:#E2E5E9;}
+  .ring-bar{
+    stroke:var(--blue);
+    stroke-linecap:round;
+    transition:stroke-dashoffset .2s linear;
+  }
+  .ring-center{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:4px; text-align:center;
+    padding:0 14%;
+  }
+  .time{
+    font-size:clamp(30px,10cqb,46px);
+    line-height:1.02; font-weight:800; letter-spacing:-.03em;
+    font-variant-numeric:tabular-nums;
+    color:var(--ink);
+  }
+  .status{
+    color:var(--ink-3);
+    font-family:var(--k-mono); font-size:11px; letter-spacing:.04em;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+  }
+  .status.flash{
+    color:var(--blue-deep);
+    font-weight:700;
+    animation:pulse .5s ease-in-out 2;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;}
+    50%{opacity:.35;}
+  }
+
+
+  .side{flex:none; margin-top:clamp(10px,2.2cqb,16px); display:flex; justify-content:center;}
+  .btns{
+    display:flex; gap:8px;
+    width:100%; max-width:250px;
+  }
+  .btns button{
+    flex:1; min-width:0; min-height:36px;
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:13px; cursor:pointer; white-space:nowrap;
+  }
+  .btn-primary{
+    background:linear-gradient(165deg, #00A1FF 0%, #007CFF 60%, #0066D6 100%);
+    color:#FFFFFF;
+    border:none;
+    font-weight:700;
+    box-shadow:0 10px 24px rgba(0,124,255,.32);
+    transition:transform .16s cubic-bezier(.3,1.5,.5,1), box-shadow .25s;
+  }
+  .btn-primary:hover{transform:scale(1.04); box-shadow:0 14px 30px rgba(0,124,255,.4);}
+  .btn-primary:active{transform:scale(.96);}
+  .btn-ghost{
+    background:rgba(255,255,255,.7);
+    color:rgba(0,0,0,.6);
+    border:1px solid rgba(0,0,0,.16);
+    transition:background .15s, border-color .15s;
+  }
+  .btn-ghost:hover{background:#FFFFFF; border-color:rgba(0,0,0,.34);}
+
+
+  .stats{
+    flex:none;
+    margin-top:clamp(10px,2.2cqb,16px);
+    padding-top:clamp(10px,2cqb,14px);
+    border-top:1px solid rgba(0,0,0,.10);
+    display:flex; flex-direction:column; gap:9px; align-items:center;
+  }
+  .dots{display:flex; gap:6px; flex-wrap:wrap; justify-content:center; min-height:12px;}
+  .dots i{
+    width:11px; height:11px; border-radius:3px;
+    background:rgba(0,0,0,.04);
+    border:1px solid rgba(0,0,0,.16);
+  }
+  .dots i.on{background:#007CFF; border-color:#007CFF;}
+  .stat-grid{display:flex; gap:8px; width:100%;}
+  .stat{
+    flex:1;
+    background:transparent;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    padding:2px 6px;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    min-width:0;
+  }
+  .stat b{font-size:18px; font-weight:800; letter-spacing:-.01em; font-variant-numeric:tabular-nums; color:var(--ink);}
+  .stat span{font-family:var(--k-mono); font-size:10px; letter-spacing:.02em; color:var(--ink-3); white-space:nowrap;}
+  .tip{font-size:11px; color:rgba(0,0,0,.45); text-align:center;}
+
+
+  @container (max-width: 245px){
+    .seg, .rounds{display:none;}
+    .title-row{margin-bottom:8px;}
+  }
+  @container (max-height: 470px){
+    .stats{display:none;}
+    .card{--pady:12px;}
+    .title{font-size:22px;}
+    .seg{margin-bottom:8px;}
+    .ring-wrap{width:min(132px,100%);}
+    .time{font-size:32px;}
+  }
+
+  .tag-row{display:none !important;}
+
+  .card{
+    border:0;
+    background:
+      radial-gradient(90% 85% at 4% 0%, rgba(255,255,255,.5), transparent 54%),
+      linear-gradient(165deg, #A6DEFF 0%, #91D4FF 55%, #7CC6F6 100%);
+  }
+  .title{color:#002E58;}
+  .rounds{color:rgba(0,46,88,.55);}
+  .seg button{
+    background:rgba(255,255,255,.5);
+    border:1px solid rgba(0,46,88,.16);
+    color:rgba(0,46,88,.72);
+  }
+  .seg button:hover{background:rgba(255,255,255,.75); border-color:rgba(0,46,88,.3); color:#002E58;}
+  .seg button[aria-selected="true"]{
+    background:linear-gradient(172deg, #FFFFFF 0%, #F7FBFF 100%);
+    border-color:transparent;
+    color:#0066D6;
+    font-weight:650;
+    box-shadow:0 8px 18px rgba(0,70,140,.18);
+  }
+  .ring-track{stroke:rgba(255,255,255,.55);}
+  .ring-bar{stroke:#007CFF;}
+  .time{color:#002E58;}
+  .status{color:rgba(0,46,88,.58);}
+  .status.flash{color:#0066D6;}
+  .btn-primary{
+    background:linear-gradient(165deg, #00A1FF 0%, #007CFF 60%, #0066D6 100%);
+    color:#FFFFFF;
+    box-shadow:0 10px 24px rgba(0,102,214,.28);
+  }
+  .btn-primary:hover{box-shadow:0 14px 30px rgba(0,102,214,.36);}
+  .btn-ghost{
+    background:rgba(255,255,255,.5);
+    color:#002E58;
+    border:1px solid rgba(0,46,88,.18);
+  }
+  .btn-ghost:hover{background:rgba(255,255,255,.8); border-color:rgba(0,46,88,.34);}
+  .stats{border-top-color:rgba(0,46,88,.16);}
+  .dots i{background:rgba(255,255,255,.45); border-color:rgba(0,46,88,.2);}
+  .dots i.on{background:#007CFF; border-color:#007CFF;}
+  .stat b{color:#002E58;}
+  .stat span{color:rgba(0,46,88,.5);}
+  .tip{color:rgba(0,46,88,.5);}
+
+  .seg button,
+  .btn-primary,
+  .btn-ghost {
+    border: 0 !important;
+    box-shadow: none !important;
+    background-image: none !important;
+  }
+  .seg button { background: rgba(0,46,88,.14) !important; color: #002E58 !important; }
+  .seg button[aria-selected="true"] { background: #002E58 !important; color: #FFFFFF !important; }
+  .seg button:hover { background: rgba(0,46,88,.22) !important; border: 0 !important; }
+  .btn-primary,
+  .btn-ghost { background: #002E58 !important; color: #FFFFFF !important; }
+  .btn-primary:hover,
+  .btn-ghost:hover { background: #002E58 !important; box-shadow: none !important; }
+  .ring-track,
+  .ring-bar { stroke: rgba(0,46,88,.30) !important; }
+
+  .card { background: #91D4FF !important; box-shadow: none !important; }
+  .card * { box-shadow: none !important; }
+
+  .title, .time, .stat b, .status.flash { color: #000000 !important; }
+  .rounds, .status, .stat span, .tip { color: rgba(0,0,0,.58) !important; }
+  .seg button { background: rgba(0,0,0,.14) !important; color: #000000 !important; }
+  .seg button:hover { background: rgba(0,0,0,.22) !important; }
+  .seg button[aria-selected="true"],
+  .btn-primary, .btn-ghost,
+  .btn-primary:hover, .btn-ghost:hover { background: #000000 !important; color: #FFFFFF !important; }
+  .ring-track, .ring-bar { stroke: rgba(0,0,0,.30) !important; }
+  .stats { border-top-color: rgba(0,0,0,.16) !important; }
+  .dots i { border-color: rgba(0,0,0,.20) !important; }
+
+  .title { font-size: 22px !important; font-weight: 800; line-height: 1.08; letter-spacing: 0; }
+  .pill-tag, .rounds, .seg button, .status, .stat span, .tip { font-size: 12px !important; line-height: 1.4; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+
+</head>
+<body>
+<main class="card" aria-label="番茄钟">
+  <header>
+    <div class="tag-row">
+      <span class="pill-tag">FOCUS</span>
+    </div>
+    <div class="title-row">
+      <span class="title">番茄钟</span>
+      <span class="rounds">今日第 <span id="roundN">0</span> 轮</span>
+    </div>
+  </header>
+
+  <div class="seg" role="tablist" aria-label="模式">
+    <button type="button" role="tab" data-mode="focus" aria-selected="true">专注 25</button>
+    <button type="button" role="tab" data-mode="short" aria-selected="false">短休 5</button>
+    <button type="button" role="tab" data-mode="long" aria-selected="false">长休 15</button>
+  </div>
+
+  <div class="stage">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="ring-track" cx="100" cy="100" r="88" fill="none" stroke-width="8" />
+        <circle id="ringBar" class="ring-bar" cx="100" cy="100" r="88" fill="none" stroke-width="8"
+          transform="rotate(-90 100 100)" />
+      </svg>
+      <div class="ring-center">
+        <div class="time" id="timeText">25:00</div>
+        <div class="status" id="statusText">准备开始</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="btns">
+      <button type="button" class="btn-primary" id="startBtn">开始</button>
+      <button type="button" class="btn-ghost" id="resetBtn">重置</button>
+    </div>
+  </div>
+
+  <section class="stats" aria-label="今日统计">
+    <div class="dots" id="dots"></div>
+    <div class="stat-grid">
+      <div class="stat"><b id="statRounds">0</b><span>今日轮数</span></div>
+      <div class="stat"><b id="statMin">0</b><span>专注分钟</span></div>
+    </div>
+    <div class="tip" id="tipText">攒满 4 轮，奖励一次长休</div>
+  </section>
+
+</main>
+
+<script>
+"use strict";
+(function () {
+    "use strict";
+    var MODES = {
+        focus: { seconds: 25 * 60, label: "专注" },
+        short: { seconds: 5 * 60, label: "短休" },
+        long: { seconds: 15 * 60, label: "长休" }
+    };
+    var CIRC = 2 * Math.PI * 88;
+    var ringBar = document.getElementById("ringBar");
+    var timeText = document.getElementById("timeText");
+    var statusText = document.getElementById("statusText");
+    var startBtn = document.getElementById("startBtn");
+    var resetBtn = document.getElementById("resetBtn");
+    var roundN = document.getElementById("roundN");
+    var segBtns = Array.prototype.slice.call(document.querySelectorAll(".seg button"));
+    ringBar.setAttribute("stroke-dasharray", String(CIRC));
+    var mode = "focus";
+    var total = MODES.focus.seconds;
+    var remaining = total;
+    var running = false;
+    var endTime = 0;
+    var timer = null;
+    var flashTimer = null;
+    function todayKey() {
+        var d = new Date();
+        var m = String(d.getMonth() + 1);
+        var day = String(d.getDate());
+        if (m.length < 2)
+            m = "0" + m;
+        if (day.length < 2)
+            day = "0" + day;
+        return "daimon_onboarding_pomo_" + d.getFullYear() + "-" + m + "-" + day;
+    }
+    function getRounds() {
+        try {
+            var v = parseInt(localStorage.getItem(todayKey()), 10);
+            return isNaN(v) || v < 0 ? 0 : v;
+        }
+        catch (e) {
+            return 0;
+        }
+    }
+    function setRounds(n) {
+        try {
+            localStorage.setItem(todayKey(), String(n));
+        }
+        catch (e) { }
+        roundN.textContent = String(n);
+        renderStats();
+    }
+    function getMinutes() {
+        try {
+            var v = parseInt(localStorage.getItem(todayKey() + "_min"), 10);
+            return isNaN(v) || v < 0 ? 0 : v;
+        }
+        catch (e) {
+            return 0;
+        }
+    }
+    function setMinutes(n) {
+        try {
+            localStorage.setItem(todayKey() + "_min", String(n));
+        }
+        catch (e) { }
+    }
+    var dotsEl = document.getElementById("dots");
+    var statRoundsEl = document.getElementById("statRounds");
+    var statMinEl = document.getElementById("statMin");
+    var tipEl = document.getElementById("tipText");
+    function renderStats() {
+        if (!dotsEl)
+            return;
+        var rounds = getRounds();
+        var slots = Math.max(8, Math.ceil(rounds / 4) * 4);
+        if (slots > 12)
+            slots = 12;
+        dotsEl.innerHTML = "";
+        for (var i = 0; i < slots; i++) {
+            var d = document.createElement("i");
+            if (i < rounds)
+                d.className = "on";
+            dotsEl.appendChild(d);
+        }
+        statRoundsEl.textContent = String(rounds);
+        statMinEl.textContent = String(getMinutes());
+        if (rounds === 0)
+            tipEl.textContent = "攒满 4 轮，奖励一次长休";
+        else if (rounds % 4 === 0)
+            tipEl.textContent = "攒满 " + rounds + " 轮了，去长休一下";
+        else
+            tipEl.textContent = "再 " + (4 - rounds % 4) + " 轮就能长休啦";
+    }
+    function fmt(sec) {
+        var s = Math.max(0, Math.ceil(sec));
+        var m = Math.floor(s / 60);
+        var r = s % 60;
+        return (m < 10 ? "0" + m : String(m)) + ":" + (r < 10 ? "0" + r : String(r));
+    }
+    function render() {
+        timeText.textContent = fmt(remaining);
+        var frac = total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 0;
+        ringBar.setAttribute("stroke-dashoffset", String(CIRC * (1 - frac)));
+    }
+    function setStatus(text, flash) {
+        statusText.textContent = text;
+        statusText.classList.remove("flash");
+        if (flashTimer) {
+            clearTimeout(flashTimer);
+            flashTimer = null;
+        }
+        if (flash) {
+            void statusText.offsetWidth;
+            statusText.classList.add("flash");
+            flashTimer = setTimeout(function () {
+                statusText.classList.remove("flash");
+            }, 1600);
+        }
+    }
+    function stopTimer() {
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+    }
+    function complete() {
+        running = false;
+        stopTimer();
+        remaining = 0;
+        render();
+        startBtn.textContent = "开始";
+        if (mode === "focus") {
+            setMinutes(getMinutes() + Math.round(MODES.focus.seconds / 60));
+            setRounds(getRounds() + 1);
+            setStatus("完成 · 喝口水", true);
+        }
+        else {
+            setStatus("完成 · 回来专注", true);
+        }
+        remaining = total;
+        setTimeout(render, 400);
+    }
+    function tick() {
+        remaining = (endTime - Date.now()) / 1000;
+        if (remaining <= 0) {
+            complete();
+            return;
+        }
+        render();
+    }
+    function start() {
+        if (remaining <= 0 || remaining > total)
+            remaining = total;
+        endTime = Date.now() + remaining * 1000;
+        running = true;
+        startBtn.textContent = "暂停";
+        setStatus(mode === "focus" ? "专注中" : MODES[mode].label + "中");
+        stopTimer();
+        timer = setInterval(tick, 200);
+        tick();
+    }
+    function pause() {
+        remaining = Math.max(0, (endTime - Date.now()) / 1000);
+        running = false;
+        stopTimer();
+        startBtn.textContent = "继续";
+        setStatus("已暂停");
+        render();
+    }
+    function reset() {
+        running = false;
+        stopTimer();
+        remaining = total;
+        startBtn.textContent = "开始";
+        setStatus("准备开始");
+        render();
+    }
+    function setMode(next) {
+        mode = next;
+        total = MODES[mode].seconds;
+        segBtns.forEach(function (b) {
+            b.setAttribute("aria-selected", b.dataset.mode === mode ? "true" : "false");
+        });
+        reset();
+    }
+    startBtn.addEventListener("click", function () {
+        if (running)
+            pause();
+        else
+            start();
+    });
+    resetBtn.addEventListener("click", reset);
+    segBtns.forEach(function (b) {
+        b.addEventListener("click", function () {
+            if (b.dataset.mode !== mode)
+                setMode(b.dataset.mode);
+        });
+    });
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden && running)
+            tick();
+    });
+    roundN.textContent = String(getRounds());
+    renderStats();
+    render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>搭建你的第一个看板</title>
+    <style>
+      :root {
+        --ink: #000;
+        --muted: rgba(0, 0, 0, 0.5);
+        --line: rgba(0, 0, 0, 0.09);
+        --radius: var(--kimi-radius-panel, 12px);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        background: transparent;
+        overflow: hidden;
+        font-family: var(
+          --kimi-font-sans,
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "SF Pro Text",
+          "PingFang SC",
+          "MiSans",
+          "Microsoft YaHei",
+          sans-serif
+        );
+        -webkit-font-smoothing: antialiased;
+      }
+      .banner {
+        container-type: size;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        width: 100%;
+        height: 100%;
+        padding: 12px 32px;
+        overflow: hidden;
+        border-radius: var(--radius);
+        background: #ffffff;
+        border: 1px solid var(--line);
+      }
+      .text {
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+        min-width: 0;
+      }
+      h1 {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.15;
+        font-weight: 800;
+        letter-spacing: 0;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      p {
+        margin: 6px 0 0;
+        font-size: 14px;
+        line-height: 1.4;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      @container (max-width: 760px) {
+        .banner {
+          padding: 10px 20px;
+          gap: 14px;
+        }
+        .text {
+          gap: 12px;
+        }
+        h1 {
+          font-size: 22px;
+        }
+        p {
+          font-size: 12px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="banner" aria-label="搭建你的第一个看板">
+      <div class="text">
+        <div>
+          <h1>搭建你的第一个看板</h1>
+          <p>挑一个喜欢的模板 点卡片预览 喜欢就添加到我的看板</p>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

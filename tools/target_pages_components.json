@@ -1,0 +1,270 @@
+{
+ "Widgets & Indicator": [
+  {
+   "node_id": "65:3554",
+   "name": "Income widget / L widget",
+   "group": "",
+   "w": 188,
+   "h": 254,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3576",
+   "name": "Expense widget / L widget",
+   "group": "",
+   "w": 188,
+   "h": 254,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3595",
+   "name": "Cashback widget  / L widget",
+   "group": "",
+   "w": 188,
+   "h": 254,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3619",
+   "name": "Transfers widgets  / L widget",
+   "group": "",
+   "w": 188,
+   "h": 254,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3634",
+   "name": "Progress widget / L widget",
+   "group": "",
+   "w": 296,
+   "h": 184,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3658",
+   "name": "Crypto / L widget",
+   "group": "",
+   "w": 216,
+   "h": 310,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3675",
+   "name": "Portfolio / M widget",
+   "group": "",
+   "w": 184,
+   "h": 220,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3685",
+   "name": "Spend this week / M widget",
+   "group": "",
+   "w": 182,
+   "h": 220,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3712",
+   "name": "Total cashback / M widget",
+   "group": "",
+   "w": 182,
+   "h": 220,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3732",
+   "name": "Spending trend / M widget",
+   "group": "",
+   "w": 184,
+   "h": 220,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3746",
+   "name": "Income / M widget",
+   "group": "",
+   "w": 197,
+   "h": 214,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3763",
+   "name": "Expense / M widget",
+   "group": "",
+   "w": 197,
+   "h": 214,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3780",
+   "name": "Total / M widget",
+   "group": "",
+   "w": 197,
+   "h": 214,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3791",
+   "name": "Progress / S widget",
+   "group": "",
+   "w": 106,
+   "h": 141,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3798",
+   "name": "Expense / S widget",
+   "group": "",
+   "w": 165,
+   "h": 138,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3811",
+   "name": "Category / S widget",
+   "group": "",
+   "w": 166,
+   "h": 157,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3818",
+   "name": "Income / S widget",
+   "group": "",
+   "w": 165,
+   "h": 137,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3830",
+   "name": "Cashback / S widget",
+   "group": "",
+   "w": 165,
+   "h": 138,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3843",
+   "name": "Credit limit / S widget",
+   "group": "",
+   "w": 165,
+   "h": 137,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3855",
+   "name": "Income 2 / XS widget",
+   "group": "",
+   "w": 238,
+   "h": 74,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3864",
+   "name": "Income / XS widget",
+   "group": "",
+   "w": 216,
+   "h": 68,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3872",
+   "name": "Last transfet / XS widget",
+   "group": "",
+   "w": 216,
+   "h": 68,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:3880",
+   "name": "Overall balance / XL widget",
+   "group": "",
+   "w": 1162,
+   "h": 308,
+   "isVariant": false
+  },
+  {
+   "node_id": "65:4019",
+   "name": "Spending trend / XL widget",
+   "group": "",
+   "w": 582,
+   "h": 582,
+   "isVariant": false
+  }
+ ],
+ "Charts | 图表": [
+  {
+   "node_id": "63:450",
+   "name": "Mini indicator",
+   "group": "",
+   "w": 240,
+   "h": 50,
+   "isVariant": false
+  },
+  {
+   "node_id": "63:460",
+   "name": "Indicator",
+   "group": "",
+   "w": 190,
+   "h": 80,
+   "isVariant": false
+  },
+  {
+   "node_id": "63:469",
+   "name": "Pie chart",
+   "group": "",
+   "w": 208,
+   "h": 208,
+   "isVariant": false
+  },
+  {
+   "node_id": "63:478",
+   "name": "Progress chart",
+   "group": "",
+   "w": 388,
+   "h": 73,
+   "isVariant": false
+  },
+  {
+   "node_id": "63:485",
+   "name": "Bubble chart",
+   "group": "",
+   "w": 740,
+   "h": 711.2835693359375,
+   "isVariant": false
+  },
+  {
+   "node_id": "63:543",
+   "name": "Line chart v2",
+   "group": "",
+   "w": 1536,
+   "h": 457,
+   "isVariant": false
+  },
+  {
+   "node_id": "63:658",
+   "name": "Candle chart",
+   "group": "",
+   "w": 1460,
+   "h": 438.5,
+   "isVariant": false
+  },
+  {
+   "node_id": "63:1067",
+   "name": "Line chart v1",
+   "group": "",
+   "w": 1063.0006103515625,
+   "h": 546,
+   "isVariant": false
+  },
+  {
+   "node_id": "63:1187",
+   "name": "Hex graph",
+   "group": "",
+   "w": 1063,
+   "h": 134,
+   "isVariant": false
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_27b1f197-a414-40cb-9109-f1fa7dc512c0",
+    "title": "历史上的今天",
+    "description": "标题置顶，使用 24px 上下安全边距与自适应正文区域。",
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "source": {
+      "sourceId": "hello-canvas-onboarding@16/widget/zh-CN:history-today",
+      "sourceBundleId": "bundle_hello-canvas-onboarding-16"
+    },
+    "createdAt": "2026-09-08T14:49:56.069Z",
+    "updatedAt": "2026-09-08T14:49:56.069Z"
+  }
+}

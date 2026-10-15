@@ -1,0 +1,12 @@
+{
+ "result": {
+  "content": [
+   {
+    "type": "text",
+    "text": "http://localhost:3667/export/5a706f78-78e9-4f74-93aa-a1c24ad1f544.svg\n\nIMPORTANT: This is a temporary direct-download URL for the exported SVG file.\nTo save locally, use a raw HTTP client such as curl or wget:\n  curl -O \"http://localhost:3667/export/5a706f78-78e9-4f74-93aa-a1c24ad1f544.svg\"\n(-O uses the last path segment, e.g. <id>.svg, as the local filename.)\nDo NOT use AI-powered fetch tools (e.g. WebFetch) - they process/summarize the response and will corrupt the binary content.\nThe URL is ephemeral and may expire. Download it IMMEDIATELY."
+   }
+  ]
+ },
+ "jsonrpc": "2.0",
+ "id": 2
+}

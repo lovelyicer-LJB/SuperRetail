@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  /* 交接提示框 · 占位符已由 agent 替换 */
+  .handoff-root {
+    font-family: var(--kimi-font-sans, sans-serif);
+    padding-block-start: var(--kimi-space-4, 16px);
+    padding-inline: var(--kimi-space-4, 16px);
+    padding-block-end: var(--kimi-space-4, 16px);
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .handoff-root button, .handoff-root textarea { font: inherit; }
+  .handoff-card { display: flex; flex-direction: column; gap: var(--kimi-space-3, 12px); }
+  .handoff-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--kimi-space-3, 12px); }
+  .handoff-meter {
+    height: 6px;
+    border-radius: var(--kimi-radius-full, 999px);
+    background: var(--kimi-color-surface-muted, rgba(127, 127, 127, .18));
+    overflow: hidden;
+  }
+  .handoff-meter-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--kimi-color-warning, #b25e09);
+  }
+  .handoff-path {
+    font-family: var(--kimi-font-mono, monospace);
+    font-size: 12px;
+    line-height: 18px;
+    word-break: break-all;
+    color: var(--kimi-color-text-secondary, #666);
+  }
+  .handoff-relay {
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    border: 1px solid var(--kimi-color-border, rgba(127, 127, 127, .35));
+    border-radius: var(--kimi-radius-input, 10px);
+    padding: var(--kimi-space-2, 8px) var(--kimi-space-3, 12px);
+    background: transparent;
+    color: var(--kimi-color-text-secondary, #666);
+    font-size: 12px;
+    line-height: 18px;
+    cursor: text;
+  }
+  .handoff-actions { display: flex; align-items: center; gap: var(--kimi-space-3, 12px); }
+  .handoff-steps {
+    margin: 0;
+    padding-inline-start: var(--kimi-space-5, 20px);
+    color: var(--kimi-color-text-secondary, #666);
+    font-size: 14px;
+    line-height: 22px;
+  }
+</style>
+</head>
+<body>
+<div class="handoff-root">
+  <section class="kimi-panel handoff-card" aria-label="会话交接提示">
+    <div class="handoff-head">
+      <h2 class="kimi-section-title" style="margin:0">上下文接近上限，建议交接</h2>
+      <span class="kimi-status kimi-status--warning">约 88%</span>
+    </div>
+    <p class="kimi-text-secondary" style="margin:0">
+      任务「版图 LOD 地图 + GI 地理标志点位层」的交接文档已生成。继续在当前会话对话可能丢失早期细节，建议一键接力到新会话。
+    </p>
+    <div class="handoff-meter" role="img" aria-label="上下文估算用量 88%">
+      <div class="handoff-meter-fill" style="width:88%"></div>
+    </div>
+    <div class="handoff-path">交接文档：D:\LJB_Plan\GitHub_ProjectManager\SuperRetail\handoffs\2026-10-13-001-lod-map-gi-points.md</div>
+    <textarea id="relay" class="handoff-relay" rows="3" readonly aria-label="新会话接力语句">请阅读交接文档 D:\LJB_Plan\GitHub_ProjectManager\SuperRetail\handoffs\2026-10-13-001-lod-map-gi-points.md，先复述当前状态和下一步，确认无误后继续工作。不要重做已完成的部分。</textarea>
+    <div class="handoff-actions">
+      <button id="go" type="button" class="kimi-button kimi-button--primary">一键接力到新会话</button>
+      <span id="hint" class="kimi-meta">点击复制接力语句</span>
+    </div>
+    <ol id="steps" class="handoff-steps" hidden>
+      <li>点击左上角「新会话」</li>
+      <li>粘贴（Ctrl+V）并发送，即可无缝续作</li>
+    </ol>
+  </section>
+</div>
+<script>
+  (function () {
+    var btn = document.getElementById('go');
+    var hint = document.getElementById('hint');
+    var steps = document.getElementById('steps');
+    var relay = document.getElementById('relay');
+    btn.addEventListener('click', async function () {
+      var ok = false;
+      try {
+        await navigator.clipboard.writeText(relay.value);
+        ok = true;
+      } catch (e) {
+        relay.focus();
+        relay.select();
+        try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+      }
+      steps.hidden = false;
+      if (ok) {
+        btn.textContent = '✓ 接力语句已复制';
+        btn.disabled = true;
+        hint.textContent = '旧会话请留作档案，勿继续在此工作';
+      } else {
+        relay.focus();
+        relay.select();
+        btn.textContent = '已全选，请 Ctrl+C 复制';
+        hint.textContent = '复制后按下方两步操作';
+      }
+    });
+    relay.addEventListener('click', function () { relay.select(); });
+  })();
+</script>
+</body>
+</html>

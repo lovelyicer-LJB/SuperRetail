@@ -1,0 +1,15 @@
+const imgLogo2 = "http://localhost:3845/assets/6a3f178e8164b8aad5ed52c2e27b46d1e731fa50.svg";
+const imgLogo1 = "http://localhost:3845/assets/f0695ce87c33901a47be8a8a0ba202e1b0925037.svg";
+
+export default function FinanceLogo({ className }: { className?: string }) {
+  return (
+    <div className={className || "overflow-clip relative size-[24px]"} data-node-id="65:4204" data-name="Finance logo">
+      <div className="absolute h-[13.598px] left-px top-[5px] w-[21.994px]" data-node-id="65:4205" data-name="Logo 2">
+        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgLogo2} />
+      </div>
+      <div className="absolute h-[7.437px] left-[0.5px] top-[8.5px] w-[23px]" data-node-id="65:4209" data-name="Logo 1">
+        <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgLogo1} />
+      </div>
+    </div>
+  );
+}

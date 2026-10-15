@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>历史上的今天</title>
+<style>
+  :root{
+
+
+    --bg:#121212; --ink:#FFFFFF; --dim:#8E9390; --faint:#002E58; --faint2:#002E58;
+    --blue:#00A1FF; --blue-l:#91D4FF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; background: var(--bg); }
+  body {
+    font-family: Menlo, "SF Mono", "DejaVu Sans Mono", "PingFang SC", monospace;
+    color: var(--ink); overflow: hidden;
+  }
+  .stage { position: relative; width: 100%; height: 100%; min-height: 180px; overflow: hidden; background: var(--bg); }
+  .el { position: absolute; }
+  button { font: inherit; }
+
+  h1.head { z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 24px; white-space: nowrap; }
+  h1.head canvas { image-rendering: pixelated; display: block; flex: none; }
+  h1.head .headline-row {
+    display: grid; grid-template-columns: clamp(72px, 20%, 88px) minmax(0, 1fr); column-gap: 12px;
+    align-items: stretch; width: 100%; white-space: nowrap;
+  }
+  h1.head .sub { grid-column: 2; align-self: center; font-weight: 700; line-height: 1.0; letter-spacing: 0.06em; color: var(--ink); }
+
+  .date {
+    z-index: 2; grid-column: 1; display: flex; align-items: center; justify-content: flex-end; gap: 0.5em;
+    padding-right: 12px; border-right: 1px solid rgba(255, 255, 255, 0.14);
+    color: var(--blue); font-weight: 500; letter-spacing: 0.14em;
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .date::before { content: ""; width: 0.55em; height: 0.55em; background: var(--blue); flex: none; animation: pulse 1.2s steps(2, end) infinite; }
+  @keyframes pulse { 50% { opacity: 0.15; } }
+
+
+  .panel { z-index: 2; overflow: auto; scrollbar-width: thin; scrollbar-color: #002E58 transparent; }
+  .ev {
+    display: grid; grid-template-columns: clamp(72px, 20%, 88px) minmax(0, 1fr); column-gap: 12px;
+    align-items: stretch; font-size: 0.82em; line-height: 1.55;
+    color: rgba(255, 255, 255, 0.88); font-weight: 400; margin-bottom: 0.55em;
+  }
+  .ev:last-child { margin-bottom: 0; }
+  .ev .yr {
+    display: block; align-self: stretch; padding-right: 12px; border-right: 1px solid rgba(255, 255, 255, 0.14);
+    color: var(--blue); font-weight: 700; font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em; text-align: right;
+  }
+  .ev .copy { min-width: 0; }
+  .ev a { color: var(--blue-l); font-weight: 700; text-decoration: none; }
+  .ev a:hover { text-decoration: underline; }
+  .state { text-align: center; padding: 1.5em 0; font-size: 0.8em; color: var(--dim); }
+
+  .foot { z-index: 2; display: flex; align-items: center; gap: 0.6em; }
+  .src { flex: 1; min-width: 0; color: var(--dim); font-size: 0.72em; font-weight: 400; letter-spacing: 0.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .go {
+    flex: none; border: 0; border-radius: 0; background: var(--faint); color: var(--ink);
+    font-size: 0.8em; font-weight: 500; letter-spacing: 0.18em; padding: 0.5em 1.1em; cursor: pointer;
+  }
+  .go:hover { background: var(--faint2); }
+  .go[disabled] { color: var(--dim); cursor: wait; }
+
+
+  .tex { z-index: 0; overflow: hidden; pointer-events: none; }
+  .tex canvas { width: 100%; height: 100%; display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .go { transition: none; }
+    .date::before { animation: none; }
+  }
+
+  h1.head .sub { font-size: 12px !important; font-weight: 800; line-height: 1.5; letter-spacing: 0; }
+  .date, .ev, .state, .src, .go { font-size: 12px !important; }
+  .date { gap: 8px; line-height: 1.5; }
+  .ev { line-height: 1.7; margin-bottom: 1em; }
+  .state, .src, .go { line-height: 1.5; }
+  .foot { gap: 12px; }
+  .go { padding: 8px 14px; }
+  body > :first-child { border: none !important; outline: none !important; }
+</style>
+</head>
+<body>
+<main class="stage" aria-label="历史上的今天">
+  <h1 class="el head">
+    <canvas id="plogo" aria-hidden="true"></canvas>
+    <span class="headline-row"><span class="date" id="dateEl"></span><span class="sub">历史上的今天</span></span>
+  </h1>
+  <div class="el panel" id="events"><div class="state">加载中…</div></div>
+  <div class="el foot" id="foot">
+    <span class="src" id="sourceEl">数据来源 · 正在连接可用线路…</span>
+    <button class="go" type="button" id="shuffleBtn">换一批</button>
+  </div>
+  <div class="el tex" id="tex" aria-hidden="true"><canvas></canvas></div>
+</main>
+
+<script>
+"use strict";
+const TEX_CH = "+()";
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function drawTex(w, h, keepOut) {
+    const cv = document.querySelector("#tex canvas");
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.max(1, Math.round(w * dpr));
+    cv.height = Math.max(1, Math.round(h * dpr));
+    const ctx = cv.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const CELL = 15;
+    const cols = Math.ceil(w / CELL) + 1, rows = Math.ceil(h / CELL) + 1;
+    const rng = mulberry32(20260714);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = '12px Menlo, "SF Mono", "DejaVu Sans Mono", monospace';
+    for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++) {
+            const x = c * CELL + CELL / 2, y = r * CELL + CELL / 2;
+            let fade = 1;
+            for (let i = 0; i < keepOut.length; i++) {
+                const k = keepOut[i];
+                const dx = Math.max(k.x - x, 0, x - (k.x + k.w));
+                const dy = Math.max(k.y - y, 0, y - (k.y + k.h));
+                if (dx === 0 && dy === 0) {
+                    fade = -1;
+                    break;
+                }
+                const d = Math.sqrt(dx * dx + dy * dy);
+                if (d < CELL && d / CELL < fade)
+                    fade = d / CELL;
+            }
+            if (fade < 0)
+                continue;
+            if (rng() >= 0.70)
+                continue;
+            const q = rng();
+            const ch = q < 0.60 ? TEX_CH[0] : q < 0.80 ? TEX_CH[1] : TEX_CH[2];
+            ctx.globalAlpha = 0.75 * fade;
+            ctx.fillStyle = rng() < 0.15 ? "#002E58" : "#002E58";
+            ctx.fillText(ch, x, y);
+        }
+    ctx.globalAlpha = 1;
+}
+const HEAD = "历史上的今天";
+const LOGO_RATIO = 33 / 5;
+const LOGO_H = 0.92;
+const FF = getComputedStyle(document.body).fontFamily;
+const mc = document.createElement("canvas").getContext("2d");
+const tw = (s, fs, w) => { mc.font = `${w} ${fs}px ${FF}`; return mc.measureText(s).width; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function pickCols(W, H) {
+    const a = W / H;
+    if (a >= 2.6)
+        return { n: 10, vert: false };
+    if (a >= 2.1)
+        return { n: 8, vert: false };
+    if (a >= 1.55)
+        return { n: 6, vert: false };
+    if (a >= 1.15)
+        return { n: 4, vert: false };
+    return { n: 5, vert: true };
+}
+function gridMetrics(W, H, n) {
+    const mx = 16, my = 16, g = 12;
+    const iw = Math.max(1, W - 2 * mx), ih = Math.max(1, H - 2 * my);
+    const sCols = Math.max(1, (iw - (n - 1) * g) / n);
+    const m = Math.max(5, Math.round((ih + g) / (sCols + g)));
+    const sRows = Math.max(1, (ih - (m - 1) * g) / m);
+    const s = Math.min(sCols, sRows);
+    const ox = mx + (iw - n * s - (n - 1) * g) / 2;
+    const oy = my + (ih - m * s - (m - 1) * g) / 2;
+    return { n, m, s, g, ox, oy };
+}
+function zones(n, m) {
+    if (n <= 5) {
+        return {
+            head: [0, 0, n, 2],
+            date: [0, 2, n, 1],
+            events: [0, 3, n, Math.max(1, m - 4)],
+            foot: [0, m - 1, n, 1]
+        };
+    }
+    const headCols = Math.max(3, n - 2);
+    return {
+        head: [0, 0, headCols, 1],
+        date: [headCols, 0, n - headCols, 1],
+        events: [0, 1, n, Math.max(1, m - 2)],
+        foot: [0, m - 1, n, 1]
+    };
+}
+const $ = s => document.querySelector(s);
+function layout() {
+    const stage = $(".stage");
+    const W = stage.clientWidth, H = stage.clientHeight;
+    if (!W || !H)
+        return;
+    const { n } = pickCols(W, H);
+    const gm = gridMetrics(W, H, n);
+    const z = zones(n, gm.m);
+    const { s, g, ox, oy } = gm;
+    const X = i => ox + i * (s + g);
+    const Y = j => oy + j * (s + g);
+    const rect = ([i, j, cs, rs]) => ({ x: X(i), y: Y(j), w: cs * s + (cs - 1) * g, h: rs * s + (rs - 1) * g });
+    const hr = rect(z.head);
+    const head = $(".head");
+    const lg = document.getElementById("plogo");
+    const date = $("#dateEl");
+    const headFs = 22;
+    const dFs = clamp(headFs * 0.34, 12, 15);
+    const logoH = Math.min(headFs * LOGO_H, hr.w * 0.98 / LOGO_RATIO);
+    head.style.flexDirection = "column";
+    head.style.alignItems = "flex-start";
+    head.style.fontSize = headFs + "px";
+    head.style.gap = "24px";
+    date.style.fontSize = dFs + "px";
+    lg.style.height = logoH + "px";
+    lg.style.width = logoH * LOGO_RATIO + "px";
+    const safeY = 24;
+    head.style.left = hr.x + "px";
+    head.style.top = safeY + "px";
+    head.style.width = hr.w + "px";
+    const headH = head.offsetHeight;
+    const headBox = { x: hr.x, y: safeY, w: hr.w, h: headH };
+    const fr = rect(z.foot);
+    const foot = $("#foot");
+    const footH = clamp(fr.h, 36, 44);
+    const footTop = H - safeY - footH;
+    foot.style.left = fr.x + "px";
+    foot.style.top = footTop + "px";
+    foot.style.width = fr.w + "px";
+    foot.style.height = footH + "px";
+    foot.style.fontSize = clamp(footH * 0.26, 12, 14) + "px";
+    const footBox = { x: fr.x, y: footTop, w: fr.w, h: footH };
+    const er = rect(z.events);
+    const panel = $("#events");
+    const panelTop = safeY + headH + 16;
+    const panelH = Math.max(1, footTop - panelTop - 16);
+    panel.style.left = er.x + "px";
+    panel.style.top = panelTop + "px";
+    panel.style.width = er.w + "px";
+    panel.style.height = panelH + "px";
+    panel.style.fontSize = clamp(panelH / 26, 12, 15) + "px";
+    const eventBox = { x: er.x, y: panelTop, w: er.w, h: panelH };
+    const tex = $("#tex");
+    if (W >= 300) {
+        const pad = 0.35 * s;
+        const keepOut = [headBox, eventBox, footBox].map(r => ({
+            x: r.x - pad, y: r.y - pad, w: r.w + 2 * pad, h: r.h + 2 * pad
+        }));
+        tex.style.display = "";
+        tex.style.left = "0px";
+        tex.style.top = "0px";
+        tex.style.width = W + "px";
+        tex.style.height = H + "px";
+        drawTex(W, H, keepOut);
+    }
+    else
+        tex.style.display = "none";
+}
+const _q = new URLSearchParams(location.search);
+if (_q.has("w") && _q.has("h")) {
+    const st = document.querySelector(".stage");
+    st.style.width = _q.get("w") + "px";
+    st.style.height = _q.get("h") + "px";
+}
+window.addEventListener("resize", layout);
+new ResizeObserver(layout).observe(document.querySelector(".stage"));
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(layout);
+layout();
+(function () {
+    "use strict";
+    var F = { H: ["101", "101", "111", "101", "101"], I: ["111", "010", "010", "010", "111"],
+        S: ["111", "100", "111", "001", "111"], T: ["111", "010", "010", "010", "010"],
+        O: ["111", "101", "101", "101", "111"], R: ["111", "101", "110", "101", "101"],
+        Y: ["101", "101", "010", "010", "010"] };
+    var word = "HISTORY", px = 4, gap = 1, sp = 2;
+    var cols = word.length * (3 + sp) - sp, c = document.getElementById("plogo");
+    c.width = cols * (px + gap);
+    c.height = 5 * (px + gap);
+    var g = c.getContext("2d");
+    g.fillStyle = "#FFFFFF";
+    var x0 = 0;
+    word.split("").forEach(function (ch) {
+        F[ch].forEach(function (r, y) {
+            r.split("").forEach(function (b, x) {
+                if (b === "1")
+                    g.fillRect((x0 + x) * (px + gap), y * (px + gap), px, px);
+            });
+        });
+        x0 += 3 + sp;
+    });
+})();
+(function () {
+    "use strict";
+    var eventsEl = document.getElementById("events");
+    var btn = document.getElementById("shuffleBtn");
+    var sourceEl = document.getElementById("sourceEl");
+    var ALL = [];
+    var now = new Date();
+    var dateLabel = (now.getMonth() + 1) + "." + now.getDate();
+    document.getElementById("dateEl").textContent = dateLabel;
+    var sources = [
+        {
+            label: "60s API · 百度百科 · 实时获取",
+            url: "https://60s.viki.moe/v2/today-in-history",
+            parse: function (payload) {
+                var items = payload && payload.data && payload.data.items;
+                if (!Array.isArray(items))
+                    return [];
+                return items.map(function (event) {
+                    return {
+                        year: event && event.year,
+                        text: event && (event.description || event.title),
+                        link: ""
+                    };
+                });
+            }
+        },
+        {
+            label: "百度百科 · 国内备用线路 · 实时获取",
+            url: "https://api.yum6.cn/briefing/baidu.php?format=json",
+            parse: function (payload) {
+                var items = payload && payload.content;
+                if (!Array.isArray(items))
+                    return [];
+                return items.map(function (title) {
+                    return { year: "今日", text: title, link: "" };
+                });
+            }
+        }
+    ];
+    function esc(s) {
+        var d = document.createElement("div");
+        d.textContent = s == null ? "" : String(s);
+        return d.innerHTML;
+    }
+    function pick(n) {
+        var pool = ALL.slice();
+        for (var i = pool.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var t = pool[i];
+            pool[i] = pool[j];
+            pool[j] = t;
+        }
+        return pool.slice(0, n).sort(function (a, b) {
+            return (parseInt(b.year, 10) || 0) - (parseInt(a.year, 10) || 0);
+        });
+    }
+    function render() {
+        var rows = pick(12);
+        if (!rows.length) {
+            eventsEl.innerHTML = '<div class="state">暂时没有可显示的历史事件</div>';
+            return;
+        }
+        eventsEl.innerHTML = rows.map(function (ev) {
+            var text = esc(ev.text);
+            if (ev.link) {
+                text += ' <a href="' + esc(ev.link) + '" target="_blank" rel="noopener">→</a>';
+            }
+            return '<div class="ev"><span class="yr">' + esc(ev.year || "—") + '</span><span class="copy">' + text + '</span></div>';
+        }).join("");
+        eventsEl.scrollTop = 0;
+    }
+    function fetchSource(index) {
+        if (index >= sources.length)
+            return Promise.reject(new Error("all sources unavailable"));
+        var source = sources[index];
+        return fetch(source.url, { cache: "no-store", credentials: "omit" })
+            .then(function (response) {
+            if (!response.ok)
+                throw new Error("HTTP " + response.status);
+            return response.json();
+        })
+            .then(function (payload) {
+            var rows = source.parse(payload).filter(function (event) {
+                return event && event.text;
+            });
+            if (!rows.length)
+                throw new Error("empty events");
+            return { rows: rows, label: source.label };
+        })
+            .catch(function () { return fetchSource(index + 1); });
+    }
+    function load() {
+        btn.disabled = true;
+        sourceEl.textContent = "数据来源 · 正在连接可用线路…";
+        eventsEl.innerHTML = '<div class="state">正在从可用线路获取今日事件…</div>';
+        fetchSource(0)
+            .then(function (result) {
+            ALL = result.rows;
+            sourceEl.textContent = "数据来源 · " + result.label;
+            render();
+        })
+            .catch(function () {
+            ALL = [];
+            sourceEl.textContent = "数据来源 · 当前线路不可用";
+            eventsEl.innerHTML = '<div class="state">历史事件获取失败，请稍后重试</div>';
+        })
+            .finally(function () { btn.disabled = false; });
+    }
+    btn.addEventListener("click", function () { ALL.length ? render() : load(); });
+    load();
+})();
+</script>
+</body>
+</html>

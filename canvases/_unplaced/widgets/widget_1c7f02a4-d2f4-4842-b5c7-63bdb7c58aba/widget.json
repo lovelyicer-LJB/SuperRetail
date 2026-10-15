@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "widget": {
+    "widgetId": "widget_1c7f02a4-d2f4-4842-b5c7-63bdb7c58aba",
+    "title": "会话接力",
+    "description": "上下文接近上限时的一键交接提示框：展示交接文档路径，点击按钮复制新会话接力语句。",
+    "creationHints": [
+      "交接文档已生成",
+      "正在装配接力提示框",
+      "即将就绪"
+    ],
+    "kind": "regular",
+    "capabilities": [],
+    "type": "html",
+    "faces": {},
+    "status": "idle",
+    "createdAt": "2026-10-08T11:18:45.643Z",
+    "updatedAt": "2026-10-08T11:18:45.643Z"
+  }
+}

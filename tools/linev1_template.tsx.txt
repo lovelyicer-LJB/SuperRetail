@@ -1,0 +1,138 @@
+/**
+ * LineChartV1C —— Pixso Charts | 图表页 Line chart v1
+ * (节点 63:1067, 1063×546, 透明底)
+ *
+ * 设计值（DSL + SVG 导出实测）:
+ *  - 网格 20 列 @ (6,43): 列宽 52.85, 描边 Gray-10 #0F0F13,
+ *    每列 2 根迷你柱 Gray-9 #1E1E24, 日期标签 2月1日~2月20日
+ *    Description 12/16 Gray-2 #D0D0DA opacity .6 @ y460 (列内)
+ *  - 分隔线 y481 x6.5..1062.5 Gray-9 #1E1E24
+ *  - 辉光 2 团 opacity .7: 紫 rgba(97,30,215,.3) 868×579 @ (-173,3),
+ *    红 rgba(215,30,30,.3) 1034×540 @ (424,0) (径向中心在椭圆左缘中点)
+ *  - 曲线 4 条 sw3 round: Amethyst #A162F7 (7 层紫影 rgba(105,0,255)),
+ *    Sea green #15FFAB, Mango Tango #FF8743 (5 层橙影), Strawberry Red #DB3031 (6 层粉影)
+ *  - 悬停列 @ (638,40) 55×502: 磨砂条 79×514 @ (626,28) r6 blur20 + 纵向渐变,
+ *    圆点 3 枚 r6 黑底, 描边 #FD4438/#FF8743/#15FFAB, 数值 ¥1,430/¥4,670/¥8,055,
+ *    底部青色线 54×2 #06D7F6 @ (638,540)
+ */
+
+__GRID_TS__
+
+__PATHS_TS__
+
+const FONT = 'HarmonyOS Sans SC, Noto Sans SC, sans-serif'
+
+/** 曲线辉光阴影链（Pixso 实测层叠原样展开） */
+const SHADOW_PURPLE =
+  'drop-shadow(0 5.42px 2.85px rgba(105,0,255,.2583)) drop-shadow(0 12.61px 6.63px rgba(105,0,255,.3732)) drop-shadow(0 22.64px 11.9px rgba(105,0,255,.4601)) drop-shadow(0 37.57px 19.75px rgba(105,0,255,.5399)) drop-shadow(0 61.9px 32.54px rgba(105,0,255,.6268)) drop-shadow(0 108.19px 56.87px rgba(105,0,255,.7417)) drop-shadow(0 234px 123px rgba(105,0,255,1))'
+const SHADOW_ORANGE =
+  'drop-shadow(0 2.51px 2.54px rgba(255,162,0,.1953)) drop-shadow(0 6.34px 6.43px rgba(255,162,0,.2795)) drop-shadow(0 12.94px 13.11px rgba(255,162,0,.3505)) drop-shadow(0 26.65px 27.01px rgba(255,162,0,.4347)) drop-shadow(0 73px 74px rgba(255,162,0,.63))'
+const SHADOW_PINK =
+  'drop-shadow(0 2.77px 2.21px rgba(255,19,94,.0956)) drop-shadow(0 6.65px 5.32px rgba(255,19,94,.1373)) drop-shadow(0 12.52px 10.02px rgba(255,19,94,.17)) drop-shadow(0 22.34px 17.87px rgba(255,19,94,.2027)) drop-shadow(0 41.78px 33.42px rgba(255,19,94,.2444)) drop-shadow(0 100px 80px rgba(255,19,94,.34))'
+
+const CURVE_STYLES = [
+  { stroke: '#A162F7', glow: SHADOW_PURPLE },
+  { stroke: '#15FFAB' },
+  { stroke: '#FF8743', glow: SHADOW_ORANGE },
+  { stroke: '#DB3031', glow: SHADOW_PINK },
+]
+
+/** 悬停圆点与数值（组件坐标） */
+const DOTS: Array<{ cy: number; ring: string; value: string; vy: number }> = [
+  { cy: 358, ring: '#FD4438', value: '¥1,430', vy: 387 },
+  { cy: 250, ring: '#FF8743', value: '¥4,670', vy: 273 },
+  { cy: 154, ring: '#15FFAB', value: '¥8,055', vy: 177 },
+]
+
+export function LineChartV1C() {
+  return (
+    <div className="sr-lv1 relative h-full w-full select-none overflow-hidden font-sans" style={{ containerType: 'size' }}>
+      <svg viewBox="0 0 1063 546" className="h-full w-full" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <radialGradient id="sr-lv1-glow1" gradientUnits="userSpaceOnUse" cx={0} cy={0} r={434} gradientTransform="translate(-173,292.5) scale(1,0.667)">
+            <stop offset={0} stopColor="rgba(97,30,215,0.3)" />
+            <stop offset={1} stopColor="rgba(42,14,91,0)" />
+          </radialGradient>
+          <radialGradient id="sr-lv1-glow2" gradientUnits="userSpaceOnUse" cx={0} cy={0} r={517} gradientTransform="translate(424,270) scale(1,0.5222)">
+            <stop offset={0} stopColor="rgba(215,30,30,0.3)" />
+            <stop offset={1} stopColor="rgba(209,63,63,0)" />
+          </radialGradient>
+        </defs>
+
+        {/* 网格 20 列 @ (6,43) */}
+        <g transform="translate(6,43)">
+          {GRID_COLS.map((col, i) => (
+            <g key={i} transform={`translate(${col.fx},0)`}>
+              <rect className="sr-lv1-fade" x={0} y={0} width={52.85} height={502} fill="none" stroke="#0F0F13" strokeWidth={1} />
+              {col.bars.map(([bx, by, bw, bh], j) => (
+                <rect key={j} className="sr-lv1-col" x={bx} y={by} width={bw} height={bh} fill="#1E1E24" style={{ animationDelay: `${i * 40 + j * 60}ms` }} />
+              ))}
+              <text className="sr-lv1-fade" x={26} y={468} textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={400} fill="#D0D0DA" opacity={0.6} style={{ fontFamily: FONT }}>
+                {col.label}
+              </text>
+            </g>
+          ))}
+          <line className="sr-lv1-fade" x1={0.5} y1={438} x2={1056.5} y2={438} stroke="#1E1E24" strokeWidth={1} />
+        </g>
+
+        {/* 辉光 2 团 */}
+        <ellipse className="sr-lv1-glow" cx={261} cy={292.5} rx={434} ry={289.5} fill="url(#sr-lv1-glow1)" />
+        <ellipse className="sr-lv1-glow" cx={941} cy={270} rx={517} ry={270} fill="url(#sr-lv1-glow2)" style={{ animationDelay: '.15s' }} />
+
+        {/* 曲线 4 条 */}
+        {CURVES.map((d, i) => (
+          <g key={i} className="sr-lv1-clip" style={{ animationDelay: `${i * 120}ms` }}>
+            <path d={d} fill="none" stroke={CURVE_STYLES[i].stroke} strokeWidth={3} strokeLinecap="round" style={CURVE_STYLES[i].glow ? { filter: CURVE_STYLES[i].glow } : undefined} />
+          </g>
+        ))}
+      </svg>
+
+      {/* 悬停磨砂条（backdrop blur 需 HTML 层） @ (626,28) 79×514 r6 */}
+      <div
+        className="sr-lv1-strip absolute"
+        style={{
+          left: '58.89%',
+          top: '5.13%',
+          width: '7.43%',
+          height: '94.14%',
+          borderRadius: 'min(0.56cqw, 1.1cqh)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          background: 'linear-gradient(to bottom, rgba(124,145,255,0) 0%, rgba(58,58,58,0) 0.01%, rgba(58,66,132,.76) 75.5%, rgba(0,0,0,1) 100%)',
+        }}
+      />
+
+      {/* 悬停圆点 / 数值 / 底线 */}
+      <svg viewBox="0 0 1063 546" className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid meet">
+        {DOTS.map((dt, i) => (
+          <g key={i} className="sr-lv1-dot" style={{ animationDelay: `${500 + i * 120}ms` }}>
+            <circle cx={665} cy={dt.cy} r={6} fill="#000" stroke={dt.ring} strokeWidth={3} />
+            <text x={665.5} y={dt.vy} textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={400} fill="#FFF" style={{ fontFamily: FONT }}>
+              {dt.value}
+            </text>
+          </g>
+        ))}
+        <rect className="sr-lv1-dot" x={638} y={540} width={54} height={2} fill="#06D7F6" style={{ animationDelay: '.9s' }} />
+      </svg>
+
+      <style>{`
+        .sr-lv1-clip { clip-path: inset(-150% 100% -150% 0); animation: sr-lv1-reveal 1.1s cubic-bezier(.22,1,.36,1) forwards; }
+        @keyframes sr-lv1-reveal { to { clip-path: inset(-150% -5% -150% 0); } }
+        .sr-lv1-fade { opacity: 0; animation: sr-lv1-fadein .7s ease-out .2s forwards; }
+        @keyframes sr-lv1-fadein { to { opacity: 1; } }
+        .sr-lv1-glow { opacity: 0; animation: sr-lv1-glowin 1.2s ease-out forwards; }
+        @keyframes sr-lv1-glowin { from { opacity: 0; } to { opacity: .7; } }
+        .sr-lv1-col { transform: scaleY(0); transform-origin: bottom; transform-box: fill-box; animation: sr-lv1-grow .5s cubic-bezier(.22,1,.36,1) forwards; }
+        @keyframes sr-lv1-grow { to { transform: scaleY(1); } }
+        .sr-lv1-dot { opacity: 0; animation: sr-lv1-fadein .5s ease-out forwards; }
+        .sr-lv1-strip { opacity: 0; animation: sr-lv1-fadein .8s ease-out .4s forwards; }
+        @media (prefers-reduced-motion: reduce) {
+          .sr-lv1-clip { animation: none !important; clip-path: none; }
+          .sr-lv1-fade, .sr-lv1-dot, .sr-lv1-strip { animation: none !important; opacity: 1; }
+          .sr-lv1-glow { animation: none !important; opacity: .7; }
+          .sr-lv1-col { animation: none !important; transform: none; }
+        }
+      `}</style>
+    </div>
+  )
+}
