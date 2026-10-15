@@ -213,7 +213,7 @@
       "x": 424.3331298828125,
       "y": -81.66668701171875,
       "w": 240,
-      "h": 863,
+      "h": 921,
       "text": "",
       "meta": {
         "title": "超零售线程",
@@ -224,9 +224,19 @@
             "mission": false
           },
           {
-            "text": "现成zi",
+            "text": "资产框架",
             "done": false,
             "depth": 0
+          },
+          {
+            "text": "美术资产",
+            "done": false,
+            "depth": 1
+          },
+          {
+            "text": "声音资产",
+            "done": false,
+            "depth": 1
           },
           {
             "text": "玩法",
