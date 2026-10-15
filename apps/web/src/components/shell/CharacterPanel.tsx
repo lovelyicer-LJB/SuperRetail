@@ -4,7 +4,7 @@
 // 背面为不变的溯源档案，所见即所得（与画板共用 buildCharacterCard 渲染）。
 import { useEffect, useRef, useState } from 'react'
 import { Box, RotateCw, Scan, X } from 'lucide-react'
-import { getBoardEngine } from '@/modules/atlas/board/bridge'
+import { getActiveBoardEngine } from '@/modules/atlas/board/bridge'
 import { buildCharacterPreview } from '@/modules/atlas/board/characterCardContent'
 import { demoCharacters, type CharacterData } from '@/modules/workshop/character-card/data'
 import { AssetIcon } from '@/modules/workshop/asset-system/AssetForms'
@@ -35,7 +35,7 @@ export function CharacterPanel({ theme, onClose }: { theme: ShellTheme; onClose:
   const [flipped, setFlipped] = useState<Record<string, boolean>>({})
 
   const handlePick = (id: string) => {
-    getBoardEngine()?.addCharacterCard(id)
+    getActiveBoardEngine()?.addCharacterCard(id)
     onClose()
   }
 

@@ -5,7 +5,9 @@
 // 分组节点 = 一个方向（vertical 左右 / horizontal 上下）+ 边界比例。
 // 支持继续拆分（分隔线右键同时拆两块成四块 / 单画板空白右键拆自己），
 // 叶子可「收起」（collapsed，被覆盖的画板进入收起态；点 Tab 复位显示）。
-// 「固定」规则：任一拆分画板有卡片才持久化；未固定的拆分下次启动自动消失。
+// 🔴 改动 2026-10-16 · 持久化规则：只要有拆分画板就持久化（空白新建 Tab 刷新后也保留）；
+// 保存的 JSON 额外带 view 字段（split 同屏拆分 / solo 独占全屏 / main 主画板全屏），刷新原样恢复视图。
+// 旧「有卡片才固定」规则已停用（isSplitFixed 保留但恒等于 boards.length > 0）。
 // pinned（屏幕钉）：技能激活的子画板默认钉在屏幕上，以浮动窗口显示。
 // 🔴 改动 2026-10-13 · 本文件是【框架约定 · 画板与 Tab 一体】的落点之一（约定全文见 engine.ts
 // 头注）：Tab 坞标签与 boards 数组一一对应（下标即身份），Tab 只是画板在坞中的把手——
@@ -34,6 +36,12 @@ export interface AtlasSplitState {
   root: SplitNode
   /** 屏幕钉标记（与 boards 对齐）：true = 该 Tab 钉在屏幕上（浮动窗口），默认非钉 */
   pinned: boolean[]
+  /** 🔴 改动 2026-10-16 · 保存时的视图态：split = 同屏拆分 / solo = 某块画板独占全屏 / main = 主画板全屏；
+   *  旧数据无此字段加载时按 'split' 处理（兼容旧行为） */
+  view?: 'split' | 'solo' | 'main'
+  /** 🔴 改动 2026-10-16 · 屏幕钉浮动窗口位置（与 boards 下标对齐；null/缺省 = 默认错位排布），
+   *  刷新后画中画窗口保持保存时的位置 */
+  pinPos?: ({ x: number; y: number } | null)[]
 }
 
 const SPLIT_STORAGE_KEY = 'superretail.atlas.split.v1'
@@ -52,9 +60,10 @@ export function emptySplitState(): AtlasSplitState {
   return { activeSplit: 0, boards: [], root: mainBoardNode(), pinned: [] }
 }
 
-/** 是否「固定」：任一拆分画板已有卡片（拖入过任何卡片 → 跨启动保持拆分状态） */
+/** 是否「固定」：任一拆分画板已有卡片（🔴 改动 2026-10-16 · 已停用：落盘不再要求有卡片，
+ *  空白画板同样跨启动保留；函数保留仅供外部调试/潜在调用） */
 export function isSplitFixed(state: AtlasSplitState): boolean {
-  return state.boards.some((b) => b.cards.length > 0)
+  return state.boards.length > 0
 }
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -84,7 +93,7 @@ export function containsTab(node: SplitNode, tab: number): boolean {
   return node.kind === 'board' ? node.tab === tab : containsTab(node.first, tab) || containsTab(node.second, tab)
 }
 
-/** 读取本地拆分状态；无数据/坏数据/未固定（全空画板）时返回 null。兼容 v1 旧格式自动迁移为树 */
+/** 读取本地拆分状态；无数据/坏数据/画板列表为空时返回 null。兼容 v1 旧格式自动迁移为树 */
 export function loadSplitState(): AtlasSplitState | null {
   try {
     const raw = window.localStorage.getItem(SPLIT_STORAGE_KEY)
@@ -97,12 +106,23 @@ export function loadSplitState(): AtlasSplitState | null {
     for (const b of boards) {
       if (!b.tid) b.tid = uid()
     }
-    if (!boards.some((b) => b.cards.length > 0)) return null
+    // 🔴 改动 2026-10-16 · 不再要求「有卡片才恢复」：空白新建 Tab 刷新后也保留
     const activeSplit = typeof v.activeSplit === 'number' && Number.isFinite(v.activeSplit)
       ? clamp(Math.trunc(v.activeSplit), 0, Math.max(0, boards.length - 1))
       : 0
     const pinnedRaw = Array.isArray(v.pinned) ? v.pinned : []
     const pinned = boards.map((_, i) => pinnedRaw[i] === true)
+    // 🔴 改动 2026-10-16 · 浮动窗口位置：与 boards 下标对齐清洗（坏值归 null = 默认排布）
+    const pinPosRaw = Array.isArray(v.pinPos) ? v.pinPos : []
+    const pinPos = boards.map((_, i) => {
+      const p = pinPosRaw[i]
+      if (isRecord(p) && typeof p.x === 'number' && Number.isFinite(p.x) && typeof p.y === 'number' && Number.isFinite(p.y)) {
+        return { x: p.x, y: p.y }
+      }
+      return null
+    })
+    // 🔴 改动 2026-10-16 · 视图态（旧数据无此字段按 'split' 处理，兼容旧行为）
+    const view = v.view === 'solo' || v.view === 'main' ? v.view : 'split'
     // 树：新格式优先；v1 旧格式 { direction, ratio, boards, activeSplit } 迁移为 [主画板 | activeSplit 画板] 两叶
     let root = sanitizeNode(v.root, boards.length, 0)
     // 框架写死：必须有一个主画板（tab:-1）；缺失时兜底重建为 [主画板 | 激活画板]
@@ -111,7 +131,7 @@ export function loadSplitState(): AtlasSplitState | null {
       const ratio = isRecord(v) && typeof v.ratio === 'number' && Number.isFinite(v.ratio) ? clamp(v.ratio, 0, 1) : 0.5
       root = groupNode(direction, ratio, mainBoardNode(), boardNode(activeSplit))
     }
-    return { activeSplit, boards, root, pinned }
+    return { activeSplit, boards, root, pinned, view, pinPos }
   } catch {
     return null
   }

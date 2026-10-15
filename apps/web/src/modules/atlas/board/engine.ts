@@ -59,6 +59,9 @@ import { demoMarkets } from '@/modules/workshop/market-card/data'
 import { assetCardName, buildRevenueCard } from './revenueCardContent'
 // 🔴 改动 2026-10-12 · 收益节点直连线的自动直角布线（移植工坊 revenueRouting 障碍网格 A* + 圆角）
 import { roundedPath, routeWire } from './wireRouting'
+// 🔴 改动 2026-10-16 · 活跃引擎追踪：本引擎根节点 pointerdown 时上报 bridge，侧边栏「加入画板」
+// 优先落到用户最近交互的画板（画中画子画板浮窗在最上层时不再误加进被遮住的父画板）
+import { setActiveBoardEngine } from './bridge'
 
 /** 引擎对外句柄：主题切换 + 销毁 + 添加卡片（侧边栏「循环」浮窗工具入口） */
 export interface BoardEngine {
@@ -105,6 +108,8 @@ export interface BoardEngine {
   clientToWorld: (clientX: number, clientY: number) => { x: number; y: number }
   /** 🔴 改动 2026-10-13 · 画板世界坐标 → 屏幕坐标（client 系；页面层放置物渲染定位用） */
   worldToClient: (worldX: number, worldY: number) => { x: number; y: number }
+  /** 🔴 改动 2026-10-16 · 引擎是否已销毁（bridge 活跃引擎追踪回落判定用） */
+  isDisposed: () => boolean
 }
 
 /**
@@ -240,14 +245,19 @@ function selectAllTarget(): LiveBoardEntry | null {
   if (ae) for (const en of liveBoards) if (en.root.contains(ae)) return en
   return mainBoardEntry
 }
-/** 🔴 改动 2026-10-14 · 跨画板拖放落点判定：几何命中除自身外的存活画板根（getBoundingClientRect，
+/** 🔴 改动 2026-10-14 · 跨画板拖放落点判定：几何命中存活画板根（getBoundingClientRect，
  *  不受 body 层拖动幽灵影响）；重叠时取面积最小者（画中画浮层悬浮于主画板之上，优先命中画中画）。
- *  子画板覆盖层（isSub）不参与。 */
+ *  子画板覆盖层（isSub）不参与。
+ *  🔴 改动 2026-10-16 · 自身也参与面积比较：指针几何上仍落在自身窗口内时，最小面积者就是
+ *  自己 → 返回 null（浮窗内拖卡不转移）。修复：画中画浮窗悬浮于全屏父画板之上，指针同时
+ *  几何命中两者，旧逻辑排除自身后把父画板误判为落点，浮窗里拖动/ reposition 卡片即被
+ *  「转移」进父画板（父画板在浮窗底层看不见，用户误以为没发生；重新拖入又产生第二张，
+ *  刷新后两张同时出现 = 「父画板也多了一个」） */
 function boardAtPoint(clientX: number, clientY: number, selfRoot: HTMLElement): LiveBoardEntry | null {
   let best: LiveBoardEntry | null = null
   let bestArea = Infinity
   for (const en of liveBoards) {
-    if (en.root === selfRoot || en.isSub) continue
+    if (en.isSub) continue
     const r = en.root.getBoundingClientRect()
     if (clientX < r.left || clientX > r.right || clientY < r.top || clientY > r.bottom) continue
     const area = r.width * r.height
@@ -256,6 +266,8 @@ function boardAtPoint(clientX: number, clientY: number, selfRoot: HTMLElement): 
       best = en
     }
   }
+  // 指针仍落在自身（或没有任何其它画板命中）→ 不跨板转移
+  if (best === null || best.root === selfRoot) return null
   return best
 }
 
@@ -269,6 +281,10 @@ export function createBoardEngine(root: HTMLElement, opts: BoardEngineOptions): 
 
   let disposed = false
   let saveTimer = 0
+  // 🔴 改动 2026-10-16 · 视口独立防抖落盘计时器（与 saveTimer 分离：applyViewport 高频触发，不进历史栈）
+  let viewSaveTimer = 0
+  // 🔴 改动 2026-10-16 · 自身句柄晚绑定（pointerdown 上报 bridge 活跃引擎用；事件触发时早已构造完成）
+  let apiRef = null as unknown as BoardEngine
   const cardEls = new Map<string, HTMLElement>()
   let selectedIds = new Set<string>()
   let editingId: string | null = null
@@ -495,6 +511,17 @@ export function createBoardEngine(root: HTMLElement, opts: BoardEngineOptions): 
     applyPins()
     // 🔴 改动 2026-10-13 · 视口广播全量化（顶栏 View 百分比取 zoom；页面层放置物取 x/y/zoom 换算定位）
     opts.onViewChange?.({ ...view })
+    // 🔴 改动 2026-10-16 · 视口（平移/缩放）持久化：view 即文档视口引用（非 localViewport 实例），
+    // 这里只排轻量防抖直写（不走 scheduleSave，避免 recordHistory 每帧污染撤销栈）
+    if (!opts.localViewport) {
+      window.clearTimeout(viewSaveTimer)
+      viewSaveTimer = window.setTimeout(() => {
+        viewSaveTimer = 0
+        if (disposed) return
+        if (opts.onPersist) opts.onPersist(board)
+        else saveBoard(board)
+      }, 600)
+    }
   }
   /** 屏幕坐标（clientX/Y）→ 画板世界坐标（逻辑像素） */
   function screenToWorld(sx: number, sy: number) {
@@ -2377,6 +2404,8 @@ export function createBoardEngine(root: HTMLElement, opts: BoardEngineOptions): 
     openCtxMenu(e.clientX, e.clientY)
   })
   on<MouseEvent>(root, 'pointerdown', (e) => {
+    // 🔴 改动 2026-10-16 · 上报「最近交互的画板引擎」：侧边栏「加入画板」经 bridge 优先落到本画板
+    if (!disposed) setActiveBoardEngine(apiRef)
     if (ctxMenuEl && e.target instanceof Node && !ctxMenuEl.contains(e.target)) closeCtxMenu()
   })
   on<KeyboardEvent>(document, 'keydown', (e) => {
@@ -2577,6 +2606,7 @@ export function createBoardEngine(root: HTMLElement, opts: BoardEngineOptions): 
     liveBoards.delete(liveEntry)
     if (mainBoardEntry === liveEntry) mainBoardEntry = null
     window.clearTimeout(saveTimer)
+    window.clearTimeout(viewSaveTimer)
     ac.abort()
     root.replaceChildren()
     root.classList.remove('sr-board', 'sr-board-dark', 'sr-panning', 'sr-connecting')
@@ -2752,10 +2782,15 @@ export function createBoardEngine(root: HTMLElement, opts: BoardEngineOptions): 
     const rect = root.getBoundingClientRect()
     return { x: rect.left + view.x + wx * view.zoom, y: rect.top + view.y + wy * view.zoom }
   }
+  function isDisposed(): boolean {
+    return disposed
+  }
   // 🔴 改动 2026-10-13 · 登记存活引擎（Ctrl+A 定向用；dispose 时注销）
   armPointerTracker()
   const liveEntry: LiveBoardEntry = { root, isMain: opts.isMainBoard === true, pip: opts.pip === true, isSub, selectAll, receiveCards }
   liveBoards.add(liveEntry)
   if (liveEntry.isMain) mainBoardEntry = liveEntry
-  return { setTheme, dispose, addCard, addFoodCard, addCharacterCard, addRecipeCard, addDishCard, addMarketCard, getDoc, setTitle, syncFromDoc, getZoom, setZoomPct, flushSave, loadDoc, activateChainAt, setSkillArmed, clearSelection, getView, clientToWorld: screenToWorld, worldToClient }
+  // 🔴 改动 2026-10-16 · 晚绑定自身句柄（pointerdown 上报 bridge 活跃引擎的闭包引用）
+  apiRef = { setTheme, dispose, addCard, addFoodCard, addCharacterCard, addRecipeCard, addDishCard, addMarketCard, getDoc, setTitle, syncFromDoc, getZoom, setZoomPct, flushSave, loadDoc, activateChainAt, setSkillArmed, clearSelection, getView, clientToWorld: screenToWorld, worldToClient, isDisposed }
+  return apiRef
 }

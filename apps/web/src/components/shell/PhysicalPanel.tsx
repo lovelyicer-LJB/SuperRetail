@@ -6,7 +6,7 @@
 // 可切换卡片形态（原 200×280 预览卡列表）；AssetIcon 的样式表在此显式引入（Vite 会去重）。
 import { useEffect, useRef, useState } from 'react'
 import { Box, Scan, X } from 'lucide-react'
-import { getBoardEngine } from '@/modules/atlas/board/bridge'
+import { getActiveBoardEngine } from '@/modules/atlas/board/bridge'
 import { buildFoodPreview } from '@/modules/atlas/board/foodCardContent'
 import { demoFoodCards, type FoodCardData } from '@/modules/workshop/food-card/data'
 import { AssetIcon } from '@/modules/workshop/asset-system/AssetForms'
@@ -38,7 +38,7 @@ export function PhysicalPanel({ theme, onClose }: { theme: ShellTheme; onClose: 
   const [view, setView] = useState<PhysicalView>('icon')
 
   const handlePick = (id: string) => {
-    getBoardEngine()?.addFoodCard(id)
+    getActiveBoardEngine()?.addFoodCard(id)
     onClose()
   }
 

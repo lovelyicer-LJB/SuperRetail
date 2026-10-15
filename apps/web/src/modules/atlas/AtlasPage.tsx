@@ -20,7 +20,6 @@ import {
   containsTab,
   emptySplitState,
   groupNode,
-  isSplitFixed,
   leafCount,
   loadSplitState,
   mainBoardNode,
@@ -1171,17 +1170,18 @@ export function AtlasPage() {
   }, [])
   // 🔴 改动 2026-10-13 · 拆分视图 v3：树形拆分（主画板 + boards[]，支持嵌套继续拆分 / 覆盖收起 / 主画板替换）。
   // 框架写死必须有一个主画板：默认画板为主画板；主画板可删除（安全弹窗），删除后右侧第一个画板自动成为主画板并全展开。
-  // 「固定」规则：任一拆分画板有卡片才写 localStorage，下次启动恢复；全空则下次启动回到单一主画板。
+  // 🔴 改动 2026-10-16 · 持久化规则升级：只要有拆分画板就写 localStorage（不再要求有卡片），
+  // 空白新建 Tab 刷新后也保留；当前视图（拆分 / 独占 / 主画板全屏）随状态一并保存，刷新原样恢复。
   const initialSplit = useMemo(() => loadSplitState(), [])
   const [atlasSplit, setAtlasSplit] = useState<AtlasSplitState | null>(initialSplit)
-  const [splitOpen, setSplitOpen] = useState<boolean>(() => initialSplit !== null)
+  const [splitOpen, setSplitOpen] = useState<boolean>(() => initialSplit !== null && initialSplit.view === 'split')
   const [mainTitle, setMainTitle] = useState('')
   // 🔴 改动 2026-10-14 · 「地图」内置常驻 Tab：为 true 时画板区整块显示地图（满画板），
   // 仅视图切换（不进拆分树 / 不写 localStorage）；点主画板或任一拆分 Tab 即回画板，拆分状态原样保留。
   const [mapOpen, setMapOpen] = useState(false)
   // 🔴 改动 2026-10-15 · 独占全屏 Tab（solo）：单画板全屏视图下点拆分 Tab，该 Tab 的画板独占整个画板区显示
-  // （不同屏拆分）；仅视图态不持久化，点主画板 Tab 或进入拆分视图即复位。框架写死主画板仍在树中（tab:-1）。
-  const [soloTab, setSoloTab] = useState<number | null>(null)
+  // （不同屏拆分）；🔴 改动 2026-10-16 · 随拆分状态持久化（view='solo'），刷新后原样恢复独占视图。
+  const [soloTab, setSoloTab] = useState<number | null>(() => (initialSplit?.view === 'solo' ? initialSplit.activeSplit : null))
   // 🔴 改动 2026-10-11 · 拆分边界：拖拽态；把手可拖拽推拉 + 方向键微调
   const [draggingSplit, setDraggingSplit] = useState(false)
   /** 🔴 改动 2026-10-13 · 正在拖拽的分隔线方向（根容器据此切 UE5 缩放光标） */
@@ -1207,24 +1207,44 @@ export function AtlasPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ kind: 'main' } | { kind: 'tab'; index: number } | null>(null)
   /** 🔴 改动 2026-10-13 · 悬浮子画板（画中画）：每 Tab 独立屏幕位置 / 选中态（蓝色四边分隔线）/ 窗口元素引用；
    *  Tab 拖到画板上即钉为浮动子画板（【框架约定 · 画板与 Tab 一体】Chrome 式撕离手势的画板内落点） */
-  const [pinPosMap, setPinPosMap] = useState<Record<number, { x: number; y: number }>>({})
+  const [pinPosMap, setPinPosMap] = useState<Record<number, { x: number; y: number }>>(() => {
+    // 🔴 改动 2026-10-16 · 浮动窗口位置随拆分状态恢复：刷新后画中画窗口保持保存时的位置
+    const m: Record<number, { x: number; y: number }> = {}
+    initialSplit?.pinPos?.forEach((p, i) => {
+      if (p) m[i] = p
+    })
+    return m
+  })
+  const pinPosMapRef = useRef(pinPosMap)
+  pinPosMapRef.current = pinPosMap
   const [pinnedSelected, setPinnedSelected] = useState<number | null>(null)
   const pinWinRefs = useRef(new Map<number, HTMLDivElement>())
   /** 🔴 改动 2026-10-13 · Tab 撕离拖拽态（幽灵片跟随光标；zone = 落点区域：坞内取消 / 画板画中画 / 窗外拆出） */
   const [tabDrag, setTabDrag] = useState<{ index: number; label: string; x: number; y: number; zone: 'dock' | 'board' | 'outside' } | null>(null)
   const tabDragRef = useRef(tabDrag)
   tabDragRef.current = tabDrag
+  // 🔴 改动 2026-10-16 · splitOpen / soloTab 的 ref 镜像：persistSplit 落盘时读取当前视图（拖拽闭包同样用）
+  const splitOpenRef = useRef(splitOpen)
+  splitOpenRef.current = splitOpen
+  const soloTabRef = useRef(soloTab)
+  soloTabRef.current = soloTab
   const draggingSplitRef = useRef(draggingSplit)
   draggingSplitRef.current = draggingSplit
   /** 🔴 改动 2026-10-13 · 框线框选命中悬浮子画板的临时矩形（重叠即选中，无需全部框住） */
   const pinMarqueeRef = useRef<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
 
-  /** 固定规则落盘：有卡片 → 保存（下次启动恢复拆分）；全空 → 清除（下次启动单画板） */
+  /** 🔴 改动 2026-10-16 · 落盘规则：只要有拆分画板就保存（空白 Tab 也保留，刷新不丢）；
+   *  视图态（拆分 / 独占 / 主画板全屏）随状态一并写入，刷新后原样恢复。
+   *  view 只存在于「保存的 JSON」，内存状态对象不带 view——跨窗口回声比对按内容四字段比较，互不干扰 */
   const persistSplit = (next: AtlasSplitState | null) => {
-    if (next && isSplitFixed(next)) saveSplitState(next)
-    else removeSplitState()
+    if (next && next.boards.length > 0) {
+      const view: 'split' | 'solo' | 'main' = !splitOpenRef.current ? (soloTabRef.current !== null ? 'solo' : 'main') : 'split'
+      saveSplitState({ ...next, view })
+    } else {
+      removeSplitState()
+    }
   }
-  /** 更新拆分状态（同步 ref 供指针事件闭包即时读取）并按固定规则落盘 */
+  /** 更新拆分状态（同步 ref 供指针事件闭包即时读取）并落盘 */
   const commitSplit = (next: AtlasSplitState | null) => {
     atlasSplitRef.current = next
     setAtlasSplit(next)
@@ -1273,16 +1293,26 @@ export function AtlasPage() {
         if (cur) {
           commitSplit(null)
           setSplitOpen(false)
+          setSoloTab(null)
         }
         return
       }
-      if (JSON.stringify(s) === JSON.stringify(cur)) return
+      // 🔴 改动 2026-10-16 · 回声/同内容判定只看内容四字段（view 仅保存态字段，内存对象不带，避免序列化顺序差异误判）
+      const canon = (x: AtlasSplitState) => JSON.stringify({ a: x.activeSplit, b: x.boards, r: x.root, p: x.pinned })
+      if (cur && canon(s) === canon(cur)) {
+        // 内容一致仅视图不同：只应用视图，不写回（防两窗口互写循环）
+        setSplitOpen(s.view !== 'solo' && s.view !== 'main')
+        setSoloTab(s.view === 'solo' ? s.activeSplit : null)
+        return
+      }
       const prevBoards = cur?.boards ?? []
       s.boards.forEach((b, i) => {
         if (JSON.stringify(prevBoards[i]) !== JSON.stringify(b)) bumpStamp(i)
       })
       commitSplit(s)
-      if (!cur) setSplitOpen(true)
+      // 🔴 改动 2026-10-16 · 跟随另一窗口的视图态（拆分 / 独占 / 主画板全屏）
+      setSplitOpen(s.view !== 'solo' && s.view !== 'main')
+      setSoloTab(s.view === 'solo' ? s.activeSplit : null)
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
@@ -1373,6 +1403,9 @@ export function AtlasPage() {
     }
     const commit = { ...prev, activeSplit: index, boards, root: restore(prev.root), pinned: prev.pinned.map((p, i) => (i === index ? false : p)) }
     if (!splitOpen || forceSolo) {
+      // 🔴 改动 2026-10-16 · 画中画拖回坞 = 脱离父画板重新成为普通画板：就地清子画板标记（不换对象，
+      // 保住引擎 in-place 持久化引用），Tab 标签在坞里重新出现
+      if (forceSolo && prev.boards[index].isSubBoard) prev.boards[index].isSubBoard = false
       // 独占全屏同时取消屏幕钉（钉是拆分视图里的浮动窗口语义），叶子复位（下次进拆分视图直接可见）
       commitSplit(commit)
       setSplitOpen(false)
@@ -1390,6 +1423,14 @@ export function AtlasPage() {
   const pointerOverDock = (clientX: number, clientY: number) => {
     const r = dockBarRef.current?.getBoundingClientRect()
     return !!r && clientX >= r.left && clientX <= r.right && clientY >= r.top - 6 && clientY <= r.bottom + 6
+  }
+
+  /** 🔴 改动 2026-10-16 · 浮动窗口位置落盘：拖动结束后把 pinPosMap 快照进拆分状态（与 boards 下标对齐），
+   *  刷新后画中画窗口保持保存时的位置 */
+  const persistPinPos = () => {
+    const prev = atlasSplitRef.current
+    if (!prev) return
+    commitSplit({ ...prev, pinPos: prev.boards.map((_, i) => pinPosMapRef.current[i] ?? null) })
   }
 
   /** 🔴 改动 2026-10-13 · 拖动悬浮子画板：屏幕像素增量，钳制在画板区范围内（每 Tab 独立位置） */
@@ -1416,7 +1457,10 @@ export function AtlasPage() {
   }
 
   /** 拖到画板上 = 浮动子画板（画中画）：钉住该 Tab，浮动窗口落在释放点；
-   *  原窗格叶子随即收起（flex 归零），同组兄弟画板自动填充剩余空间（点 Tab 可复位） */
+   *  原窗格叶子随即收起（flex 归零），同组兄弟画板自动填充剩余空间（点 Tab 可复位）
+   *  🔴 改动 2026-10-16 · 底层是整屏单块画板（全屏/独占视图，非同屏拆分）时，被钉的 Tab 就是
+   *  底层那块画板的子画板：就地标记 isSubBoard（不换对象，保住引擎 in-place 持久化的引用同一性），
+   *  Tab 坞不再显示它的标签；同屏拆分视图上的钉不影响（父画板不唯一，维持普通 Tab） */
   const pinTabAt = (index: number, clientX: number, clientY: number) => {
     const prev = atlasSplitRef.current
     if (!prev || !prev.boards[index]) return
@@ -1424,6 +1468,8 @@ export function AtlasPage() {
     const x = Math.max(8, clientX - (rect?.left ?? 0) - 240)
     const y = Math.max(8, clientY - (rect?.top ?? 0) - 20)
     setPinPosMap((m) => ({ ...m, [index]: { x, y } }))
+    pinPosMapRef.current = { ...pinPosMapRef.current, [index]: { x, y } }
+    if (!splitOpen && !mapOpen) prev.boards[index].isSubBoard = true
     const cover = (node: SplitNode): SplitNode => {
       if (node.kind === 'board') return node.tab === index ? { ...node, collapsed: true } : node
       return { ...node, first: cover(node.first), second: cover(node.second) }
@@ -1433,6 +1479,8 @@ export function AtlasPage() {
       activeSplit: index,
       root: cover(prev.root),
       pinned: prev.pinned.map((p, i) => (i === index ? true : p)),
+      // 🔴 改动 2026-10-16 · 浮动窗口初始位置一并落盘（刷新后保持）
+      pinPos: prev.boards.map((_, i) => (i === index ? { x, y } : pinPosMapRef.current[i] ?? null)),
     })
     setPinnedSelected(index)
     // 🔴 改动 2026-10-15 · 不再强制打开拆分视图：从全屏/独占视图拖出时当前视图原样保留，
@@ -1449,8 +1497,8 @@ export function AtlasPage() {
     const doc = board.detachId ? board : { ...board, detachId: uid() }
     const next = { ...prev, boards: prev.boards.map((b, i) => (i === index ? doc : b)) }
     commitSplit(next)
-    // 拆出必须保证弹窗能读到文档：绕过「固定」规则直接落盘（空画板下次启动仍按规则不恢复，不影响存量语义）
-    saveSplitState(next)
+    // 拆出必须保证弹窗能读到文档：绕过落盘规则直接写入（内存对象不带 view，这里按当前视图补上）
+    saveSplitState({ ...next, view: !splitOpenRef.current ? (soloTabRef.current !== null ? 'solo' as const : 'main' as const) : 'split' as const })
     const url = `${window.location.origin}${window.location.pathname}?boardwin=${doc.detachId}`
     window.open(
       url,
@@ -1514,13 +1562,17 @@ export function AtlasPage() {
     boards.splice(to, 0, doc)
     const [p] = pinned.splice(from, 1)
     pinned.splice(to, 0, p)
+    // 🔴 改动 2026-10-16 · 浮动窗口位置跟随 Tab 换位（按下标对齐存储，需同步重排）
+    const pinPos = [...(prev.pinPos ?? prev.boards.map(() => null))]
+    const [pp] = pinPos.splice(from, 1)
+    pinPos.splice(to, 0, pp)
     const remap = (t: number): number => {
       if (t === from) return to
       return from < to ? (t > from && t <= to ? t - 1 : t) : (t >= to && t < from ? t + 1 : t)
     }
     const remapTree = (node: SplitNode): SplitNode =>
       node.kind === 'board' ? { ...node, tab: remap(node.tab) } : { ...node, first: remapTree(node.first), second: remapTree(node.second) }
-    commitSplit({ ...prev, activeSplit: remap(prev.activeSplit), boards, root: remapTree(prev.root), pinned })
+    commitSplit({ ...prev, activeSplit: remap(prev.activeSplit), boards, root: remapTree(prev.root), pinned, pinPos })
     setSoloTab((s) => (s === null ? null : remap(s)))
     setPinnedSelected((s) => (s === null ? null : remap(s)))
   }
@@ -2376,7 +2428,12 @@ export function AtlasPage() {
                 onDragEnd={(x, y) => {
                   setPinDragOverDock(false)
                   // 拖回坞：取消屏幕钉 + 叶子复位，并独占全屏显示该画板（forceSolo 覆盖拆分视图态）
-                  if (pointerOverDock(x, y)) handleSelectTab(i, true)
+                  if (pointerOverDock(x, y)) {
+                    handleSelectTab(i, true)
+                    return
+                  }
+                  // 🔴 改动 2026-10-16 · 正常拖动结束：浮动窗口最终位置落盘（刷新后保持）
+                  persistPinPos()
                 }}
                 onPersist={(d) => {
                   const prev = atlasSplitRef.current

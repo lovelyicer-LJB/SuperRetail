@@ -3,7 +3,7 @@
 // 形态筛选与实物/角色/配方/菜品浮窗一致（图标 / 卡片）；卡片预览与画板共用 buildMarketCard 渲染，所见即所得。
 import { useEffect, useRef, useState } from 'react'
 import { Box, Scan, X } from 'lucide-react'
-import { getBoardEngine } from '@/modules/atlas/board/bridge'
+import { getActiveBoardEngine } from '@/modules/atlas/board/bridge'
 import { buildMarketPreview } from '@/modules/atlas/board/marketCardContent'
 import { demoMarkets, type MarketData } from '@/modules/workshop/market-card/data'
 import { AssetIcon } from '@/modules/workshop/asset-system/AssetForms'
@@ -32,7 +32,7 @@ export function MarketPanel({ theme, onClose }: { theme: ShellTheme; onClose: ()
   const [view, setView] = useState<MarketView>('icon')
 
   const handlePick = (id: string) => {
-    getBoardEngine()?.addMarketCard(id)
+    getActiveBoardEngine()?.addMarketCard(id)
     onClose()
   }
 

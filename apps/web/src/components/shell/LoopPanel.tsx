@@ -3,7 +3,7 @@
 // 图标与样式 1:1 复刻 Evoloop「All cards」组件池：深色圆角方块 + 浅色描边 SVG（railIcon 变体），
 // 3 列网格；底层画板当前仅支持 笔记/待办/连线/画板，其余类型以禁用态陈列（即将支持）。
 import { X } from 'lucide-react'
-import { getBoardEngine } from '@/modules/atlas/board/bridge'
+import { getActiveBoardEngine } from '@/modules/atlas/board/bridge'
 import { useLang, type DictKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { ShellTheme } from './TopMenu'
@@ -84,7 +84,7 @@ export function LoopPanel({ theme, onClose }: { theme: ShellTheme; onClose: () =
 
   const handlePick = (item: LoopItem) => {
     if (!item.enabled) return
-    getBoardEngine()?.addCard(item.type as 'note' | 'todo' | 'line' | 'board')
+    getActiveBoardEngine()?.addCard(item.type as 'note' | 'todo' | 'line' | 'board')
     onClose()
   }
 

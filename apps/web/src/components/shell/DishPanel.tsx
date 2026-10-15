@@ -3,7 +3,7 @@
 // 形态筛选与实物/角色/配方浮窗一致（图标 / 卡片）；卡片预览与画板共用 buildDishCard 渲染，所见即所得。
 import { useEffect, useRef, useState } from 'react'
 import { Box, Scan, X } from 'lucide-react'
-import { getBoardEngine } from '@/modules/atlas/board/bridge'
+import { getActiveBoardEngine } from '@/modules/atlas/board/bridge'
 import { buildDishPreview } from '@/modules/atlas/board/dishCardContent'
 import { demoDishes, type DishData } from '@/modules/workshop/dish-card/data'
 import { AssetIcon } from '@/modules/workshop/asset-system/AssetForms'
@@ -32,7 +32,7 @@ export function DishPanel({ theme, onClose }: { theme: ShellTheme; onClose: () =
   const [view, setView] = useState<DishView>('icon')
 
   const handlePick = (id: string) => {
-    getBoardEngine()?.addDishCard(id)
+    getActiveBoardEngine()?.addDishCard(id)
     onClose()
   }
 

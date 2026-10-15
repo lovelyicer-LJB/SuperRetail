@@ -3,7 +3,7 @@
 // 形态筛选与实物浮窗一致（图标 / 卡片）；卡片预览与画板共用 buildRecipeCard 渲染，所见即所得。
 import { useEffect, useRef, useState } from 'react'
 import { Box, Scan, X } from 'lucide-react'
-import { getBoardEngine } from '@/modules/atlas/board/bridge'
+import { getActiveBoardEngine } from '@/modules/atlas/board/bridge'
 import { buildRecipePreview } from '@/modules/atlas/board/recipeCardContent'
 import { demoRecipes, type RecipeData } from '@/modules/workshop/recipe-card/data'
 import { AssetIcon } from '@/modules/workshop/asset-system/AssetForms'
@@ -32,7 +32,7 @@ export function RecipePanel({ theme, onClose }: { theme: ShellTheme; onClose: ()
   const [view, setView] = useState<RecipeView>('icon')
 
   const handlePick = (id: string) => {
-    getBoardEngine()?.addRecipeCard(id)
+    getActiveBoardEngine()?.addRecipeCard(id)
     onClose()
   }
 
