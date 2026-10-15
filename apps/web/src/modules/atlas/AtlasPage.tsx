@@ -1181,7 +1181,12 @@ export function AtlasPage() {
   const [mapOpen, setMapOpen] = useState(false)
   // 🔴 改动 2026-10-15 · 独占全屏 Tab（solo）：单画板全屏视图下点拆分 Tab，该 Tab 的画板独占整个画板区显示
   // （不同屏拆分）；🔴 改动 2026-10-16 · 随拆分状态持久化（view='solo'），刷新后原样恢复独占视图。
-  const [soloTab, setSoloTab] = useState<number | null>(() => (initialSplit?.view === 'solo' ? initialSplit.activeSplit : null))
+  // 🔴 改动 2026-10-16 · 自愈：存档里 solo 目标同时钉着屏幕钉（pinTabAt 旧版未清 soloTab 留下的坏状态）
+  // 时放弃 solo 恢复——同一份文档不能既全屏独占又画中画浮动（双引擎双渲染，刷新后出现「重复节点」），
+  // 回落为「主画板全屏 + 浮动窗口」。
+  const [soloTab, setSoloTab] = useState<number | null>(() =>
+    initialSplit?.view === 'solo' && !initialSplit.pinned[initialSplit.activeSplit] ? initialSplit.activeSplit : null,
+  )
   // 🔴 改动 2026-10-11 · 拆分边界：拖拽态；把手可拖拽推拉 + 方向键微调
   const [draggingSplit, setDraggingSplit] = useState(false)
   /** 🔴 改动 2026-10-13 · 正在拖拽的分隔线方向（根容器据此切 UE5 缩放光标） */
@@ -1302,7 +1307,8 @@ export function AtlasPage() {
       if (cur && canon(s) === canon(cur)) {
         // 内容一致仅视图不同：只应用视图，不写回（防两窗口互写循环）
         setSplitOpen(s.view !== 'solo' && s.view !== 'main')
-        setSoloTab(s.view === 'solo' ? s.activeSplit : null)
+        // 🔴 改动 2026-10-16 · solo 目标钉着屏幕钉时不恢复独占（同一文档双渲染防御，与初始加载同理）
+        setSoloTab(s.view === 'solo' && !s.pinned[s.activeSplit] ? s.activeSplit : null)
         return
       }
       const prevBoards = cur?.boards ?? []
@@ -1312,7 +1318,8 @@ export function AtlasPage() {
       commitSplit(s)
       // 🔴 改动 2026-10-16 · 跟随另一窗口的视图态（拆分 / 独占 / 主画板全屏）
       setSplitOpen(s.view !== 'solo' && s.view !== 'main')
-      setSoloTab(s.view === 'solo' ? s.activeSplit : null)
+      // 🔴 改动 2026-10-16 · solo 目标钉着屏幕钉时不恢复独占（同一文档双渲染防御，与初始加载同理）
+      setSoloTab(s.view === 'solo' && !s.pinned[s.activeSplit] ? s.activeSplit : null)
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
@@ -1470,6 +1477,15 @@ export function AtlasPage() {
     setPinPosMap((m) => ({ ...m, [index]: { x, y } }))
     pinPosMapRef.current = { ...pinPosMapRef.current, [index]: { x, y } }
     if (!splitOpen && !mapOpen) prev.boards[index].isSubBoard = true
+    // 🔴 改动 2026-10-16 · 钉住的正是当前独占全屏（solo）的画板：先退出独占、底层回落主画板。
+    // 否则同一份文档被「独占全屏 + 浮动窗口」两个引擎同时挂载：浮窗里的编辑只重渲浮窗
+    // （两引擎无互同步），底层全屏视图照旧空白；刷新后两个视图各自渲染同一份持久化文档，
+    // 表现为「父画板多出来一个节点」（实为同一块画板被渲染了两次）。
+    // 同步清 ref：紧随其后的 commitSplit → persistSplit 读 soloTabRef 计算 view，须立即生效。
+    if (soloTab === index) {
+      soloTabRef.current = null
+      setSoloTab(null)
+    }
     const cover = (node: SplitNode): SplitNode => {
       if (node.kind === 'board') return node.tab === index ? { ...node, collapsed: true } : node
       return { ...node, first: cover(node.first), second: cover(node.second) }
@@ -2408,7 +2424,9 @@ export function AtlasPage() {
         {!mapOpen &&
           atlasSplit &&
           splitBoards.map((b, i) =>
-            splitPinned[i] !== true ? null : (
+            // 🔴 改动 2026-10-16 · 兜底：当前独占全屏（solo）的画板不再渲染浮动窗口——
+            // 同一文档只允许一个引擎挂载（pinTabAt 已源头阻断，此处防跨窗口同步等残余路径）
+            splitPinned[i] !== true || soloTab === i ? null : (
               <PinnedBoardWindow
                 key={`pin-${i}`}
                 dark={dark}
