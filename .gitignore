@@ -18,3 +18,4 @@ output/
 .DS_Store
 Thumbs.db
 *.log
+tools/pixso-ai-integration/
