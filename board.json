@@ -213,49 +213,18 @@
       "x": 424.3331298828125,
       "y": -81.66668701171875,
       "w": 240,
-      "h": 302,
+      "h": 128,
       "text": "",
       "meta": {
         "title": "超零售线程",
         "items": [
           {
-            "text": "Overall Frame",
+            "text": "Overall Fram",
             "done": true,
             "mission": false
           },
           {
             "text": "",
-            "done": false,
-            "depth": 0
-          },
-          {
-            "text": "版图",
-            "done": true,
-            "depth": 1,
-            "mission": false
-          },
-          {
-            "text": "官方排行榜",
-            "done": false,
-            "depth": 2
-          },
-          {
-            "text": "仪表图",
-            "done": false,
-            "depth": 2
-          },
-          {
-            "text": "商城",
-            "done": false,
-            "depth": 1
-          },
-          {
-            "text": "互动",
-            "done": false,
-            "depth": 1
-          },
-          {
-            "text": "工坊",
             "done": false,
             "depth": 1
           }
