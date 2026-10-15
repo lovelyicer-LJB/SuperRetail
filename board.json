@@ -337,11 +337,16 @@
       "x": 362.21249112215895,
       "y": 210.242304021662,
       "w": 278.96977095170456,
-      "h": 1753,
+      "h": 1782,
       "text": "",
       "meta": {
         "title": "SuperRetail Process",
         "items": [
+          {
+            "text": "是的",
+            "done": false,
+            "depth": 0
+          },
           {
             "text": "地图操作",
             "done": false,
