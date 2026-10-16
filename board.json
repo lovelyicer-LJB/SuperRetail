@@ -73,66 +73,6 @@
       }
     },
     {
-      "id": "c_jq3indhwmu3e6kx8",
-      "type": "todo",
-      "x": 983.7279274680398,
-      "y": -78.18194580078125,
-      "w": 240,
-      "h": 402,
-      "text": "",
-      "meta": {
-        "title": "部门工作线程",
-        "items": [
-          {
-            "text": "打包盒异形贴",
-            "done": false
-          },
-          {
-            "text": "姚开花店铺装修",
-            "done": false
-          },
-          {
-            "text": "LOGO-Workflow",
-            "done": false
-          },
-          {
-            "text": "整理平台所需的品牌系统，及系统子项目",
-            "done": false
-          },
-          {
-            "text": "品牌系统各子项工作流",
-            "done": false
-          },
-          {
-            "text": "Poster Workflow",
-            "done": false,
-            "depth": 0
-          },
-          {
-            "text": "Looking for inspiration & Idea",
-            "done": false,
-            "depth": 1
-          },
-          {
-            "text": "Optimize Prompt",
-            "done": false,
-            "depth": 1
-          },
-          {
-            "text": "Text to Image",
-            "done": false,
-            "depth": 1
-          },
-          {
-            "text": "Agent Fix Detail",
-            "done": false,
-            "depth": 1
-          }
-        ],
-        "locked": false
-      }
-    },
-    {
       "id": "c_4ylahka8mu3e9sfe",
       "type": "todo",
       "x": 172.6666259765625,
@@ -210,8 +150,8 @@
     {
       "id": "c_rcplfvy6mu3gpa3c",
       "type": "todo",
-      "x": 424.3331298828125,
-      "y": -81.66668701171875,
+      "x": 660.3331298828125,
+      "y": -75.66668701171875,
       "w": 240,
       "h": 921,
       "text": "",
@@ -344,7 +284,7 @@
             "depth": 2
           }
         ],
-        "locked": true
+        "locked": false
       }
     },
     {
