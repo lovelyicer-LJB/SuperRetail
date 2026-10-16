@@ -1,8 +1,8 @@
 {
   "title": "Plan",
   "viewport": {
-    "x": -112.6666259765625,
-    "y": 146,
+    "x": -153.00048828124972,
+    "y": 142,
     "zoom": 1
   },
   "cards": [
@@ -342,56 +342,6 @@
             "text": "保护、传承、创新（数字资产）、交流",
             "done": false,
             "depth": 2
-          }
-        ],
-        "locked": true
-      }
-    },
-    {
-      "id": "c_w0qfpl9bmu57klva",
-      "type": "todo",
-      "x": 1429.3338623046873,
-      "y": -81.99998982747397,
-      "w": 240,
-      "h": 1302,
-      "text": "",
-      "meta": {
-        "title": "海报解决方案参考",
-        "items": [
-          {
-            "text": "https://www.bilibili.com/video/BV1dRKZ6GEWD/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
-            "done": false,
-            "mission": false
-          },
-          {
-            "text": "https://www.bilibili.com/video/BV1xfuV6kEvf/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
-            "done": false,
-            "mission": false
-          },
-          {
-            "text": "https://www.bilibili.com/video/BV1LetB6rEUC/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
-            "done": false,
-            "mission": false
-          },
-          {
-            "text": "https://www.bilibili.com/video/BV1unY36NEAU/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
-            "done": false,
-            "mission": false
-          },
-          {
-            "text": "https://www.bilibili.com/video/BV1F53b62Eov/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
-            "done": false,
-            "mission": false
-          },
-          {
-            "text": "https://www.bilibili.com/video/BV1uSTg6NEB6/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
-            "done": false,
-            "mission": false
-          },
-          {
-            "text": "https://www.bilibili.com/video/BV1De2uYeEtK/?spm_id_from=333.337.search-card.all.click&vd_source=15865871af6386bce40d1d35144bf7b7",
-            "done": false,
-            "mission": false
           }
         ],
         "locked": true
