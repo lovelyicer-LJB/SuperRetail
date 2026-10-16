@@ -1367,12 +1367,13 @@ export function AtlasPage() {
   }
 
   /** 🔴 改动 2026-10-13 · 技能激活 → 框线范围已抽取为子画板：挂新 Tab，默认屏幕钉（浮动窗口）；
-   *  叶子以收起态入树（pinned 叶子不在窗格渲染，兄弟画板自动填充） */
-  const handleChainActivated = (sub: { doc: BoardDoc; title: string; kind: 'thread' | 'loop' }) => {
+   *  叶子以收起态入树（pinned 叶子不在窗格渲染，兄弟画板自动填充）
+   *  🔴 改动 2026-10-16 · parent = 技能所在画板的身份（'main' / 父画板 tid）：浮动窗口只在父画板可见时显示 */
+  const handleChainActivated = (sub: { doc: BoardDoc; title: string; kind: 'thread' | 'loop' }, parent?: string) => {
     const prev = atlasSplitRef.current ?? emptySplitState()
     // 🔴 改动 2026-10-15 · 补发 Tab 稳定身份 tid（引擎抽取的子画板文档没有该字段）；
     // 标记 isSubBoard：属于其它画板的子画板不在 Tab 坞显示标签（只以屏幕钉浮动窗口存在）
-    const subDoc: BoardDoc = { ...sub.doc, isSubBoard: true, tid: sub.doc.tid ?? uid() }
+    const subDoc: BoardDoc = { ...sub.doc, isSubBoard: true, tid: sub.doc.tid ?? uid(), ...(parent ? { pinParent: parent } : {}) }
     const boards = [...prev.boards, subDoc]
     const index = boards.length - 1
     const root = groupNode('vertical', 0.5, prev.root, boardNode(index, true))
@@ -1411,8 +1412,11 @@ export function AtlasPage() {
     const commit = { ...prev, activeSplit: index, boards, root: restore(prev.root), pinned: prev.pinned.map((p, i) => (i === index ? false : p)) }
     if (!splitOpen || forceSolo) {
       // 🔴 改动 2026-10-16 · 画中画拖回坞 = 脱离父画板重新成为普通画板：就地清子画板标记（不换对象，
-      // 保住引擎 in-place 持久化引用），Tab 标签在坞里重新出现
-      if (forceSolo && prev.boards[index].isSubBoard) prev.boards[index].isSubBoard = false
+      // 保住引擎 in-place 持久化引用），Tab 标签在坞里重新出现；父级归属一并清除（下次钉住按落点重记）
+      if (forceSolo && prev.boards[index].isSubBoard) {
+        prev.boards[index].isSubBoard = false
+        delete prev.boards[index].pinParent
+      }
       // 独占全屏同时取消屏幕钉（钉是拆分视图里的浮动窗口语义），叶子复位（下次进拆分视图直接可见）
       commitSplit(commit)
       setSplitOpen(false)
@@ -1455,6 +1459,35 @@ export function AtlasPage() {
   }
 
   // ---------- 🔴 改动 2026-10-13 · Tab 撕离（复刻 Chrome 标签拖出） ----------
+  /** 🔴 改动 2026-10-16 · 画板表面当前是否作为「承载面」可见（-1 = 主画板）：
+   *  浮动窗口只渲染在父画板可见时——每个 Tab 是独立画板，拖进 Tab1 的子画板不出现在主画板上。
+   *  父画板自身也是浮动窗口时递归判定（嵌套画中画跟随父窗口显隐），depth 防御环。 */
+  const isBoardSurfaceVisible = (tab: number, depth = 0): boolean => {
+    if (depth > 8 || mapOpen) return false
+    if (tab === -1) {
+      if (splitOpen) return collectLeaves(splitRoot).some((l) => l.tab === -1 && !l.collapsed)
+      return soloTab === null
+    }
+    if (splitPinned[tab] === true) {
+      const p = splitBoards[tab]?.pinParent
+      if (!p) return true
+      if (p === 'main') return isBoardSurfaceVisible(-1, depth + 1)
+      const pi = splitBoards.findIndex((b) => b.tid === p)
+      return pi < 0 ? true : isBoardSurfaceVisible(pi, depth + 1)
+    }
+    if (splitOpen) return collectLeaves(splitRoot).some((l) => l.tab === tab && !l.collapsed)
+    return soloTab === tab
+  }
+
+  /** 浮动窗口 i 当前是否渲染：无父级记录（旧数据）= 全局悬浮（兼容旧行为）；父画板已删除 = 兜底全局可见 */
+  const pinnedWindowVisible = (i: number): boolean => {
+    const p = splitBoards[i]?.pinParent
+    if (!p) return true
+    if (p === 'main') return isBoardSurfaceVisible(-1)
+    const pi = splitBoards.findIndex((b) => b.tid === p)
+    return pi < 0 ? true : isBoardSurfaceVisible(pi)
+  }
+
   /** 落点区域判定：窗外 = 拆出新窗口；画板区 = 画中画钉到落点；其余（坞/壳层）= 取消 */
   const tearZoneOf = (clientX: number, clientY: number): 'dock' | 'board' | 'outside' => {
     if (clientX < 0 || clientY < 0 || clientX > window.innerWidth || clientY > window.innerHeight) return 'outside'
@@ -1486,6 +1519,27 @@ export function AtlasPage() {
       soloTabRef.current = null
       setSoloTab(null)
     }
+    // 🔴 改动 2026-10-16 · 记录父画板身份：落点在哪块画板，浮动窗口就只属于哪块画板
+    // （每个 Tab 是独立画板——拖进 Tab1 的子画板不再出现在主画板上）。
+    // 拆分视图：按落点命中窗格（data-pane-tab）；独占全屏：父 = 当前独占画板；主画板全屏：父 = 'main'；
+    // 地图视图 / 未命中窗格：清掉旧归属，回落全局悬浮（兼容旧行为）。
+    // 就地写文档字段（不换对象，保住引擎 in-place 持久化的引用同一性），随后 commitSplit 一并落盘。
+    let parent: string | undefined
+    if (splitOpen) {
+      for (const el of document.elementsFromPoint(clientX, clientY)) {
+        const pane = (el as HTMLElement).closest?.('[data-pane-tab]') as HTMLElement | null
+        if (!pane) continue
+        const t = Number(pane.dataset.paneTab)
+        if (t === -1) { parent = 'main'; break }
+        if (Number.isInteger(t) && t >= 0 && t !== index && prev.boards[t]?.tid) { parent = prev.boards[t].tid; break }
+      }
+    } else if (!mapOpen) {
+      // 钉住的正是当前独占画板时上方已退出独占、底层回落主画板，故父 = 'main'
+      if (soloTab === index || soloTab === null) parent = 'main'
+      else if (prev.boards[soloTab]?.tid) parent = prev.boards[soloTab].tid
+    }
+    if (parent) prev.boards[index].pinParent = parent
+    else delete prev.boards[index].pinParent
     const cover = (node: SplitNode): SplitNode => {
       if (node.kind === 'board') return node.tab === index ? { ...node, collapsed: true } : node
       return { ...node, first: cover(node.first), second: cover(node.second) }
@@ -2061,6 +2115,8 @@ export function AtlasPage() {
         <div
           className="relative flex min-h-0 min-w-0 overflow-hidden"
           style={{ flex: node.collapsed ? '0 0 0px' : '1 1 0px' }}
+          // 🔴 改动 2026-10-16 · 窗格身份标记：Tab 撕离钉住时按落点命中父画板（elementsFromPoint 查这个属性）
+          data-pane-tab={node.tab}
         >
           {node.tab === -1 ? (
             <BoardCanvas
@@ -2075,7 +2131,7 @@ export function AtlasPage() {
               onBoardSplit={() => performBoardSplit(path)}
               onCollapseBoard={() => performCollapse(path)}
               onDeleteBoard={() => setDeleteTarget({ kind: 'main' })}
-              onChainActivated={handleChainActivated}
+              onChainActivated={(sub) => handleChainActivated(sub, 'main')}
             />
           ) : (
             <BoardCanvas
@@ -2092,7 +2148,7 @@ export function AtlasPage() {
               onCollapseBoard={() => performCollapse(path)}
               onBecomeMain={() => performBecomeMain(node.tab)}
               onDeleteBoard={() => setDeleteTarget({ kind: 'tab', index: node.tab })}
-              onChainActivated={handleChainActivated}
+              onChainActivated={(sub) => handleChainActivated(sub, splitBoards[node.tab]?.tid)}
             />
           )}
         </div>
@@ -2396,7 +2452,7 @@ export function AtlasPage() {
               onBoardSplit={() => performBoardSplit(collectLeaves(splitRoot).find((l) => l.tab === soloTab)?.path ?? [])}
               onBecomeMain={() => performBecomeMain(soloTab)}
               onDeleteBoard={() => setDeleteTarget({ kind: 'tab', index: soloTab })}
-              onChainActivated={handleChainActivated}
+              onChainActivated={(sub) => handleChainActivated(sub, splitBoards[soloTab]?.tid)}
             />
           </div>
         ) : (
@@ -2412,7 +2468,7 @@ export function AtlasPage() {
             onBoardSplit={() => performBoardSplit([])}
             onCollapseBoard={() => performCollapse([])}
             onDeleteBoard={() => setDeleteTarget({ kind: 'main' })}
-            onChainActivated={handleChainActivated}
+            onChainActivated={(sub) => handleChainActivated(sub, 'main')}
           />
         )}
 
@@ -2426,7 +2482,9 @@ export function AtlasPage() {
           splitBoards.map((b, i) =>
             // 🔴 改动 2026-10-16 · 兜底：当前独占全屏（solo）的画板不再渲染浮动窗口——
             // 同一文档只允许一个引擎挂载（pinTabAt 已源头阻断，此处防跨窗口同步等残余路径）
-            splitPinned[i] !== true || soloTab === i ? null : (
+            // 🔴 改动 2026-10-16 · 父画板归属过滤：浮动窗口只属于落点所在画板（pinParent），
+            // 父画板当前不可见（在别的 Tab / 主画板）时不渲染——每个 Tab 是独立画板
+            splitPinned[i] !== true || soloTab === i || !pinnedWindowVisible(i) ? null : (
               <PinnedBoardWindow
                 key={`pin-${i}`}
                 dark={dark}

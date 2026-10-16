@@ -118,6 +118,8 @@ export function sanitizeDoc(raw: unknown, depth: number): BoardDoc {
   if (typeof raw.tid === 'string' && raw.tid) doc.tid = raw.tid
   // 🔴 改动 2026-10-15 · 子画板标记白名单放行（属于其它画板的子画板不在 Tab 坞显示标签）
   if (raw.isSubBoard === true) doc.isSubBoard = true
+  // 🔴 改动 2026-10-16 · 浮动窗口父画板身份白名单放行（'main' 或父画板 tid；渲染按父画板可见性过滤）
+  if (typeof raw.pinParent === 'string' && raw.pinParent) doc.pinParent = raw.pinParent
   return doc
 }
 
