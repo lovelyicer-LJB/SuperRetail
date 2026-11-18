@@ -1,1 +1,0 @@
-These styles are contained in the design: white: #FFFFFF.
